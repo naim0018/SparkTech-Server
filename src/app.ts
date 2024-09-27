@@ -11,19 +11,19 @@ const app = express()
 app.use(express.json())
 app.use(cors({ origin: ['http://localhost:5173'], credentials: true }));
 // app.use(cors())
-app.use('/api/v1',router)
+app.use('/api/v1', router)
 
-app.get('/',(req:Request,res:Response)=>{
+app.get('/', (req: Request, res: Response) => {
     res.status(StatusCodes.OK).json({
-        success:true,
-        message:"Server connected",
-        data:"Server is Running"
+        success: true,
+        message: "Server connected",
+        data: "Server is Running"
     })
 })
 
 app.use(globalErrorHandler);
 
-//Not Found
+// Not Found
 app.use(notFound);
 
 export default app
