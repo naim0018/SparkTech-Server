@@ -11,7 +11,7 @@ try {
      })
     
 } catch (error) {
-    console.log(error)
+    console.log("Failed to connect to database",error)
 }
 }
 

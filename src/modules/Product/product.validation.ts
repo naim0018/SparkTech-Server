@@ -1,63 +1,93 @@
 import { z } from "zod";
-import { TProduct,  TShippingDetails, TVariant } from "./product.interface";
 
-// Review Validation Schema
-// const reviewSchemaZod = z.object({
-//   user: z.string().min(1, { message: "User is required and cannot be empty." }),
-//   rating: z.number().min(1, { message: "Rating must be at least 1." }).max(5, { message: "Rating cannot be more than 5." }),
-//   comment: z.string().min(1, { message: "Comment is required and cannot be empty." }),
-//   date: z.date().default(new Date()),
-// });
+const ProductImageSchema = z.object({
+  url: z.string().url(),
+  alt: z.string()
+});
 
-// Shipping Details Validation Schema
-const shippingDetailsSchemaZod = z.object({
-  weight: z.number().min(0.1, { message: "Weight must be greater than 0." }),
-  dimensions: z.object({
-    length: z.number().min(0.1, { message: "Length must be greater than 0." }),
-    width: z.number().min(0.1, { message: "Width must be greater than 0." }),
-    height: z.number().min(0.1, { message: "Height must be greater than 0." }),
-  }),
+const ProductVariantSchema = z.object({
+  name: z.string(),
+  value: z.string(),
+  price: z.number().positive().optional() // Added price option
+});
+
+const ProductSpecificationItemSchema = z.object({
+  name: z.string(),
+  value: z.string()
+});
+
+const ProductSpecificationSchema = z.object({
+  group: z.string(),
+  items: z.array(ProductSpecificationItemSchema)
+});
+
+const ProductReviewSchema = z.object({
+  user: z.string(),
+  rating: z.number().min(1).max(5),
+  comment: z.string(),
+  date: z.date().default(() => new Date())
+});
+
+const ProductPriceSchema = z.object({
+  regular: z.number().positive(),
+  discounted: z.number().positive().optional(),
+  savings: z.number().nonnegative().optional(),
+  savingsPercentage: z.number().min(0).max(100).optional()
+});
+
+const ProductDimensionsSchema = z.object({
+  length: z.number().positive(),
+  width: z.number().positive(),
+  height: z.number().positive(),
+  unit: z.enum(['cm', 'in'])
+});
+
+// Remove ManufacturerInfoSchema
+
+const AdditionalInfoSchema = z.object({
   freeShipping: z.boolean().default(false),
   estimatedDelivery: z.string().optional(),
+  returnPolicy: z.string().optional(),
+  warranty: z.string().optional()
 });
 
-// Variant Validation Schema
-const variantSchemaZod = z.object({
-  variantName: z.string().min(1, { message: "Variant name is required and cannot be empty." }),
-  options: z.array(z.string()).nonempty({ message: "Options array cannot be empty." }),
-});
-
-// Product Validation Schema
 const productSchemaZod = z.object({
-  body:z.object({
-    title: z.string().min(1, { message: "Product title is required." }),
-    description: z.record(z.string(), z.string()).optional(),
-    price: z.number().min(0, { message: "Price must be a positive number." }),
-    discountAmount: z.number().optional(),
-    discountPrice: z.number().optional(),
-    productCode: z.number().min(1, { message: "Product code must be a positive number." }),
-    category: z.string().min(1, { message: "Category is required." }),
-    subCategory: z.string().optional(),
-    images: z.array(z.string()).nonempty({ message: "Images array cannot be empty." }),
-    stockQuantity: z.number().min(0, { message: "Stock quantity must be a non-negative number." }),
-    rating: z.number().min(0).max(5).optional(),
-    // reviews: z.array(reviewSchemaZod).optional(),
-    specifications: z.record(z.string(), z.string()).optional(),
-    brand: z.string().optional(),
-    tags: z.array(z.string()).optional(),
+  body: z.object({
+    title: z.string().min(1),
+    brand: z.string(),
+    category: z.string(),
+    subcategory: z.string().optional(),
+    price: ProductPriceSchema,
+    stockStatus: z.enum(['In Stock', 'Out of Stock', 'Pre-order']),
+    stockQuantity: z.number().int().nonnegative().optional(),
+    images: z.array(ProductImageSchema).nonempty(),
+    variants: z.array(ProductVariantSchema),
+    keyFeatures: z.array(z.string()),
+    description: z.string(),
+    specifications: z.array(ProductSpecificationSchema),
+    reviews: z.array(ProductReviewSchema).optional(),
+    rating: z.object({
+      average: z.number().min(0).max(5).default(0),
+      count: z.number().int().nonnegative().default(0)
+    }),
+    relatedProducts: z.array(z.string()).optional(),
+    tags: z.array(z.string()),
+    paymentOptions: z.array(z.string()),
+    weight: z.string().optional(),
+    dimensions: ProductDimensionsSchema.optional(),
+    // Remove manufacturerInfo
+    additionalInfo: AdditionalInfoSchema.optional(),
     isFeatured: z.boolean().default(false),
-    isOnSale: z.boolean().default(false),
-    shippingDetails: shippingDetailsSchemaZod.optional(),
-    variants: z.array(variantSchemaZod).optional(),
+    isOnSale: z.boolean().default(false)
   })
-})
+});
+
 const updateProductSchemaZod = productSchemaZod.partial().refine(
-    (data) => Object.keys(data).length > 0,
-    { message: "At least one field must be updated." }
-  );
-export const ProductZodValidation ={
-    productSchemaZod,
-    updateProductSchemaZod
-}
+  (data) => Object.keys(data.body || {}).length > 0,
+  { message: "At least one field must be updated." }
+);
 
-
+export const ProductZodValidation = {
+  productSchemaZod,
+  updateProductSchemaZod
+};

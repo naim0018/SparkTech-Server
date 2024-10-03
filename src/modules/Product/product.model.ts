@@ -1,54 +1,103 @@
-import { model, Schema } from "mongoose";
-import { TProduct, TShippingDetails, TVariant } from "./product.interface";
+import { model, Schema, Types } from "mongoose";
+import { IProduct } from "./product.interface";
 
+const ProductImageSchema = new Schema({
+  url: { type: String, required: true },
+  alt: { type: String, required: true }
+}, { _id: false });
 
+const ProductVariantSchema = new Schema({
+  name: { type: String, required: true },
+  value: { type: String, required: true }
+}, { _id: false });
 
-// const reviewSchema = new Schema<TReview>({
-//   user: { type: String, required: true },      // Name or ID of the user who wrote the review
-//   rating: { type: Number, required: true },    // Rating given by the user
-//   comment: { type: String, required: true },   // Review comment
-//   date: { type: Date, default: Date.now },     // Date when the review was submitted
-// });
+const ProductSpecificationItemSchema = new Schema({
+  name: { type: String, required: true },
+  value: { type: String, required: true }
+}, { _id: false });
 
-const shippingDetailsSchema = new Schema<TShippingDetails>({
-  weight: { type: Number, required: true },    // Weight of the product (in grams, kilograms, etc.)
-  dimensions: {
-    length: { type: Number, required: true },  // Length of the product
-    width: { type: Number, required: true },   // Width of the product
-    height: { type: Number, required: true },  // Height of the product
+const ProductSpecificationSchema = new Schema({
+  group: { type: String, required: true },
+  items: [ProductSpecificationItemSchema]
+}, { _id: false });
+
+const ProductReviewSchema = new Schema({
+  user: { type: String, required: true },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  comment: { type: String, required: true },
+  date: { type: Date, default: Date.now }
+});
+
+const ProductPriceSchema = new Schema({
+  regular: { type: Number, required: true },
+  discounted: { type: Number },
+  savings: { type: Number },
+  savingsPercentage: { type: Number }
+}, { _id: false });
+
+const ProductDimensionsSchema = new Schema({
+  length: { type: Number, required: true },
+  width: { type: Number, required: true },
+  height: { type: Number, required: true },
+  unit: { type: String, enum: ['cm', 'in'], required: true }
+}, { _id: false });
+
+const productSchema = new Schema<IProduct>({
+  productCode: { 
+    type: String, 
+    required: true,
+    unique: true
   },
-  freeShipping: { type: Boolean, default: false },  // Whether the product qualifies for free shipping
-  estimatedDelivery: { type: String },          // Estimated delivery time
-},{_id:false});
+  title: { type: String, required: true },
+  brand: { type: String, required: true },
+  category: { type: String, required: true },
+  subcategory: { type: String },
+  price: ProductPriceSchema,
+  stockStatus: { 
+    type: String, 
+    enum: ['In Stock', 'Out of Stock', 'Pre-order'],
+    required: true 
+  },
+  stockQuantity: { type: Number },
+  images: [ProductImageSchema],
+  variants: [ProductVariantSchema],
+  keyFeatures: [{ type: String }],
+  description: { type: String, required: true },
+  specifications: [ProductSpecificationSchema],
+  reviews: [ProductReviewSchema],
+  rating: {
+    average: { type: Number, default: 0 },
+    count: { type: Number, default: 0 }
+  },
+  relatedProducts: [{ type: Types.ObjectId, ref: 'Product' }],
+  tags: [{ type: String }],
+  paymentOptions: [{ type: String }],
+  weight: { type: String },
+  dimensions: { type: ProductDimensionsSchema },
+  additionalInfo: {
+    freeShipping: { type: Boolean, default: false },
+    estimatedDelivery: { type: String },
+    returnPolicy: { type: String },
+    warranty: { type: String }
+  },
+  isFeatured: { type: Boolean, default: false },
+  isOnSale: { type: Boolean, default: false }
+}, { timestamps: true });
 
-const variantSchema = new Schema<TVariant>({
-  variantName: { type: String, required: true }, // Name of the variant (e.g., "Size", "Color")
-  options: { type: [String], required: true },   // Options available for the variant (e.g., ["S", "M", "L"])
-},{_id:false});
+// Indexes for improved query performance
+productSchema.index({ productCode: 1 });
+productSchema.index({ title: 'text', description: 'text' });
+productSchema.index({ category: 1, subcategory: 1 });
+productSchema.index({ 'price.regular': 1, 'price.discounted': 1 });
+productSchema.index({ stockStatus: 1 });
 
-const productSchema = new Schema<TProduct>({
-  title: { type: String, required: true },     // The name of the product
-  description: { type: Map, of: String },      // Key-value pairs for product details
-  price: { type: Number, required: true },     // Base price of the product
-  discountAmount: { type: Number },            // Amount of discount applied
-  discountPrice: { type: Number },             // Price after discount
-  productCode: { type: Number, required: true, unique: true }, // Unique identifier for the product (SKU, UPC, etc.)
-  category: { type: String, required: true },  // Category to which the product belongs
-  subCategory: { type: String },               // Optional subcategory for more specific classification
-  images: { type: [String], required: true },  // Array of image URLs for the product
-  stockQuantity: { type: Number, required: true }, // Number of units available in stock
-  rating: { type: Number },                    // Average rating of the product
-  // reviews: [reviewSchema],                     // Array of customer reviews
-  specifications: { type: Map, of: String },   // Detailed technical specifications
-  brand: { type: String },                     // Brand name (if applicable)
-  tags: { type: [String] },                    // Tags or keywords associated with the product
-  isFeatured: { type: Boolean, default: false }, // Whether the product is featured on the website
-  isOnSale: { type: Boolean, default: false }, // Whether the product is on sale
-  shippingDetails: shippingDetailsSchema,      // Shipping information like weight, dimensions, etc.
-  variants: [variantSchema],                   // Different variants of the product (e.g., size, color)
-},{timestamps:true});
+// Pre-save hook to ensure productCode is provided
+productSchema.pre('save', function(next) {
+  if (!this.productCode) {
+    next(new Error('Product code is required'));
+  } else {
+    next();
+  }
+});
 
-// Creating the Product model
-export const ProductModel = model<TProduct>('Product', productSchema);
-
-
+export const ProductModel = model<IProduct>('Product', productSchema);

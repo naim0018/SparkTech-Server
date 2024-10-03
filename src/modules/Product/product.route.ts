@@ -3,9 +3,10 @@ import validateRequest from "../../app/middleware/validateRequest";
 import { ProductController } from "./product.controller";
 import { ProductZodValidation } from "./product.validation";
 
-const router= Router()
+const router = Router();
 
-router.get('/',ProductController.getAllProduct)
-router.post('/add-product',validateRequest(ProductZodValidation.productSchemaZod),ProductController.addProduct)
+router.get('/', ProductController.getAllProduct);
+router.post('/add-product', validateRequest(ProductZodValidation.productSchemaZod), ProductController.addProduct);
+router.get("/:id", ProductController.getProductById);
 
-export const ProductRoute = router
+export const ProductRoute = router;
