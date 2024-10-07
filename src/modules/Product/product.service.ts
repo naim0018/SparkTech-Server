@@ -1,4 +1,3 @@
-
 import { IProduct } from "./product.interface"
 import { ProductModel } from "./product.model"
 
@@ -15,8 +14,20 @@ const getProductByIdData = async (id: string) => {
     return await ProductModel.findById(id);
 };
 
+const updateProductDataById = async (id: string, updateData: Partial<IProduct>) => {
+    return await ProductModel.findByIdAndUpdate(id, updateData, { new: true });
+};
+
+const deleteProductDataById = async (id: string) => {
+    return await ProductModel.findByIdAndDelete(id);
+};
+
 export const ProductService ={
     addProductData,
     getAllProductData,
-    getProductByIdData
+    getProductByIdData,
+    updateProductDataById,
+    deleteProductDataById,
+    
+
 }

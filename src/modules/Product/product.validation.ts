@@ -8,7 +8,7 @@ const ProductImageSchema = z.object({
 const ProductVariantSchema = z.object({
   name: z.string(),
   value: z.string(),
-  price: z.number().positive().optional() // Added price option
+  price: z.number().positive().optional()
 });
 
 const ProductSpecificationItemSchema = z.object({
@@ -42,8 +42,6 @@ const ProductDimensionsSchema = z.object({
   unit: z.enum(['cm', 'in'])
 });
 
-// Remove ManufacturerInfoSchema
-
 const AdditionalInfoSchema = z.object({
   freeShipping: z.boolean().default(false),
   estimatedDelivery: z.string().optional(),
@@ -61,7 +59,7 @@ const productSchemaZod = z.object({
     stockStatus: z.enum(['In Stock', 'Out of Stock', 'Pre-order']),
     stockQuantity: z.number().int().nonnegative().optional(),
     images: z.array(ProductImageSchema).nonempty(),
-    variants: z.array(ProductVariantSchema),
+    variants: z.array(ProductVariantSchema).optional(),
     keyFeatures: z.array(z.string()),
     description: z.string(),
     specifications: z.array(ProductSpecificationSchema),
@@ -75,14 +73,15 @@ const productSchemaZod = z.object({
     paymentOptions: z.array(z.string()),
     weight: z.string().optional(),
     dimensions: ProductDimensionsSchema.optional(),
-    // Remove manufacturerInfo
     additionalInfo: AdditionalInfoSchema.optional(),
     isFeatured: z.boolean().default(false),
     isOnSale: z.boolean().default(false)
   })
 });
 
-const updateProductSchemaZod = productSchemaZod.partial().refine(
+const updateProductSchemaZod = z.object({
+  body: productSchemaZod.shape.body.partial()
+}).refine(
   (data) => Object.keys(data.body || {}).length > 0,
   { message: "At least one field must be updated." }
 );
