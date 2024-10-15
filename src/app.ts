@@ -9,8 +9,20 @@ import notFound from './app/middleware/notFound'
 const app = express()
 
 app.use(express.json())
-app.use(cors({ origin: ['http://localhost:5173','https://spark-tech-seven.vercel.app/'], credentials: true }));
-// app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://spark-tech-seven.vercel.app'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://spark-tech-seven.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
 app.use('/api/v1', router)
 
 app.get('/', (req: Request, res: Response) => {
