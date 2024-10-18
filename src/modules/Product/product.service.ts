@@ -1,3 +1,4 @@
+import ProductQueryBuilder from "../../app/builder/QueryBuilder"
 import { IProduct } from "./product.interface"
 import { ProductModel } from "./product.model"
 
@@ -5,9 +6,21 @@ const addProductData =async (payload : IProduct)=>{
     const result = await ProductModel.create(payload)
     return result 
 }
-const getAllProductData =async ()=>{
-    const result = await ProductModel.find()
-    return result 
+const getAllProductData = async (query: Record<string, unknown>) => {
+    console.log(query);
+    const queryBuilder = new ProductQueryBuilder(query)
+        .search(['description', 'category', 'tags', 'subcategory', 'title'])
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+    const result = await queryBuilder.execute();
+    const paginationInfo = await queryBuilder.countTotal();
+
+    return {
+        data: result,
+        meta: paginationInfo
+    };
 }
 
 const getProductByIdData = async (id: string) => {
