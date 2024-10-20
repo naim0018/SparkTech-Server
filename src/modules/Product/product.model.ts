@@ -1,5 +1,5 @@
 import { model, Schema, Types } from "mongoose";
-import { IProduct, ProductVariant } from "./product.interface";
+import { IProduct, ProductVariant, ProductShippingDetails } from "./product.interface";
 
 const ProductImageSchema = new Schema({
   url: { type: String, required: true },
@@ -37,16 +37,13 @@ const ProductPriceSchema = new Schema({
   selectedVariant: { type: String }
 }, { _id: false });
 
-const ProductDimensionsSchema = new Schema({
+const ProductShippingDetailsSchema = new Schema({
   length: { type: Number, required: true },
   width: { type: Number, required: true },
   height: { type: Number, required: true },
-  unit: { type: String, enum: ['cm', 'in'], required: true }
-}, { _id: false });
-
-const ProductShippingSchema = new Schema({
-  shippingWeight: { type: Number },
-  shippingWeightUnit: { type: String, enum: ['kg', 'lb'] }
+  weight: { type: Number, required: true },
+  dimensionUnit: { type: String, enum: ['cm', 'in'], required: true },
+  weightUnit: { type: String, enum: ['kg', 'lb'], required: true }
 }, { _id: false });
 
 const ProductSEOSchema = new Schema({
@@ -66,8 +63,8 @@ const ProductBasicInfoSchema = new Schema({
 }, { _id: false });
 
 const productSchema = new Schema<IProduct>({
-  basicInfo: ProductBasicInfoSchema,
-  price: ProductPriceSchema,
+  basicInfo: { type: ProductBasicInfoSchema, required: true },
+  price: { type: ProductPriceSchema, required: true },
   stockStatus: { 
     type: String, 
     enum: ['In Stock', 'Out of Stock', 'Pre-order'],
@@ -75,7 +72,7 @@ const productSchema = new Schema<IProduct>({
   },
   stockQuantity: { type: Number },
   sold: { type: Number, default: 0 },
-  images: [ProductImageSchema],
+  images: { type: [ProductImageSchema], required: true },
   variants: [ProductVariantSchema],
   specifications: [ProductSpecificationSchema],
   reviews: [ProductReviewSchema],
@@ -85,9 +82,7 @@ const productSchema = new Schema<IProduct>({
   },
   relatedProducts: [{ type: Types.ObjectId, ref: 'Product' }],
   tags: [{ type: String }],
-  paymentOptions: [{ type: String }],
-  dimensions: ProductDimensionsSchema,
-  shipping: ProductShippingSchema,
+  shippingDetails: { type: ProductShippingDetailsSchema, required: true },
   additionalInfo: {
     freeShipping: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
@@ -96,7 +91,7 @@ const productSchema = new Schema<IProduct>({
     returnPolicy: { type: String },
     warranty: { type: String }
   },
-  seo: ProductSEOSchema
+  seo: { type: ProductSEOSchema }
 }, { timestamps: true });
 
 // Indexes for improved query performance
@@ -107,7 +102,7 @@ productSchema.index({ 'price.regular': 1, 'price.discounted': 1 });
 productSchema.index({ stockStatus: 1 });
 
 // Pre-save hook to ensure productCode is provided
-productSchema.pre('save', function(next) {
+productSchema.pre('save', function(this: IProduct, next) {
   if (!this.basicInfo.productCode) {
     next(new Error('Product code is required'));
   } else {
@@ -116,7 +111,7 @@ productSchema.pre('save', function(next) {
 });
 
 // Pre-save hook to calculate savings and savingsPercentage
-productSchema.pre('save', function(next) {
+productSchema.pre('save', function(this: IProduct, next) {
   if (this.price.regular && this.price.discounted) {
     this.price.savings = this.price.regular - this.price.discounted;
     this.price.savingsPercentage = (this.price.savings / this.price.regular) * 100;
@@ -124,7 +119,7 @@ productSchema.pre('save', function(next) {
 
   // Update price if a variant is selected
   if (this.price.selectedVariant) {
-    const selectedVariant = this?.variants?.find((v: ProductVariant) => v.value === this.price.selectedVariant);
+    const selectedVariant = this.variants?.find((v: ProductVariant) => v.value === this.price.selectedVariant);
     if (selectedVariant) {
       this.price.discounted = selectedVariant.price;
       this.price.savings = this.price.regular - this.price.discounted;
@@ -136,7 +131,7 @@ productSchema.pre('save', function(next) {
 });
 
 // Pre-save hook to update rating average
-productSchema.pre('save', function(next) {
+productSchema.pre('save', function(this: IProduct, next) {
   if (this.reviews.length > 0) {
     const totalRating = this.reviews.reduce((sum, review) => sum + review.rating, 0);
     this.rating.average = totalRating / this.reviews.length;
@@ -146,7 +141,7 @@ productSchema.pre('save', function(next) {
 });
 
 // Pre-save hook to find related products based on the same category
-productSchema.pre('save', async function(next) {
+productSchema.pre('save', async function(this: IProduct, next) {
   if (this.isNew || this.isModified('basicInfo.subcategory')) {
     try {
       const relatedProducts = await ProductModel.find({

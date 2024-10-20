@@ -57,18 +57,15 @@ export interface ProductPrice {
   selectedVariant?: string;
 }
 
-// Product Dimensions and Shipping
-export interface ProductDimensions {
+// Product Shipping Details
+export interface ProductShippingDetails {
   length: number;
   width: number;
   height: number;
   weight: number;
-  unit: 'cm' | 'in';
-}
-
-export interface ProductShipping {
-  shippingWeight?: number;
-  shippingWeightUnit?: 'kg' | 'lb';
+  dimensionUnit: 'cm' | 'in';
+  weightUnit: 'kg' | 'lb';
+ 
 }
 
 // Additional Product Information
@@ -114,10 +111,8 @@ export interface IProduct extends Document {
   relatedProducts: Types.ObjectId[];
   tags: string[];
 
-  // Payment and Shipping
-  paymentOptions: string[];
-  dimensions?: ProductDimensions;
-  shipping: ProductShipping;
+  // Shipping Details
+  shippingDetails: ProductShippingDetails;
 
   // Additional Information
   additionalInfo?: AdditionalInfo;

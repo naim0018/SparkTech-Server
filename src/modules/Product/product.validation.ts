@@ -21,7 +21,7 @@ const ProductImageSchema = z.object({
 const ProductVariantSchema = z.object({
   name: z.string(),
   value: z.string(),
-  price: z.number().positive().optional()
+  price: z.number().positive()
 });
 
 // Product Specifications
@@ -53,21 +53,18 @@ const ProductPriceSchema = z.object({
   regular: z.number().positive(),
   discounted: z.number().positive().optional(),
   savings: z.number().nonnegative().optional(),
-  savingsPercentage: z.number().min(0).max(100).optional()
+  savingsPercentage: z.number().min(0).max(100).optional(),
+  selectedVariant: z.string().optional()
 });
 
-// Product Dimensions and Shipping
-const ProductDimensionsSchema = z.object({
+// Product Shipping Details
+const ProductShippingDetailsSchema = z.object({
   length: z.number().positive(),
   width: z.number().positive(),
   height: z.number().positive(),
   weight: z.number().positive(),
-  unit: z.enum(['cm', 'in'])
-});
-
-const ProductShippingSchema = z.object({
-  shippingWeight: z.number().optional(),
-  shippingWeightUnit: z.enum(['kg', 'lb']).optional()
+  dimensionUnit: z.enum(['cm', 'in']),
+  weightUnit: z.enum(['kg', 'lb'])
 });
 
 // Additional Product Information
@@ -101,9 +98,7 @@ const productSchemaZod = z.object({
     rating: ProductRatingSchema,
     relatedProducts: z.array(z.string()).optional(),
     tags: z.array(z.string()),
-    paymentOptions: z.array(z.string()),
-    dimensions: ProductDimensionsSchema.optional(),
-    shipping: ProductShippingSchema,
+    shippingDetails: ProductShippingDetailsSchema,
     additionalInfo: AdditionalInfoSchema.optional(),
     seo: ProductSEOSchema.optional()
   })
