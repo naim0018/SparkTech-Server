@@ -1,5 +1,5 @@
 import { FilterQuery, Query } from "mongoose";
-import { IProduct} from "../../modules/Product/product.interface";
+import { IProduct } from "../../modules/Product/product.interface";
 import { ProductModel } from "../../modules/Product/product.model";
 
 /**
@@ -51,15 +51,12 @@ class ProductQueryBuilder {
 
     // Handle price range
     if (this.query.minPrice || this.query.maxPrice) {
-      queryObj.price = queryObj.price || {};
+      queryObj['price.regular'] = queryObj['price.regular'] || {};
       if (this.query.minPrice) {
-        (queryObj.price as any).regular = { $gte: Number(this.query.minPrice) };
+        (queryObj['price.regular'] as any).$gte = Number(this.query.minPrice);
       }
       if (this.query.maxPrice) {
-        (queryObj.price as any).regular = { 
-          ...(queryObj.price as any).regular,
-          $lte: Number(this.query.maxPrice)
-        };
+        (queryObj['price.regular'] as any).$lte = Number(this.query.maxPrice);
       }
     }
 
@@ -73,19 +70,18 @@ class ProductQueryBuilder {
           queryObj.stockQuantity = 0;
           break;
         case 'Pre-order':
-          // Assuming 'isPreOrder' is part of IProduct interface
-          (queryObj as any).isPreOrder = true;
+          queryObj.stockStatus = 'Pre-order';
           break;
       }
       delete queryObj.stockStatus;
     }
 
     // Handle category and subcategory with case-insensitive partial matching
-    if (queryObj.category) {
-      queryObj.category = { $regex: queryObj.category, $options: "i" } as any;
+    if (queryObj['basicInfo.category']) {
+      queryObj['basicInfo.category'] = { $regex: queryObj['basicInfo.category'], $options: "i" } as any;
     }
-    if (queryObj.subcategory) {
-      queryObj.subcategory = { $regex: queryObj.subcategory, $options: "i" } as any;
+    if (queryObj['basicInfo.subcategory']) {
+      queryObj['basicInfo.subcategory'] = { $regex: queryObj['basicInfo.subcategory'], $options: "i" } as any;
     }
 
     // Handle tags as a comma-separated string
@@ -98,7 +94,8 @@ class ProductQueryBuilder {
 
     // Handle rating as a minimum value
     if (queryObj.rating) {
-      queryObj.rating = { average: { $gte: Number(queryObj.rating) } } as any;
+      queryObj['rating.average'] = { $gte: Number(queryObj.rating) } as any;
+      delete queryObj.rating;
     }
 
     this.modelQuery = this.modelQuery.find(queryObj);
@@ -161,7 +158,14 @@ class ProductQueryBuilder {
    * @returns A promise that resolves to an array of IProduct
    */
   async execute(): Promise<IProduct[]> {
-    return this.modelQuery.exec();
+    try {
+      const results = await this.modelQuery.exec();
+      console.log(`Query executed successfully. Found ${results.length} products.`);
+      return results;
+    } catch (error) {
+      console.error('Error executing product query:', error);
+      throw error; // Re-throw the error for the global error handler
+    }
   }
 }
 
@@ -173,11 +177,11 @@ export default ProductQueryBuilder;
 // 2. The constructor initializes the query with ProductModel.find() and stores the query parameters.
 // 3. The search method creates a complex $or query for partial matching across multiple fields.
 // 4. The filter method handles various filtering scenarios:
-//    - Price range filtering
-//    - Stock status filtering
-//    - Category and subcategory partial matching
+//    - Price range filtering (updated to use 'price.regular')
+//    - Stock status filtering (updated to match new schema)
+//    - Category and subcategory partial matching (updated to use 'basicInfo.category' and 'basicInfo.subcategory')
 //    - Tags filtering (supports both array and comma-separated string)
-//    - Rating filtering (as a minimum value)
+//    - Rating filtering (updated to use 'rating.average')
 // 5. The sort method allows sorting by multiple fields.
 // 6. The paginate method implements skip-limit based pagination.
 // 7. The fields method allows selecting specific fields to be returned.
