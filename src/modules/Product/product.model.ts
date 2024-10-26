@@ -53,7 +53,7 @@ const ProductSEOSchema = new Schema({
 }, { _id: false });
 
 const ProductBasicInfoSchema = new Schema({
-  productCode: { type: String, required: true, unique: true },
+  productCode: { type: String, unique: true },
   title: { type: String, required: true },
   brand: { type: String, required: true },
   category: { type: String, required: true },
@@ -95,20 +95,25 @@ const productSchema = new Schema<IProduct>({
 }, { timestamps: true });
 
 // Indexes for improved query performance
-productSchema.index({ 'basicInfo.productCode': 1 });
+
 productSchema.index({ 'basicInfo.title': 'text', });
 productSchema.index({ 'basicInfo.category': 1, 'basicInfo.subcategory': 1 });
-productSchema.index({ 'price.regular': 1, 'price.discounted': 1 });
-productSchema.index({ stockStatus: 1 });
+// productSchema.index({ 'price.regular': 1, 'price.discounted': 1 });
+// productSchema.index({ stockStatus: 1 });
 
-// Pre-save hook to ensure productCode is provided
-productSchema.pre('save', function(this: IProduct, next) {
-  if (!this.basicInfo.productCode) {
-    next(new Error('Product code is required'));
-  } else {
-    next();
+// Pre-save hook to generate product code
+productSchema.pre('save', async function(this: IProduct, next) {
+  console.log('Running pre-save hook for productCode generation...');
+  if (this.isNew && !this.basicInfo.productCode) {
+    const prefix = this.basicInfo.category.slice(0, 3).toUpperCase();
+    const count = await ProductModel.countDocuments();
+    const paddedCount = String(count + 1).padStart(3, '0');
+    this.basicInfo.productCode = `${prefix}${paddedCount}`;
+    console.log('Generated productCode:', this.basicInfo.productCode);
   }
+  next();
 });
+
 
 // Pre-save hook to calculate savings and savingsPercentage
 productSchema.pre('save', function(this: IProduct, next) {

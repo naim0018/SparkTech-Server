@@ -2,7 +2,7 @@ import { Document, Types } from 'mongoose';
 
 // Basic Product Information
 export interface ProductBasicInfo {
-  productCode: string;
+  productCode?: string;
   title: string;
   brand: string;
   category: string;

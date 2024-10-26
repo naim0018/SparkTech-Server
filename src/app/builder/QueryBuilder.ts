@@ -46,59 +46,64 @@ class ProductQueryBuilder {
    */
   filter() {
     const queryObj = { ...this.query } as FilterQuery<IProduct>;
-    const excludeFields = ["search", "sort", "limit", "page", "fields", "minPrice", "maxPrice"];
+    const excludeFields = ["search", "sort", "limit", "page", "fields"];
     excludeFields.forEach((el) => delete queryObj[el as keyof typeof queryObj]);
 
-    // Handle price range
-    if (this.query.minPrice || this.query.maxPrice) {
-      queryObj['price.regular'] = queryObj['price.regular'] || {};
-      if (this.query.minPrice) {
-        (queryObj['price.regular'] as any).$gte = Number(this.query.minPrice);
-      }
-      if (this.query.maxPrice) {
-        (queryObj['price.regular'] as any).$lte = Number(this.query.maxPrice);
-      }
-    }
+    const buildQuery = (filters: Record<string, any>) => {
+      const query: FilterQuery<IProduct> = {};
 
-    // Handle stock status
-    if (queryObj.stockStatus) {
-      switch (queryObj.stockStatus) {
-        case 'In Stock':
-          queryObj.stockQuantity = { $gt: 0 } as any;
-          break;
-        case 'Out of Stock':
-          queryObj.stockQuantity = 0;
-          break;
-        case 'Pre-order':
-          queryObj.stockStatus = 'Pre-order';
-          break;
+      // Price Range
+      if (filters.priceRange && Array.isArray(filters.priceRange) && filters.priceRange[1] > 0) {
+        query['price.regular'] = {
+          $gte: filters.priceRange[0],
+          $lte: filters.priceRange[1],
+        };
       }
-      delete queryObj.stockStatus;
-    }
 
-    // Handle category and subcategory with case-insensitive partial matching
-    if (queryObj['basicInfo.category']) {
-      queryObj['basicInfo.category'] = { $regex: queryObj['basicInfo.category'], $options: "i" } as any;
-    }
-    if (queryObj['basicInfo.subcategory']) {
-      queryObj['basicInfo.subcategory'] = { $regex: queryObj['basicInfo.subcategory'], $options: "i" } as any;
-    }
+      // Availability (Stock Status)
+      if (filters.stockStatus && filters.stockStatus !== 'all') {
+        switch (filters.stockStatus) {
+          case 'In Stock':
+            query.stockQuantity = { $gt: 0 };
+            break;
+          case 'Out of Stock':
+            query.stockQuantity = 0;
+            break;
+          case 'Pre-order':
+            query.stockStatus = 'Pre-order';
+            break;
+        }
+      }
+
+      // Category
+      if (filters.category && filters.category !== 'all') {
+        query['basicInfo.category'] = filters.category;
+      }
+
+      // Subcategory
+      if (filters.subcategory && filters.subcategory !== 'all') {
+        query['basicInfo.subcategory'] = filters.subcategory;
+      }
+
+      // Brand
+      if (filters.brand && filters.brand !== 'all') {
+        query['basicInfo.brand'] = filters.brand;
+      }
+
+      return query;
+    };
+
+    const builtQuery = buildQuery(queryObj);
 
     // Handle tags as a comma-separated string
     if (queryObj.tags) {
       const tagsArray = Array.isArray(queryObj.tags) 
         ? queryObj.tags 
         : (queryObj.tags as string).split(',').map(tag => tag.trim());
-      queryObj.tags = { $in: tagsArray } as any;
+      builtQuery.tags = { $in: tagsArray };
     }
 
-    // Handle rating as a minimum value
-    if (queryObj.rating) {
-      queryObj['rating.average'] = { $gte: Number(queryObj.rating) } as any;
-      delete queryObj.rating;
-    }
-
-    this.modelQuery = this.modelQuery.find(queryObj);
+    this.modelQuery = this.modelQuery.find(builtQuery);
     return this;
   }
 
@@ -170,21 +175,3 @@ class ProductQueryBuilder {
 }
 
 export default ProductQueryBuilder;
-
-// Code Details Explanation:
-
-// 1. The class uses Mongoose's Query and FilterQuery types for type safety.
-// 2. The constructor initializes the query with ProductModel.find() and stores the query parameters.
-// 3. The search method creates a complex $or query for partial matching across multiple fields.
-// 4. The filter method handles various filtering scenarios:
-//    - Price range filtering (updated to use 'price.regular')
-//    - Stock status filtering (updated to match new schema)
-//    - Category and subcategory partial matching (updated to use 'basicInfo.category' and 'basicInfo.subcategory')
-//    - Tags filtering (supports both array and comma-separated string)
-//    - Rating filtering (updated to use 'rating.average')
-// 5. The sort method allows sorting by multiple fields.
-// 6. The paginate method implements skip-limit based pagination.
-// 7. The fields method allows selecting specific fields to be returned.
-// 8. The countTotal method provides pagination metadata.
-// 9. The execute method runs the constructed query and returns the results.
-// 10. Each method returns 'this' for method chaining, allowing a fluent API design.

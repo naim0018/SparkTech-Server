@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Basic Product Information
 const ProductBasicInfoSchema = z.object({
-  productCode: z.string(),
+  productCode: z.string().optional(),
   title: z.string().min(1),
   brand: z.string(),
   category: z.string(),

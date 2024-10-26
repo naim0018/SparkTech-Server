@@ -2,14 +2,15 @@ import ProductQueryBuilder from "../../app/builder/QueryBuilder"
 import { IProduct } from "./product.interface"
 import { ProductModel } from "./product.model"
 
-const addProductData =async (payload : IProduct)=>{
+const addProductData = async (payload: IProduct) => {
     const result = await ProductModel.create(payload)
     return result 
 }
+
 const getAllProductData = async (query: Record<string, unknown>) => {
     console.log(query);
     const queryBuilder = new ProductQueryBuilder(query)
-        .search(query.search as (keyof IProduct)[])
+        .search(['title', 'brand', 'category', 'subcategory'] as Array<keyof IProduct>)
         .filter()
         .sort()
         .paginate()
@@ -35,12 +36,10 @@ const deleteProductDataById = async (id: string) => {
     return await ProductModel.findByIdAndDelete(id);
 };
 
-export const ProductService ={
+export const ProductService = {
     addProductData,
     getAllProductData,
     getProductByIdData,
     updateProductDataById,
     deleteProductDataById,
-    
-
 }
