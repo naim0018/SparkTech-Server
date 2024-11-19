@@ -10,13 +10,13 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 
-
 const loginUser = async (payload: TLoginUser) => {
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(payload.id);
-
-  if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
+ 
+  const user = await UserModel.isUserExistsByCustomId(payload.email);
+  
+  if (!user || user == null) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
   }
   // checking if the user is already deleted
 
@@ -42,7 +42,7 @@ const loginUser = async (payload: TLoginUser) => {
   //create token and sent to the  client
 
   const jwtPayload = {
-    userId: user.id,
+    email: user.email,
     role: user.role,
   };
 
@@ -151,7 +151,7 @@ const refreshToken = async (token: string) => {
   }
 
   const jwtPayload = {
-    userId: user.id,
+    email: user.email,
     role: user.role,
   };
 
@@ -188,7 +188,7 @@ const forgetPassword = async (userId: string) => {
   }
 
   const jwtPayload = {
-    userId: user.id,
+    email: user.email,
     role: user.role,
   };
 
@@ -206,11 +206,11 @@ const forgetPassword = async (userId: string) => {
 };
 
 const resetPassword = async (
-  payload: { id: string; newPassword: string },
+  payload: { email: string; newPassword: string },
   token: string,
 ) => {
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(payload?.id);
+  const user = await UserModel.isUserExistsByCustomId(payload?.email);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
@@ -236,8 +236,8 @@ const resetPassword = async (
 
   //localhost:3000?id=A-0001&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJBLTAwMDEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDI4NTA2MTcsImV4cCI6MTcwMjg1MTIxN30.-T90nRaz8-KouKki1DkCSMAbsHyb9yDi0djZU3D6QO4
 
-  if (payload.id !== decoded.userId) {
-    console.log(payload.id, decoded.userId);
+  if (payload.email !== decoded.email) {
+    console.log(payload.email, decoded.email);
     throw new AppError(httpStatus.FORBIDDEN, 'You are forbidden!');
   }
 
@@ -249,7 +249,7 @@ const resetPassword = async (
 
   await UserModel.findOneAndUpdate(
     {
-      id: decoded.userId,
+      email: decoded.email,
       role: decoded.role,
     },
     {

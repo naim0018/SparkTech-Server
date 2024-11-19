@@ -8,9 +8,8 @@ const addProductData = async (payload: IProduct) => {
 }
 
 const getAllProductData = async (query: Record<string, unknown>) => {
-    console.log(query);
     const queryBuilder = new ProductQueryBuilder(query)
-        .search(['title', 'brand', 'category', 'subcategory'] as Array<keyof IProduct>)
+        .search(['title', 'brand', 'category', 'subcategory'] as unknown as Array<keyof IProduct>)
         .filter()
         .sort()
         .paginate()

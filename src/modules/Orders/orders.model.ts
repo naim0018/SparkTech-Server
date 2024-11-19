@@ -29,7 +29,7 @@ const orderSchema = new Schema<OrderInterface>({
   items: { type: [orderItemSchema], required: true, validate: [arrayMinLength, 'Order must contain at least one item'] },
   totalAmount: { type: Number, required: true, min: 0 },
   status: { type: String, required: true },
-  billingInformation: { type: billingInformationSchema, required: true }
+  billingInformation: { type: billingInformationSchema, required: true }  
 },
 { timestamps: true }
 );

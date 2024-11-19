@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { TUser, TUserModel } from './user.interface';
 import bcrypt from 'bcrypt';
 import config from '../../app/config';
-
+import { USER_ROLE, USER_STATUS } from './user.constant';
 
 const userSchema = new Schema<TUser>(
   {
@@ -18,6 +18,7 @@ const userSchema = new Schema<TUser>(
     password: {
       type: String,
       required: true,
+      select: false,
     },
     needsPasswordChange: {
       type: Boolean,
@@ -25,12 +26,12 @@ const userSchema = new Schema<TUser>(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
+      enum: ['user', 'admin'] as const,
       default: 'user',
     },
     status: {
       type: String,
-      enum: ['active', 'blocked'],
+      enum: ['active', 'blocked'] as const,
       default: 'active',
     },
     isDeleted: {
@@ -40,16 +41,37 @@ const userSchema = new Schema<TUser>(
     passwordChangedAt: {
       type: Date,
     },
+    phoneNumber: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other'],
+    },
+    profileImage: {
+      type: String,
+    },
+    bio: {
+      type: String,
+    },
+    lastLoginAt: {
+      type: Date,
+    }
   },
   {
     timestamps: true,
-    
   }
 );
 
 userSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this; // doc
+  const user = this as TUser;
   // hashing password and save into DB
   user.password = await bcrypt.hash(
     user.password,
@@ -58,13 +80,13 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.post('save', function (doc, next) {
+userSchema.post('save', function (doc: TUser, next) {
   doc.password = '';
   next();
 });
 
-userSchema.statics.isUserExistsByCustomId = async function (id: string) {
-  return await UserModel.findOne({ id }).select('+password');
+userSchema.statics.isUserExistsByCustomId = async function (email: string) {
+  return await UserModel.findOne({ email }).select('+password');
 };
 
 userSchema.statics.isPasswordMatched = async function (
@@ -83,5 +105,9 @@ userSchema.statics.isJWTIssuedBeforePasswordChanged = function (
   return passwordChangedTime > jwtIssuedTimestamp;
 };
 
+userSchema.statics.checkUserStatus = async function (id: string) {
+  const user = await UserModel.findById(id);
+  return user?.status === USER_STATUS.ACTIVE;
+};
 
 export const UserModel = model<TUser, TUserModel>('User', userSchema);

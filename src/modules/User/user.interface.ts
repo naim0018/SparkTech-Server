@@ -8,11 +8,18 @@ export interface TUser {
   password: string;
   needsPasswordChange: boolean;
   role: 'user' | 'admin';
-  createdAt: Date;
-  updatedAt: Date;
   isDeleted: boolean;
   status: 'active' | 'blocked';
   passwordChangedAt?: Date;
+  phoneNumber?: string;
+  address?: string;
+  dateOfBirth?: Date;
+  gender?: 'male' | 'female' | 'other';
+  profileImage?: string;
+  bio?: string;
+  lastLoginAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface TUserModel extends Model<TUser> {

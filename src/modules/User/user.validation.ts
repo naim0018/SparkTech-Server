@@ -16,6 +16,15 @@ const createUserZodSchema = z.object({
     needsPasswordChange: z.boolean().default(true),
     role: z.enum(['user', 'admin']).default('user'),
     status: z.enum(['active', 'blocked']).default('active'),
+    isDeleted: z.boolean().default(false),
+    passwordChangedAt: z.date().optional(),
+    phoneNumber: z.string().optional(),
+    address: z.string().optional(),
+    dateOfBirth: z.date().optional(),
+    gender: z.enum(['male', 'female', 'other']).optional(),
+    profileImage: z.string().optional(),
+    bio: z.string().optional(),
+    lastLoginAt: z.date().optional()
   }),
 });
 
@@ -27,6 +36,15 @@ const updateUserZodSchema = z.object({
     needsPasswordChange: z.boolean().optional(),
     role: z.enum(['user', 'admin']).optional(),
     status: z.enum(['active', 'blocked']).optional(),
+    isDeleted: z.boolean().optional(),
+    passwordChangedAt: z.date().optional(),
+    phoneNumber: z.string().optional(),
+    address: z.string().optional(),
+    dateOfBirth: z.date().optional(),
+    gender: z.enum(['male', 'female', 'other']).optional(),
+    profileImage: z.string().optional(),
+    bio: z.string().optional(),
+    lastLoginAt: z.date().optional()
   }),
 });
 

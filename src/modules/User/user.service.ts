@@ -16,6 +16,12 @@ const getUserById = async (id: string): Promise<TUser | null> => {
   return result;
 };
 
+const getUserByEmail = async (email: string): Promise<TUser | null> => {
+  console.log(email);
+  const result = await UserModel.findOne({ email, isDeleted: { $ne: true } });
+  return result;
+};
+
 const updateUser = async (id: string, updateData: Partial<TUser>): Promise<TUser | null> => {
   const result = await UserModel.findOneAndUpdate(
     { _id: id, isDeleted: { $ne: true } },
@@ -46,6 +52,7 @@ export const UserService = {
   createUser,
   getAllUsers,
   getUserById,
+  getUserByEmail,
   updateUser,
   deleteUser,
   checkUserStatus,
