@@ -185,6 +185,11 @@ class ProductQueryBuilder {
       throw new Error(`Failed to execute product query: ${(error as Error).message}`);
     }
   }
+
+  populate(options: { path: string, select: string }) {
+    this.modelQuery = this.modelQuery.populate(options);
+    return this;
+  }
 }
 
 export default ProductQueryBuilder;

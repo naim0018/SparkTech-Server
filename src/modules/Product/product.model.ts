@@ -147,10 +147,10 @@ productSchema.pre('save', function(this: IProduct, next) {
 
 // Pre-save hook to find related products based on the same category
 productSchema.pre('save', async function(this: IProduct, next) {
-  if (this.isNew || this.isModified('basicInfo.subcategory')) {
+  if (this.isNew || this.isModified('basicInfo.category')) {
     try {
       const relatedProducts = await ProductModel.find({
-        'basicInfo.subcategory': this.basicInfo.subcategory,
+        'basicInfo.category': this.basicInfo.category,
         _id: { $ne: this._id }
       })
       .select('_id')

@@ -8,6 +8,7 @@ const addProductData = async (payload: IProduct) => {
 }
 
 const getAllProductData = async (query: Record<string, unknown>) => {
+    console.log(query)
     const queryBuilder = new ProductQueryBuilder(query)
         .search(['title', 'brand', 'category', 'subcategory'] as unknown as Array<keyof IProduct>)
         .filter()
@@ -24,7 +25,10 @@ const getAllProductData = async (query: Record<string, unknown>) => {
 }
 
 const getProductByIdData = async (id: string) => {
-    return await ProductModel.findById(id);
+    return await ProductModel.findById(id).populate({
+        path: 'relatedProducts',
+        select: 'title price.regular price.discounted images basicInfo.title basicInfo.category basicInfo.subcategory'    
+    });
 };
 
 const updateProductDataById = async (id: string, updateData: Partial<IProduct>) => {
