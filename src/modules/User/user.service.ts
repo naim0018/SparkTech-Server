@@ -17,7 +17,6 @@ const getUserById = async (id: string): Promise<TUser | null> => {
 };
 
 const getUserByEmail = async (email: string): Promise<TUser | null> => {
-  console.log(email);
   const result = await UserModel.findOne({ email, isDeleted: { $ne: true } });
   return result;
 };

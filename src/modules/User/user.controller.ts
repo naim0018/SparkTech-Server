@@ -36,7 +36,6 @@ const getUserById = catchAsync(async (req: Request, res: Response) => {
 });
 const getUserByEmail = catchAsync(async (req: Request, res: Response) => {
   const email = req.params.email;
-  console.log(email);
   const result = await UserService.getUserByEmail(email);
   sendResponse(res, {
     success: true,

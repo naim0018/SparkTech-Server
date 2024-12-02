@@ -103,13 +103,11 @@ productSchema.index({ 'basicInfo.category': 1, 'basicInfo.subcategory': 1 });
 
 // Pre-save hook to generate product code
 productSchema.pre('save', async function(this: IProduct, next) {
-  console.log('Running pre-save hook for productCode generation...');
   if (this.isNew && !this.basicInfo.productCode) {
     const prefix = this.basicInfo.category.slice(0, 3).toUpperCase();
     const count = await ProductModel.countDocuments();
     const paddedCount = String(count + 1).padStart(3, '0');
     this.basicInfo.productCode = `${prefix}${paddedCount}`;
-    console.log('Generated productCode:', this.basicInfo.productCode);
   }
   next();
 });

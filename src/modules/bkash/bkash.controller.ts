@@ -18,7 +18,6 @@ class PaymentController {
   }
 
   public payment_create = async (req: Request, res: Response) => {
-    console.log("req.body", req.body);
     const { amount, userEmail } = req.body as { amount: number; userEmail: string };
     try {
       const { data } = await axios.post(
@@ -47,10 +46,8 @@ class PaymentController {
 
   public call_back = async (req: Request, res: Response) => {
     const { paymentID, status } = req.query as { paymentID: string; status: string };
-    console.log(paymentID, status);
 
     if (status === "cancel" || status === "failure") {
-      console.log("status ", status);
       return res.redirect(`${baseURL}/error?message=${encodeURIComponent(status)}`);
     }
 
@@ -63,8 +60,6 @@ class PaymentController {
             headers: await this.bkash_headers(),
           }
         );
-
-        console.log("SuccessData-", data);
         if (data && data.statusCode === "0000") {
           await paymentModel.create({
             userId: Math.random() * 10 + 1,
@@ -78,13 +73,11 @@ class PaymentController {
             `${baseURL}/checkout?message=${encodeURIComponent(data.statusMessage)}&trxID=${encodeURIComponent(data.trxID)}&amount=${encodeURIComponent(data.amount)}`
           );
         } else {
-          console.log("status success else", data.statusMessage);
           return res.redirect(
             `${baseURL}/checkout?message=${encodeURIComponent(data.statusMessage)}`
           );
         }
       } catch (error) {
-        console.log("status error", error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         return res.redirect(
           `${baseURL}/error?message=${encodeURIComponent(errorMessage)}`

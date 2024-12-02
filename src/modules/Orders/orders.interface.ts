@@ -3,6 +3,7 @@ export interface OrderInterface {
   totalAmount: number;
   status: string;
   billingInformation: BillingInformation;
+  paymentInfo?: PaymentInfo;
 }
 
 export interface OrderItem {
@@ -29,6 +30,15 @@ export interface BillingInformation {
   notes?: string;
 }
 
+export interface PaymentInfo {
+  paymentMethod: 'cash on delivery' | 'bkash';
+  status: 'pending' | 'completed' | 'failed';
+  transactionId?: string; // Required for bKash
+  paymentDate?: Date;
+  amount: number;
+  bkashNumber?: string; // Required for bKash
+}
+
 // Differences:
 // 1. Renamed IOrder to OrderInterface
 // 2. Renamed IOrderItem to OrderItem
@@ -38,3 +48,4 @@ export interface BillingInformation {
 // 6. Changed paymentMethod type from union of 'card' | 'paypal' to string
 // 7. Removed createdAt and updatedAt fields from OrderInterface
 // 8. Removed import of Types from mongoose
+// 9. Added PaymentInfo interface with bKash and cash on delivery options

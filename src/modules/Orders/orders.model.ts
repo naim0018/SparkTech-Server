@@ -1,10 +1,19 @@
 import { Schema, model } from 'mongoose';
-import { BillingInformation, OrderInterface, OrderItem } from './orders.interface';
+import { BillingInformation, OrderInterface, OrderItem, PaymentInfo } from './orders.interface';
 
 const orderItemSchema = new Schema<OrderItem>({
   product: { type: Schema.Types.Mixed, required: true }, // Can be string or number
   quantity: { type: Number, required: true, min: 1 },
   price: { type: Number, required: true, min: 0 }
+});
+
+const paymentInfoSchema = new Schema<PaymentInfo>({
+  paymentMethod: { type: String, enum: ['cash on delivery', 'bkash'], required: true },
+  status: { type: String, enum: ['pending', 'completed', 'failed'], required: true },
+  transactionId: { type: String },
+  paymentDate: { type: Date },
+  amount: { type: Number, required: true },
+  bkashNumber: { type: String }
 });
 
 const billingInformationSchema = new Schema<BillingInformation>({
@@ -29,7 +38,8 @@ const orderSchema = new Schema<OrderInterface>({
   items: { type: [orderItemSchema], required: true, validate: [arrayMinLength, 'Order must contain at least one item'] },
   totalAmount: { type: Number, required: true, min: 0 },
   status: { type: String, required: true },
-  billingInformation: { type: billingInformationSchema, required: true }  
+  billingInformation: { type: billingInformationSchema, required: true },
+  paymentInfo: { type: paymentInfoSchema }
 },
 { timestamps: true }
 );

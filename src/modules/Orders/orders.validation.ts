@@ -7,6 +7,16 @@ const OrderItemSchema = z.object({
   price: z.number().positive()
 });
 
+// Payment Information Schema
+const PaymentInfoSchema = z.object({
+  paymentMethod: z.enum(['cash on delivery', 'bkash']),
+  status: z.enum(['pending', 'completed', 'failed']),
+  transactionId: z.string().optional(),
+  paymentDate: z.date().optional(),
+  amount: z.number().positive(),
+  bkashNumber: z.string().optional()
+});
+
 // Billing Information Schema
 const BillingInformationSchema = z.object({
   firstName: z.string().min(1),
@@ -32,7 +42,8 @@ const orderSchemaZod = z.object({
     items: z.array(OrderItemSchema).nonempty(),
     totalAmount: z.number().nonnegative(),
     status: z.string().min(1),
-    billingInformation: BillingInformationSchema
+    billingInformation: BillingInformationSchema,
+    paymentInfo: PaymentInfoSchema.optional()
   })
 });
 

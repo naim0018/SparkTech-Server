@@ -18,7 +18,7 @@ try {
 main()
 
 process.on('unhandledRejection',(err)=>{
-    console.log("Unhandled Rejection, shutting down the server ",err)
+    // console.log("Unhandled Rejection, shutting down the server ",err)
     if(server){
         server.close(()=>{
             process.exit(1)
@@ -28,7 +28,7 @@ process.on('unhandledRejection',(err)=>{
 })
 
 process.on('uncaughtRejection',()=>{
-    console.log("Uncaught Rejection, shutting down the server")
+    // console.log("Uncaught Rejection, shutting down the server")
     process.exit(1)
     
 })

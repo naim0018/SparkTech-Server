@@ -33,22 +33,20 @@ class ProductQueryBuilder {
 
   /**
    * Adds a search functionality to the query
-   * @param searchableFields An array of field names to search in
    * @returns The ProductQueryBuilder instance for method chaining
    */
-  search(searchableFields: (keyof IProduct)[]) {
+  search(p0: (keyof IProduct)[]) {
     const search = this.query.search;
     if (search) {
-      const searchTerms = search.split(' ').filter(term => term.length > 0);
-      const searchConditions = searchTerms.map(term => ({
-        $or: searchableFields.map((field) => {
-          if (field === 'tags') {
-            return { [field]: { $in: [new RegExp(term, 'i')] } };
-          }
-          return { [field]: { $regex: term, $options: "i" } };
-        }),
-      }));
-      this.modelQuery = this.modelQuery.find({ $and: searchConditions });
+      const searchRegex = new RegExp(search, 'i');
+      this.modelQuery = this.modelQuery.find({
+        $or: [
+          { 'basicInfo.title': searchRegex },
+          { 'basicInfo.category': searchRegex },
+          { 'basicInfo.subcategory': searchRegex },
+          { 'basicInfo.brand': searchRegex }
+        ]
+      });
     }
     return this;
   }
@@ -178,7 +176,6 @@ class ProductQueryBuilder {
   async execute(): Promise<IProduct[]> {
     try {
       const results = await this.modelQuery.exec();
-      console.log(`Query executed successfully. Found ${results.length} products.`);
       return results;
     } catch (error) {
       console.error('Error executing product query:', error);
