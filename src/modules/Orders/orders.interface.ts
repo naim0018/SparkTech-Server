@@ -23,7 +23,6 @@ export interface BillingInformation {
   phone: string;
   streetAddress: string;
   city: string;
-
   zipCode: string;
   country: string;
   paymentMethod: string;
