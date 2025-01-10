@@ -4,7 +4,11 @@ import { z } from 'zod';
 const OrderItemSchema = z.object({
   product: z.union([z.string(), z.number()]),
   quantity: z.number().int().positive(),
-  price: z.number().positive()
+  price: z.number().positive(),
+  variant: z.object({
+    name: z.string(),
+    value: z.string()
+  }).optional()
 });
 
 // Payment Information Schema
@@ -25,7 +29,6 @@ const BillingInformationSchema = z.object({
   phone: z.string().min(1),
   streetAddress: z.string().min(1),
   city: z.string().min(1),
-  state: z.string().min(1),
   zipCode: z.string().min(1),
   country: z.string().min(1),
   paymentMethod: z.string().min(1),

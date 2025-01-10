@@ -20,11 +20,11 @@ const createUserZodSchema = z.object({
     passwordChangedAt: z.date().optional(),
     phoneNumber: z.string().optional(),
     address: z.string().optional(),
-    dateOfBirth: z.date().optional(),
+    dateOfBirth: z.string().optional(),
     gender: z.enum(['male', 'female', 'other']).optional(),
     profileImage: z.string().optional(),
     bio: z.string().optional(),
-    lastLoginAt: z.date().optional()
+    lastLoginAt: z.string().optional()
   }),
 });
 
@@ -40,11 +40,11 @@ const updateUserZodSchema = z.object({
     passwordChangedAt: z.date().optional(),
     phoneNumber: z.string().optional(),
     address: z.string().optional(),
-    dateOfBirth: z.date().optional(),
+    dateOfBirth: z.string().optional(),
     gender: z.enum(['male', 'female', 'other']).optional(),
     profileImage: z.string().optional(),
     bio: z.string().optional(),
-    lastLoginAt: z.date().optional()
+    lastLoginAt: z.string().optional()
   }),
 });
 

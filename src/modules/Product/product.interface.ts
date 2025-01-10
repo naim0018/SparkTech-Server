@@ -8,7 +8,7 @@ export interface ProductBasicInfo {
   category: string;
   subcategory?: string;
   description: string;
-  keyFeatures: string[];
+  keyFeatures?: string[];
 }
 
 // Product Images
@@ -18,10 +18,14 @@ export interface ProductImage {
 }
 
 // Product Variants
-export interface ProductVariant {
-  name: string;
+export interface ProductVariantItem {
   value: string;
   price: number;
+}
+
+export interface ProductVariant {
+  group: string;
+  items: ProductVariantItem[];
 }
 
 // Product Specifications
@@ -54,7 +58,7 @@ export interface ProductPrice {
   discounted?: number;
   savings?: number;
   savingsPercentage?: number;
-  selectedVariant?: string;
+  selectedVariants?: Record<string, string>;
 }
 
 // Product Shipping Details
@@ -80,9 +84,9 @@ export interface AdditionalInfo {
 
 // Product SEO
 export interface ProductSEO {
-  metaTitle: string;
-  metaDescription: string;
-  slug: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  slug?: string;
 }
 
 /**
@@ -104,8 +108,8 @@ export interface IProduct extends Document {
   specifications?: ProductSpecification[];
 
   // Reviews and Ratings
-  reviews: ProductReview[];
-  rating: ProductRating;
+  reviews?: ProductReview[];
+  rating?: ProductRating;
 
   // Related Products and Tags
   relatedProducts: Types.ObjectId[];

@@ -6,10 +6,14 @@ const ProductImageSchema = new Schema({
   alt: { type: String, required: true }
 }, { _id: false });
 
-const ProductVariantSchema = new Schema({
-  name: { type: String, required: true },
+const ProductVariantItemSchema = new Schema({
   value: { type: String, required: true },
   price: { type: Number, required: true }
+}, { _id: false });
+
+const ProductVariantSchema = new Schema({
+  group: { type: String, required: true },
+  items: [ProductVariantItemSchema]
 }, { _id: false });
 
 const ProductSpecificationItemSchema = new Schema({
@@ -34,7 +38,7 @@ const ProductPriceSchema = new Schema({
   discounted: { type: Number },
   savings: { type: Number },
   savingsPercentage: { type: Number },
-  selectedVariant: { type: String }
+  selectedVariants: { type: Map, of: String }
 }, { _id: false });
 
 const ProductShippingDetailsSchema = new Schema({
@@ -47,9 +51,9 @@ const ProductShippingDetailsSchema = new Schema({
 }, { _id: false });
 
 const ProductSEOSchema = new Schema({
-  metaTitle: { type: String, required: true },
-  metaDescription: { type: String, required: true },
-  slug: { type: String, required: true, unique: true }
+  metaTitle: { type: String },
+  metaDescription: { type: String },
+  slug: { type: String, sparse: true }
 }, { _id: false });
 
 const ProductBasicInfoSchema = new Schema({
@@ -120,14 +124,23 @@ productSchema.pre('save', function(this: IProduct, next) {
     this.price.savingsPercentage = (this.price.savings / this.price.regular) * 100;
   }
 
-  // Update price if a variant is selected
-  if (this.price.selectedVariant) {
-    const selectedVariant = this.variants?.find((v: ProductVariant) => v.value === this.price.selectedVariant);
-    if (selectedVariant) {
-      this.price.discounted = selectedVariant.price;
-      this.price.savings = this.price.regular - this.price.discounted;
-      this.price.savingsPercentage = (this.price.savings / this.price.regular) * 100;
+  // Calculate price based on selected variants
+  if (this.price.selectedVariants && this.variants) {
+    let variantPrice = this.price.regular;
+    
+    for (const [group, value] of Object.entries(this.price.selectedVariants)) {
+      const variantGroup = this.variants.find(v => v.group === group);
+      if (variantGroup) {
+        const selectedVariant = variantGroup.items.find(item => item.value === value);
+        if (selectedVariant) {
+          variantPrice = selectedVariant.price;
+        }
+      }
     }
+
+    this.price.discounted = variantPrice;
+    this.price.savings = this.price.regular - variantPrice;
+    this.price.savingsPercentage = (this.price.savings / this.price.regular) * 100;
   }
 
   next();
@@ -135,8 +148,14 @@ productSchema.pre('save', function(this: IProduct, next) {
 
 // Pre-save hook to update rating average
 productSchema.pre('save', function(this: IProduct, next) {
-  if (this.reviews.length > 0) {
+  if (this.reviews && this.reviews.length > 0) {
     const totalRating = this.reviews.reduce((sum, review) => sum + review.rating, 0);
+    if (!this.rating) {
+      this.rating = {
+        average: 0,
+        count: 0
+      };
+    }
     this.rating.average = totalRating / this.reviews.length;
     this.rating.count = this.reviews.length;
   }

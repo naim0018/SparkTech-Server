@@ -4,7 +4,11 @@ import { BillingInformation, OrderInterface, OrderItem, PaymentInfo } from './or
 const orderItemSchema = new Schema<OrderItem>({
   product: { type: Schema.Types.Mixed, required: true }, // Can be string or number
   quantity: { type: Number, required: true, min: 1 },
-  price: { type: Number, required: true, min: 0 }
+  price: { type: Number, required: true, min: 0 },
+  variant: {
+    name: { type: String },
+    value: { type: String }
+  }
 });
 
 const paymentInfoSchema = new Schema<PaymentInfo>({
@@ -23,7 +27,7 @@ const billingInformationSchema = new Schema<BillingInformation>({
   phone: { type: String, required: true },
   streetAddress: { type: String, required: true },
   city: { type: String, required: true },
-  state: { type: String, required: true },
+  
   zipCode: { type: String, required: true },
   country: { type: String, required: true },
   paymentMethod: { type: String, required: true },

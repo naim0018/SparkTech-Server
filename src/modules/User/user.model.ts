@@ -39,7 +39,7 @@ const userSchema = new Schema<TUser>(
       default: false,
     },
     passwordChangedAt: {
-      type: Date,
+      type: String,
     },
     phoneNumber: {
       type: String,
@@ -48,7 +48,7 @@ const userSchema = new Schema<TUser>(
       type: String,
     },
     dateOfBirth: {
-      type: Date,
+      type: String,
     },
     gender: {
       type: String,
@@ -61,7 +61,7 @@ const userSchema = new Schema<TUser>(
       type: String,
     },
     lastLoginAt: {
-      type: Date,
+      type: String,
     }
   },
   {

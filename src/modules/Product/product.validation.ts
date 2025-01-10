@@ -8,7 +8,7 @@ const ProductBasicInfoSchema = z.object({
   category: z.string(),
   subcategory: z.string().optional(),
   description: z.string(),
-  keyFeatures: z.array(z.string())
+  keyFeatures: z.array(z.string()).optional()
 });
 
 // Product Images
@@ -18,10 +18,14 @@ const ProductImageSchema = z.object({
 });
 
 // Product Variants
-const ProductVariantSchema = z.object({
-  name: z.string(),
+const ProductVariantItemSchema = z.object({
   value: z.string(),
   price: z.number().positive()
+});
+
+const ProductVariantSchema = z.object({
+  group: z.string(),
+  items: z.array(ProductVariantItemSchema)
 });
 
 // Product Specifications
@@ -54,7 +58,7 @@ const ProductPriceSchema = z.object({
   discounted: z.number().positive().optional(),
   savings: z.number().nonnegative().optional(),
   savingsPercentage: z.number().min(0).max(100).optional(),
-  selectedVariant: z.string().optional()
+  selectedVariants: z.record(z.string()).optional()
 });
 
 // Product Shipping Details
@@ -79,9 +83,9 @@ const AdditionalInfoSchema = z.object({
 
 // Product SEO
 const ProductSEOSchema = z.object({
-  metaTitle: z.string(),
-  metaDescription: z.string(),
-  slug: z.string()
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  slug: z.string().optional()
 });
 
 const productSchemaZod = z.object({
@@ -95,7 +99,7 @@ const productSchemaZod = z.object({
     variants: z.array(ProductVariantSchema).optional(),
     specifications: z.array(ProductSpecificationSchema).optional(),
     reviews: z.array(ProductReviewSchema).optional(),
-    rating: ProductRatingSchema,
+    rating: ProductRatingSchema.optional(),
     relatedProducts: z.array(z.string()).optional(),
     tags: z.array(z.string()),
     shippingDetails: ProductShippingDetailsSchema,

@@ -7,9 +7,13 @@ export interface OrderInterface {
 }
 
 export interface OrderItem {
-  product: string | number; // Assuming product ID
+  product: string | number; // Product ID
   quantity: number;
   price: number;
+  variant?: {
+    name: string;
+    value: string;
+  };
 }
 
 export interface BillingInformation {
@@ -19,7 +23,7 @@ export interface BillingInformation {
   phone: string;
   streetAddress: string;
   city: string;
-  state: string;
+
   zipCode: string;
   country: string;
   paymentMethod: string;

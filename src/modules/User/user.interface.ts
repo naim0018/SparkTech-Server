@@ -10,16 +10,16 @@ export interface TUser {
   role: 'user' | 'admin';
   isDeleted: boolean;
   status: 'active' | 'blocked';
-  passwordChangedAt?: Date;
+  passwordChangedAt?: string;
   phoneNumber?: string;
   address?: string;
-  dateOfBirth?: Date;
+  dateOfBirth?: string;
   gender?: 'male' | 'female' | 'other';
   profileImage?: string;
   bio?: string;
-  lastLoginAt?: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
+  lastLoginAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface TUserModel extends Model<TUser> {
