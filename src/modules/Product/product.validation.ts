@@ -20,7 +20,12 @@ const ProductImageSchema = z.object({
 // Product Variants
 const ProductVariantItemSchema = z.object({
   value: z.string(),
-  price: z.number().positive()
+  price: z.number().optional(),
+  stock: z.number().optional(),
+  image: z.object({
+    url: z.string().optional(),
+    alt: z.string().optional()
+  }).optional()
 });
 
 const ProductVariantSchema = z.object({
@@ -55,9 +60,9 @@ const ProductRatingSchema = z.object({
 // Product Pricing
 const ProductPriceSchema = z.object({
   regular: z.number().positive(),
-  discounted: z.number().positive().optional(),
-  savings: z.number().nonnegative().optional(),
-  savingsPercentage: z.number().min(0).max(100).optional(),
+  discounted: z.number().optional(),
+  savings: z.number().optional(),
+  savingsPercentage: z.number().optional(),
   selectedVariants: z.record(z.string()).optional()
 });
 

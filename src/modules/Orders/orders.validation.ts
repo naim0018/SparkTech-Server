@@ -1,20 +1,24 @@
 import { z } from 'zod';
 
 // Order Item Schema
+const SelectedVariantSchema = z.object({
+  value: z.string(),
+  price: z.number().positive()
+});
+
 const OrderItemSchema = z.object({
   product: z.union([z.string(), z.number()]),
   quantity: z.number().int().positive(),
   price: z.number().positive(),
-  variant: z.object({
-    name: z.string(),
-    value: z.string()
-  }).optional()
+  image: z.string(),
+  itemKey: z.string(),
+  selectedVariants: z.record(SelectedVariantSchema).optional()
 });
 
 // Payment Information Schema
 const PaymentInfoSchema = z.object({
   paymentMethod: z.enum(['cash on delivery', 'bkash']),
-  status: z.enum(['pending', 'completed', 'failed']),
+  status: z.enum(['pending', 'processing', 'shipped', 'completed', 'cancelled']),
   transactionId: z.string().optional(),
   paymentDate: z.date().optional(),
   amount: z.number().positive(),

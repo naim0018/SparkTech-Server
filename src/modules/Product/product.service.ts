@@ -1,6 +1,7 @@
 import ProductQueryBuilder from "../../app/builder/QueryBuilder"
 import { IProduct } from "./product.interface"
-import { ProductModel } from "./product.model"
+import ProductModel from "./product.model"
+
 
 const addProductData = async (payload: IProduct) => {
     const result = await ProductModel.create(payload)

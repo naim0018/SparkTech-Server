@@ -20,7 +20,12 @@ export interface ProductImage {
 // Product Variants
 export interface ProductVariantItem {
   value: string;
-  price: number;
+  price?: number;
+  stock?: number;
+  image?: {
+    url?: string;
+    alt?: string;
+  };
 }
 
 export interface ProductVariant {
@@ -58,7 +63,7 @@ export interface ProductPrice {
   discounted?: number;
   savings?: number;
   savingsPercentage?: number;
-  selectedVariants?: Record<string, string>;
+  selectedVariants?: Map<string, string>;
 }
 
 // Product Shipping Details
@@ -69,7 +74,6 @@ export interface ProductShippingDetails {
   weight: number;
   dimensionUnit: 'cm' | 'in';
   weightUnit: 'kg' | 'lb';
- 
 }
 
 // Additional Product Information

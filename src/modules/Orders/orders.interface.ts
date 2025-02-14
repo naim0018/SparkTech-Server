@@ -1,3 +1,5 @@
+import { ObjectId } from "mongoose";
+
 export interface OrderInterface {
   items: OrderItem[];
   totalAmount: number;
@@ -6,14 +8,19 @@ export interface OrderInterface {
   paymentInfo?: PaymentInfo;
 }
 
+export interface SelectedVariant {
+  value: string; // The selected value of the variant
+  price: number; // The price of the selected variant
+  
+}
+
 export interface OrderItem {
-  product: string | number; // Product ID
+  product: ObjectId; // Product ID
   quantity: number;
   price: number;
-  variant?: {
-    name: string;
-    value: string;
-  };
+  image: string;
+  itemKey: string;
+  selectedVariants?: Record<string, SelectedVariant>;
 }
 
 export interface BillingInformation {
@@ -35,7 +42,7 @@ export interface BillingInformation {
 
 export interface PaymentInfo {
   paymentMethod: 'cash on delivery' | 'bkash';
-  status: 'pending' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'shipped' | 'completed' | 'cancelled';
   transactionId?: string; // Required for bKash
   paymentDate?: Date;
   amount: number;

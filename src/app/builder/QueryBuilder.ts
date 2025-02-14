@@ -1,6 +1,6 @@
 import { FilterQuery, Query } from "mongoose";
 import { IProduct } from "../../modules/Product/product.interface";
-import { ProductModel } from "../../modules/Product/product.model";
+import ProductModel from "../../modules/Product/product.model";
 
 /**
  * QueryBuilder class for building and executing MongoDB queries for ProductModel
