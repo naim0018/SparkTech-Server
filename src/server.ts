@@ -3,7 +3,7 @@ import app from './app'
 import config from './app/config'
 import {Server} from 'http'
 let server:Server
-async function main (){
+async function main (){ 
 try {
    await mongoose.connect(config.db as string)
     server = app.listen(config.port,()=>{
