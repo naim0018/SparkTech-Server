@@ -10,4 +10,5 @@ router.post('/add-product', validateRequest(ProductZodValidation.productSchemaZo
 router.get("/:id", ProductController.getProductById);
 router.patch("/:id/update-product", ProductController.updateProductById);
 router.delete("/:id/delete-product", ProductController.deleteProductById);
+router.get('/category/:category', ProductController.getProductsByCategory);
 export const ProductRoute = router;

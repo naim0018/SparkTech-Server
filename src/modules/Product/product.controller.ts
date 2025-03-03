@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../app/utils/catchAsync";
 import sendResponse from "../../app/utils/sendResponse";
 import { ProductService } from "./product.service";
+import httpStatus from "http-status";
 
 const addProduct = catchAsync(async (req, res) => {
   const result = await ProductService.addProductData(req.body);
@@ -57,10 +58,25 @@ const deleteProductById = catchAsync(async (req, res) => {
   });
 });
 
+const getProductsByCategory = catchAsync(async (req, res) => {
+  const { category } = req.params;
+  const { limit = 10 } = req.query;
+  
+  const result = await ProductService.getProductsByCategory(category, Number(limit));
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Products retrieved successfully',
+    data: result
+  });
+});
+
 export const ProductController = {
   addProduct,
   getAllProduct,
   getProductById,
   updateProductById,
-  deleteProductById
+  deleteProductById,
+  getProductsByCategory
 };

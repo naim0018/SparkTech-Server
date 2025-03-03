@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 // Order Item Schema
 const SelectedVariantSchema = z.object({
-  value: z.string(),
-  price: z.number().positive()
+  value: z.string().optional(),
+  price: z.number().nonnegative().optional()
 });
 
 const OrderItemSchema = z.object({
@@ -27,19 +27,12 @@ const PaymentInfoSchema = z.object({
 
 // Billing Information Schema
 const BillingInformationSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
+  name: z.string().min(1),
   email: z.string().email(),
   phone: z.string().min(1),
-  streetAddress: z.string().min(1),
-  city: z.string().min(1),
-  zipCode: z.string().min(1),
+  address: z.string().min(1),
   country: z.string().min(1),
   paymentMethod: z.string().min(1),
-  cardNumber: z.string().optional(),
-  expMonth: z.string().optional(),
-  expYear: z.string().optional(),
-  cvv: z.string().optional(),
   notes: z.string().optional()
 });
 

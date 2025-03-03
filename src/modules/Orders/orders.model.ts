@@ -10,8 +10,8 @@ const orderItemSchema = new Schema<OrderItem>({
   selectedVariants: { 
     type: Map, 
     of: new Schema({
-      value: { type: String, required: true }, // The selected value of the variant
-      price: { type: Number, required: true } // The price of the selected variant
+      value: { type: String }, // The selected value of the variant
+      price: { type: Number} // The price of the selected variant
     }), 
     default: {} 
   }
@@ -27,19 +27,11 @@ const paymentInfoSchema = new Schema<PaymentInfo>({
 });
 
 const billingInformationSchema = new Schema<BillingInformation>({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
+  name: { type: String, required: true },
   email: { type: String, required: true },
   phone: { type: String, required: true },
-  streetAddress: { type: String, required: true },
-  city: { type: String, required: true },
-  zipCode: { type: String, required: true },
+  address: { type: String, required: true },
   country: { type: String, required: true },
-  paymentMethod: { type: String, required: true },
-  cardNumber: { type: String },
-  expMonth: { type: String },
-  expYear: { type: String },
-  cvv: { type: String },
   notes: { type: String }
 });
 

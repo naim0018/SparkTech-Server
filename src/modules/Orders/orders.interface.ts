@@ -24,13 +24,10 @@ export interface OrderItem {
 }
 
 export interface BillingInformation {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   phone: string;
-  streetAddress: string;
-  city: string;
-  zipCode: string;
+  address: string;
   country: string;
   paymentMethod: string;
   cardNumber?: string;

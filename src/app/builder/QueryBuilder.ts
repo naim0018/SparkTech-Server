@@ -13,7 +13,6 @@ class ProductQueryBuilder {
     limit?: number;
     page?: number;
     fields?: string;
-    priceRange?: [number, number];
     stockStatus?: 'all' | 'In Stock' | 'Out of Stock' | 'Pre-order';
     category?: string;
     subcategory?: string;
@@ -57,60 +56,27 @@ class ProductQueryBuilder {
    */
   filter() {
     const queryObj = { ...this.query };
-    const excludeFields = ["search", "sort", "limit", "page", "fields"];
-    excludeFields.forEach((el) => delete queryObj[el]);
+    const excludeFields = ['page', 'sort', 'limit', 'fields', 'search'];
+    excludeFields.forEach(field => delete queryObj[field]);
 
-    const buildQuery = (filters: Record<string, any>): FilterQuery<IProduct> => {
-      const query: FilterQuery<IProduct> = {};
-
-      if (filters.priceRange && Array.isArray(filters.priceRange) && filters.priceRange.length === 2) {
-        const [min, max] = filters.priceRange;
-        if (typeof min === 'number' && typeof max === 'number' && min < max) {
-          query['price.regular'] = { $gte: min, $lte: max };
-        }
-      }
-
-      if (filters.stockStatus && filters.stockStatus !== 'all') {
-        switch (filters.stockStatus) {
-          case 'In Stock':
-            query.stockQuantity = { $gt: 0 };
-            break;
-          case 'Out of Stock':
-            query.stockQuantity = 0;
-            break;
-          case 'Pre-order':
-            query.stockStatus = 'Pre-order';
-            break;
-          default:
-            console.warn(`Unexpected stockStatus: ${filters.stockStatus}`);
-        }
-      }
-
-      if (filters.category && filters.category !== 'all') {
-        query['basicInfo.category'] = filters.category;
-      }
-
-      if (filters.subcategory && filters.subcategory !== 'all') {
-        query['basicInfo.subcategory'] = filters.subcategory;
-      }
-
-      if (filters.brand && filters.brand !== 'all') {
-        query['basicInfo.brand'] = filters.brand;
-      }
-
-      return query;
-    };
-
-    const builtQuery = buildQuery(queryObj);
-
-    if (queryObj.tags) {
-      const tagsArray = Array.isArray(queryObj.tags) 
-        ? queryObj.tags 
-        : (queryObj.tags as string).split(',').map(tag => tag.trim());
-      builtQuery.tags = { $in: tagsArray };
+    if (queryObj.category) {
+      this.modelQuery = this.modelQuery.find({
+        'basicInfo.category': queryObj.category
+      });
     }
 
-    this.modelQuery = this.modelQuery.find(builtQuery);
+    if (queryObj.subcategory) {
+      this.modelQuery = this.modelQuery.find({
+        'basicInfo.subcategory': queryObj.subcategory
+      });
+    }
+
+    if (queryObj.stockStatus && queryObj.stockStatus !== 'all') {
+      this.modelQuery = this.modelQuery.find({
+        'basicInfo.stockStatus': queryObj.stockStatus
+      });
+    }
+
     return this;
   }
 
@@ -119,11 +85,20 @@ class ProductQueryBuilder {
    * @returns The ProductQueryBuilder instance for method chaining
    */
   sort() {
-    const allowedSortFields = ['createdAt', 'price.regular', 'stockQuantity'];
-    const sort = this.query.sort?.split(",")
-      .filter(field => allowedSortFields.includes(field.replace('-', '')))
-      .join(" ") || "-createdAt";
-    this.modelQuery = this.modelQuery.sort(sort);
+    if (this.query.sort) {
+      const sortFields = this.query.sort.split(',');
+      const sortQuery = sortFields
+        .map(field => {
+          if (field === 'price.regular' || field === '-price.regular') {
+            return field;
+          }
+          return field.startsWith('-') ? field : `-${field}`;
+        })
+        .join(' ');
+      this.modelQuery = this.modelQuery.sort(sortQuery);
+    } else {
+      this.modelQuery = this.modelQuery.sort('-createdAt');
+    }
     return this;
   }
 

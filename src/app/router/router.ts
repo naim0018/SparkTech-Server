@@ -5,7 +5,7 @@ import { OrderRoute } from "../../modules/Orders/orders.route";
 import { UserRoutes } from "../../modules/User/user.route";
 import { SteadFastRoute } from "../../modules/SteadFast/steadFast.route";
 import { bkashRouter } from "../../modules/bkash/bkash.router";
-
+import { CategoryRoute } from "../../modules/Categories/categories.route";
 const router = Router()
 
 const moduleRoute = [
@@ -28,6 +28,10 @@ const moduleRoute = [
     {
         path: '/order',
         route: OrderRoute
+    },
+    {
+        path: '/categories',
+        route: CategoryRoute
     },
     {
         path: '/steadfast',
