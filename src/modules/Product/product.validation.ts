@@ -8,7 +8,10 @@ const ProductBasicInfoSchema = z.object({
   category: z.string(),
   subcategory: z.string().optional(),
   description: z.string(),
-  keyFeatures: z.array(z.string()).optional()
+  keyFeatures: z.array(z.string()).optional(),
+  addDeliveryCharge: z.boolean().optional(),
+  deliveryChargeInsideDhaka: z.number().optional(),
+  deliveryChargeOutsideDhaka: z.number().optional(),
 });
 
 // Product Images

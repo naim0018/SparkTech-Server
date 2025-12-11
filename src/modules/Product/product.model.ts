@@ -94,6 +94,9 @@ const ProductBasicInfoSchema = new Schema(
     subcategory: { type: String },
     description: { type: String, required: true },
     keyFeatures: [{ type: String }],
+    addDeliveryCharge: { type: Boolean, default: false },
+    deliveryChargeInsideDhaka: { type: Number },
+    deliveryChargeOutsideDhaka: { type: Number },
   },
   { _id: false }
 );

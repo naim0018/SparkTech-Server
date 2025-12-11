@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Document, Types } from "mongoose";
 
 // Basic Product Information
 export interface ProductBasicInfo {
@@ -9,6 +9,9 @@ export interface ProductBasicInfo {
   subcategory?: string;
   description: string;
   keyFeatures?: string[];
+  addDeliveryCharge?: boolean;
+  deliveryChargeInsideDhaka?: number;
+  deliveryChargeOutsideDhaka?: number;
 }
 
 // Product Images
@@ -72,8 +75,8 @@ export interface ProductShippingDetails {
   width: number;
   height: number;
   weight: number;
-  dimensionUnit: 'cm' | 'in';
-  weightUnit: 'kg' | 'lb';
+  dimensionUnit: "cm" | "in";
+  weightUnit: "kg" | "lb";
 }
 
 // Additional Product Information
@@ -102,7 +105,7 @@ export interface IProduct extends Document {
 
   // Pricing and Stock
   price: ProductPrice;
-  stockStatus: 'In Stock' | 'Out of Stock' | 'Pre-order';
+  stockStatus: "In Stock" | "Out of Stock" | "Pre-order";
   stockQuantity?: number;
   sold: number;
 
