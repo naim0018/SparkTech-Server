@@ -18,17 +18,17 @@ const orderItemSchema = new Schema<OrderItem>({
 }, { _id: false });
 
 const paymentInfoSchema = new Schema<PaymentInfo>({
-  paymentMethod: { type: String, enum: ['cash on delivery', 'bkash'], required: true },
-  status: { type: String, enum: ['pending', 'processing', 'shipped', 'completed', 'cancelled'], required: true },
+  paymentMethod: { type: String, enum: ['cash on delivery', 'bkash'], required: true, default: 'cash on delivery' },
+  status: { type: String, enum: ['pending', 'processing', 'shipped', 'completed', 'cancelled'], required: true, default: 'pending' },
   transactionId: { type: String },
-  paymentDate: { type: Date },
+  paymentDate: { type: String },
   amount: { type: Number, required: true },
   bkashNumber: { type: String }
 });
 
 const billingInformationSchema = new Schema<BillingInformation>({
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String },
   phone: { type: String, required: true },
   address: { type: String, required: true },
   country: { type: String, required: true },
@@ -40,7 +40,9 @@ const orderSchema = new Schema<OrderInterface>({
   totalAmount: { type: Number, required: true, min: 0 },
   status: { type: String, required: true },
   billingInformation: { type: billingInformationSchema, required: true },
-  paymentInfo: { type: paymentInfoSchema }
+  paymentInfo: { type: paymentInfoSchema },
+  courierCharge: { type: String, enum: ['insideDhaka', 'outsideDhaka'], required: true },
+  cuponCode: { type: String }
 },
 { timestamps: true }
 );
@@ -48,6 +50,9 @@ const orderSchema = new Schema<OrderInterface>({
 function arrayMinLength(val: any[]) {
   return val.length > 0;
 }
+
+
+
 
 const OrderModel = model<OrderInterface>('Order', orderSchema);
 

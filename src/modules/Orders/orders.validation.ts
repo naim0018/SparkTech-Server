@@ -17,10 +17,10 @@ const OrderItemSchema = z.object({
 
 // Payment Information Schema
 const PaymentInfoSchema = z.object({
-  paymentMethod: z.enum(['cash on delivery', 'bkash']),
-  status: z.enum(['pending', 'processing', 'shipped', 'completed', 'cancelled']),
+  paymentMethod: z.enum(['cash on delivery', 'bkash']).default('cash on delivery'),
+  status: z.enum(['pending', 'processing', 'shipped', 'completed', 'cancelled']).default('pending'),
   transactionId: z.string().optional(),
-  paymentDate: z.date().optional(),
+  paymentDate: z.string().optional(),
   amount: z.number().positive(),
   bkashNumber: z.string().optional()
 });
@@ -28,7 +28,7 @@ const PaymentInfoSchema = z.object({
 // Billing Information Schema
 const BillingInformationSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().email().optional(),
   phone: z.string().min(1),
   address: z.string().min(1),
   country: z.string().min(1),
@@ -43,7 +43,9 @@ const orderSchemaZod = z.object({
     totalAmount: z.number().nonnegative(),
     status: z.string().min(1),
     billingInformation: BillingInformationSchema,
-    paymentInfo: PaymentInfoSchema.optional()
+    paymentInfo: PaymentInfoSchema.optional(),
+    courierCharge: z.enum(['insideDhaka', 'outsideDhaka']),
+    cuponCode: z.string().optional()
   })
 });
 

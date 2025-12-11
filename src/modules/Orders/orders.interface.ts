@@ -6,6 +6,8 @@ export interface OrderInterface {
   status: string;
   billingInformation: BillingInformation;
   paymentInfo?: PaymentInfo;
+  courierCharge: 'insideDhaka' | 'outsideDhaka';
+  cuponCode?: string;
 }
 
 export interface SelectedVariant {
@@ -25,7 +27,7 @@ export interface OrderItem {
 
 export interface BillingInformation {
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   address: string;
   country: string;
@@ -41,9 +43,10 @@ export interface PaymentInfo {
   paymentMethod: 'cash on delivery' | 'bkash';
   status: 'pending' | 'processing' | 'shipped' | 'completed' | 'cancelled';
   transactionId?: string; // Required for bKash
-  paymentDate?: Date;
+  paymentDate?: string;
   amount: number;
   bkashNumber?: string; // Required for bKash
+  
 }
 
 // Differences:

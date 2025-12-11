@@ -7,7 +7,7 @@ const addOrderData = async (payload: OrderInterface) => {
 };
 
 const getAllOrdersData = async () => {
-  const result = await OrderModel.find().populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants");
+  const result = await OrderModel.find().populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants").sort({ createdAt: -1 });
   return result;
 };
 

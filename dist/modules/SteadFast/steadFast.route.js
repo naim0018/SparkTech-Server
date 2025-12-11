@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SteadFastRoute = void 0;
+const express_1 = require("express");
+const steadFast_controller_1 = require("./steadFast.controller");
+const router = (0, express_1.Router)();
+router.post('/create-order', steadFast_controller_1.SteadFastController.createOrder);
+router.get('/get-city', steadFast_controller_1.SteadFastController.getCity);
+router.get('/get-zone', steadFast_controller_1.SteadFastController.getZone);
+router.get('/track-parcel/:consignment', steadFast_controller_1.SteadFastController.trackParcel);
+exports.SteadFastRoute = router;

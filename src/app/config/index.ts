@@ -24,4 +24,8 @@ export default {
     callbackURL : process.env.callbackURL,
     bkash_payment_callback_url : process.env.bkash_payment_callback_url,
     bkash_refund_callback_url : process.env.bkash_refund_callback_url,
+    steadfast:{
+        apiKey:process.env.steadfast_api_key,
+        baseUrl:process.env.steadfast_base_url,
+    }
 }
