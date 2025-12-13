@@ -60,6 +60,9 @@ const ProductBasicInfoSchema = new mongoose_1.Schema({
     subcategory: { type: String },
     description: { type: String, required: true },
     keyFeatures: [{ type: String }],
+    addDeliveryCharge: { type: Boolean, default: false },
+    deliveryChargeInsideDhaka: { type: Number },
+    deliveryChargeOutsideDhaka: { type: Number },
 }, { _id: false });
 const productSchema = new mongoose_1.Schema({
     basicInfo: { type: ProductBasicInfoSchema, required: true },

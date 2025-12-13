@@ -10,7 +10,10 @@ const ProductBasicInfoSchema = zod_1.z.object({
     category: zod_1.z.string(),
     subcategory: zod_1.z.string().optional(),
     description: zod_1.z.string(),
-    keyFeatures: zod_1.z.array(zod_1.z.string()).optional()
+    keyFeatures: zod_1.z.array(zod_1.z.string()).optional(),
+    addDeliveryCharge: zod_1.z.boolean().optional(),
+    deliveryChargeInsideDhaka: zod_1.z.number().optional(),
+    deliveryChargeOutsideDhaka: zod_1.z.number().optional(),
 });
 // Product Images
 const ProductImageSchema = zod_1.z.object({

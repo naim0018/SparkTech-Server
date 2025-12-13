@@ -12,7 +12,7 @@ const notFound_1 = __importDefault(require("./app/middleware/notFound"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
-    origin: ['http://localhost:5174', 'http://localhost:5173', 'https://spark-tech-seven.vercel.app', 'https://www.bestbuy4ubd.com', 'https://bestbuy4ubd.com/', 'https://connect.facebook.net/en_US/sdk/xfbml.customerchat.js'],
+    origin: ["https://bestbuy4ubd.com/", 'http://localhost:5174', 'http://localhost:5173', 'https://spark-tech-seven.vercel.app', 'https://www.bestbuy4ubd.com', 'https://bestbuy4ubd.com/', 'https://connect.facebook.net/en_US/sdk/xfbml.customerchat.js'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
