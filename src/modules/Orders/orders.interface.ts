@@ -8,6 +8,8 @@ export interface OrderInterface {
   paymentInfo?: PaymentInfo;
   courierCharge: 'insideDhaka' | 'outsideDhaka';
   cuponCode?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface SelectedVariant {

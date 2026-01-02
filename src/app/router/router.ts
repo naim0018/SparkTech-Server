@@ -6,6 +6,7 @@ import { UserRoutes } from "../../modules/User/user.route";
 import { SteadFastRoute } from "../../modules/SteadFast/steadFast.route";
 import { bkashRouter } from "../../modules/bkash/bkash.router";
 import { CategoryRoute } from "../../modules/Categories/categories.route";
+import { DashboardRoute } from "../../modules/Dashboard/dashboard.route";
 const router = Router()
 
 const moduleRoute = [
@@ -40,6 +41,10 @@ const moduleRoute = [
     {
         path: '/bkash',
         route: bkashRouter
+    },
+    {
+        path: '/dashboard',
+        route: DashboardRoute
     }
 ]
 

@@ -8,6 +8,7 @@ const user_route_1 = require("../../modules/User/user.route");
 const steadFast_route_1 = require("../../modules/SteadFast/steadFast.route");
 const bkash_router_1 = require("../../modules/bkash/bkash.router");
 const categories_route_1 = require("../../modules/Categories/categories.route");
+const dashboard_route_1 = require("../../modules/Dashboard/dashboard.route");
 const router = (0, express_1.Router)();
 const moduleRoute = [
     {
@@ -41,6 +42,10 @@ const moduleRoute = [
     {
         path: '/bkash',
         route: bkash_router_1.bkashRouter
+    },
+    {
+        path: '/dashboard',
+        route: dashboard_route_1.DashboardRoute
     }
 ];
 moduleRoute.forEach((route) => router.use(route.path, route.route));
