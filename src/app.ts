@@ -33,6 +33,8 @@ const allowedOrigins = [
   "http://localhost:5174",
   "https://connect.facebook.net/en_US/sdk/xfbml.customerchat.js",
   "https://topdealsbd.com/",
+  "https://topdealsbd.com",
+  "https://www.topdealsbd.com",
 ];
 
 app.use(
