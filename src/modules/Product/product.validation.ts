@@ -86,7 +86,8 @@ const AdditionalInfoSchema = z.object({
   isOnSale: z.boolean().default(false),
   estimatedDelivery: z.string().optional(),
   returnPolicy: z.string().optional(),
-  warranty: z.string().optional()
+  warranty: z.string().optional(),
+  landingPageTemplate: z.string().optional()
 });
 
 // Product SEO

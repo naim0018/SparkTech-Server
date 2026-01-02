@@ -130,6 +130,7 @@ const productSchema = new Schema<IProduct>(
       estimatedDelivery: { type: String },
       returnPolicy: { type: String },
       warranty: { type: String },
+      landingPageTemplate: { type: String, default: "template1" },
     },
     seo: { type: ProductSEOSchema },
   },

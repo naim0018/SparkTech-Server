@@ -78,7 +78,8 @@ const AdditionalInfoSchema = zod_1.z.object({
     isOnSale: zod_1.z.boolean().default(false),
     estimatedDelivery: zod_1.z.string().optional(),
     returnPolicy: zod_1.z.string().optional(),
-    warranty: zod_1.z.string().optional()
+    warranty: zod_1.z.string().optional(),
+    landingPageTemplate: zod_1.z.string().optional()
 });
 // Product SEO
 const ProductSEOSchema = zod_1.z.object({

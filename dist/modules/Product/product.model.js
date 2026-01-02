@@ -92,6 +92,7 @@ const productSchema = new mongoose_1.Schema({
         estimatedDelivery: { type: String },
         returnPolicy: { type: String },
         warranty: { type: String },
+        landingPageTemplate: { type: String, default: "template1" },
     },
     seo: { type: ProductSEOSchema },
 }, { timestamps: true });
