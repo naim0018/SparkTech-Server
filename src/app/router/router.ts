@@ -7,6 +7,8 @@ import { SteadFastRoute } from "../../modules/SteadFast/steadFast.route";
 import { bkashRouter } from "../../modules/bkash/bkash.router";
 import { CategoryRoute } from "../../modules/Categories/categories.route";
 import { DashboardRoute } from "../../modules/Dashboard/dashboard.route";
+import { bannerRoutes } from "../../modules/Banner/banner.route";
+
 const router = Router()
 
 const moduleRoute = [
@@ -45,6 +47,10 @@ const moduleRoute = [
     {
         path: '/dashboard',
         route: DashboardRoute
+    },
+    {
+        path: '/banner',
+        route: bannerRoutes
     }
 ]
 
