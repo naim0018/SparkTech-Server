@@ -49,11 +49,9 @@ const getAllProductData = async (query: Record<string, unknown>) => {
     const skip = (Number(page) - 1) * Number(limit);
 
     // Before the sort line, add type assertion for the sort key
-    const sortKey = sort as string;
-
     const result = await ProductModel
         .find(filter)
-        .sort(sortKey ? { [sortKey]: 1 } : { createdAt: -1 })
+        .sort(sort ? (sort as string) : '-createdAt')
         .skip(skip)
         .limit(Number(limit));
 
