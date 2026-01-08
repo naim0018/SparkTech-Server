@@ -8,6 +8,8 @@ import { bkashRouter } from "../../modules/bkash/bkash.router";
 import { CategoryRoute } from "../../modules/Categories/categories.route";
 import { DashboardRoute } from "../../modules/Dashboard/dashboard.route";
 import { bannerRoutes } from "../../modules/Banner/banner.route";
+import { GoogleAnalyticsRoutes } from "../../modules/GoogleAnalytics/googleAnalytics.route";
+import { FacebookPixelRoutes } from "../../modules/FacebookPixel/facebookPixel.route";
 
 const router = Router()
 
@@ -51,6 +53,14 @@ const moduleRoute = [
     {
         path: '/banner',
         route: bannerRoutes
+    },
+    {
+        path: '/google-analytics',
+        route: GoogleAnalyticsRoutes
+    },
+    {
+        path: '/facebook-pixel',
+        route: FacebookPixelRoutes
     }
 ]
 
