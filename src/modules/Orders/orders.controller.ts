@@ -34,6 +34,17 @@ const getOrderById = catchAsync(async (req, res) => {
   });
 });
 
+const trackOrderByPhone = catchAsync(async (req, res) => {
+  const { phone } = req.query;
+  const result = await OrderService.trackOrderByPhoneData(phone as string);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Orders Fetched Successfully",
+    data: result,
+  });
+});
+
 const updateOrderById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await OrderService.updateOrderDataById(id, req.body);
@@ -60,6 +71,7 @@ export const OrderController = {
   getAllOrders,
   createOrder,
   getOrderById,
+  trackOrderByPhone,
   updateOrderById,
   deleteOrderById
 };

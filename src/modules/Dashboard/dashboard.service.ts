@@ -82,6 +82,9 @@ const getStats = async () => {
         .limit(10)
         .select('totalAmount status createdAt billingInformation');
 
+    const pendingCount = statsMap['pending']?.count || 0;
+    const currentMonthOrders = monthlyStatsResult.find(s => s._id.month === currentMonth && s._id.year === currentYear)?.orders || 0;
+
     return {
         overview: {
             totalOrders,
@@ -91,8 +94,11 @@ const getStats = async () => {
             canceledAmount,
             deliveredCount,
             processingCount,
+            pendingCount,
             canceledCount,
             salesGrowth: Number(salesGrowth.toFixed(2)),
+            currentMonthSales: currentMonthSales,
+            currentMonthOrders: currentMonthOrders,
             lastOrder: recentOrdersRaw[0] || null
         },
         statusBreakdown: orderStats.map(s => ({

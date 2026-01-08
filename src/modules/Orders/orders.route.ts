@@ -7,6 +7,7 @@ const router = Router();
 
 router.get('/', OrderController.getAllOrders);
 router.post('/create-order', validateRequest(OrderZodValidation.orderSchemaZod), OrderController.createOrder);
+router.get('/track-order', OrderController.trackOrderByPhone);
 router.get('/:id', OrderController.getOrderById);
 router.patch('/:id', validateRequest(OrderZodValidation.updateOrderSchemaZod.innerType()), OrderController.updateOrderById);
 router.delete('/:id/delete-order', OrderController.deleteOrderById);

@@ -10,6 +10,7 @@ import { DashboardRoute } from "../../modules/Dashboard/dashboard.route";
 import { bannerRoutes } from "../../modules/Banner/banner.route";
 import { GoogleAnalyticsRoutes } from "../../modules/GoogleAnalytics/googleAnalytics.route";
 import { FacebookPixelRoutes } from "../../modules/FacebookPixel/facebookPixel.route";
+import { UserDashboardRoute } from "../../modules/UserDashboard/userDashboard.route";
 
 const router = Router()
 
@@ -61,6 +62,10 @@ const moduleRoute = [
     {
         path: '/facebook-pixel',
         route: FacebookPixelRoutes
+    },
+    {
+        path: '/user-dashboard',
+        route: UserDashboardRoute
     }
 ]
 

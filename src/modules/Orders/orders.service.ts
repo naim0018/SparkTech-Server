@@ -29,10 +29,18 @@ const deleteOrderDataById = async (id: string) => {
   return await OrderModel.findByIdAndDelete(id);
 };
 
+const trackOrderByPhoneData = async (phone: string) => {
+  const result = await OrderModel.find({ "billingInformation.phone": phone })
+    .populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants")
+    .sort({ createdAt: -1 });
+  return result;
+};
+
 export const OrderService = {
   addOrderData,
   getAllOrdersData,
   getOrderByIdData,
+  trackOrderByPhoneData,
   updateOrderDataById,
   deleteOrderDataById,
 };
