@@ -3,12 +3,12 @@ import { AuthRoute } from "../../modules/Auth/auth.route";
 import { ProductRoute } from "../../modules/Product/product.route";
 import { OrderRoute } from "../../modules/Orders/orders.route";
 import { UserRoutes } from "../../modules/User/user.route";
-import { SteadFastRoute } from "../../modules/SteadFast/steadFast.route";
 import { bkashRouter } from "../../modules/bkash/bkash.router";
 import { CategoryRoute } from "../../modules/Categories/categories.route";
 import { DashboardRoute } from "../../modules/Dashboard/dashboard.route";
 import { bannerRoutes } from "../../modules/Banner/banner.route";
 import { TrackingRoutes } from "../../modules/TrackingIntegrations/tracking.route";
+import { SteadfastRoutes } from "../../modules/Steadfast/steadfast.route";
 import { UserDashboardRoute } from "../../modules/UserDashboard/userDashboard.route";
 
 const router = Router()
@@ -38,10 +38,7 @@ const moduleRoute = [
         path: '/categories',
         route: CategoryRoute
     },
-    {
-        path: '/steadfast',
-        route: SteadFastRoute
-    },
+
     {
         path: '/bkash',
         route: bkashRouter
@@ -57,6 +54,10 @@ const moduleRoute = [
     {
         path: '/tracking',
         route: TrackingRoutes
+    },
+    {
+        path: '/steadfast',
+        route: SteadfastRoutes
     },
     {
         path: '/user-dashboard',

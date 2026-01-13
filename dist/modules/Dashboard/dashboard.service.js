@@ -16,7 +16,7 @@ exports.DashboardService = void 0;
 const orders_model_1 = __importDefault(require("../Orders/orders.model"));
 const product_model_1 = __importDefault(require("../Product/product.model"));
 const getStats = () => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     const totalOrders = yield orders_model_1.default.countDocuments();
     const totalProducts = yield product_model_1.default.countDocuments();
     // Aggregating general order stats by status
@@ -89,6 +89,8 @@ const getStats = () => __awaiter(void 0, void 0, void 0, function* () {
         .sort({ createdAt: -1 })
         .limit(10)
         .select('totalAmount status createdAt billingInformation');
+    const pendingCount = ((_l = statsMap['pending']) === null || _l === void 0 ? void 0 : _l.count) || 0;
+    const currentMonthOrders = ((_m = monthlyStatsResult.find(s => s._id.month === currentMonth && s._id.year === currentYear)) === null || _m === void 0 ? void 0 : _m.orders) || 0;
     return {
         overview: {
             totalOrders,
@@ -98,8 +100,11 @@ const getStats = () => __awaiter(void 0, void 0, void 0, function* () {
             canceledAmount,
             deliveredCount,
             processingCount,
+            pendingCount,
             canceledCount,
             salesGrowth: Number(salesGrowth.toFixed(2)),
+            currentMonthSales: currentMonthSales,
+            currentMonthOrders: currentMonthOrders,
             lastOrder: recentOrdersRaw[0] || null
         },
         statusBreakdown: orderStats.map(s => ({

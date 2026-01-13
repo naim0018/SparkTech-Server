@@ -42,7 +42,8 @@ const orderSchema = new Schema<OrderInterface>({
   billingInformation: { type: billingInformationSchema, required: true },
   paymentInfo: { type: paymentInfoSchema },
   courierCharge: { type: String, enum: ['insideDhaka', 'outsideDhaka'], required: true },
-  cuponCode: { type: String }
+  cuponCode: { type: String },
+  consignment_id: { type: String }
 },
 { timestamps: true }
 );

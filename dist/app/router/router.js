@@ -5,11 +5,13 @@ const auth_route_1 = require("../../modules/Auth/auth.route");
 const product_route_1 = require("../../modules/Product/product.route");
 const orders_route_1 = require("../../modules/Orders/orders.route");
 const user_route_1 = require("../../modules/User/user.route");
-const steadFast_route_1 = require("../../modules/SteadFast/steadFast.route");
 const bkash_router_1 = require("../../modules/bkash/bkash.router");
 const categories_route_1 = require("../../modules/Categories/categories.route");
 const dashboard_route_1 = require("../../modules/Dashboard/dashboard.route");
 const banner_route_1 = require("../../modules/Banner/banner.route");
+const tracking_route_1 = require("../../modules/TrackingIntegrations/tracking.route");
+const steadfast_route_1 = require("../../modules/Steadfast/steadfast.route");
+const userDashboard_route_1 = require("../../modules/UserDashboard/userDashboard.route");
 const router = (0, express_1.Router)();
 const moduleRoute = [
     {
@@ -37,10 +39,6 @@ const moduleRoute = [
         route: categories_route_1.CategoryRoute
     },
     {
-        path: '/steadfast',
-        route: steadFast_route_1.SteadFastRoute
-    },
-    {
         path: '/bkash',
         route: bkash_router_1.bkashRouter
     },
@@ -51,6 +49,18 @@ const moduleRoute = [
     {
         path: '/banner',
         route: banner_route_1.bannerRoutes
+    },
+    {
+        path: '/tracking',
+        route: tracking_route_1.TrackingRoutes
+    },
+    {
+        path: '/steadfast',
+        route: steadfast_route_1.SteadfastRoutes
+    },
+    {
+        path: '/user-dashboard',
+        route: userDashboard_route_1.UserDashboardRoute
     }
 ];
 moduleRoute.forEach((route) => router.use(route.path, route.route));

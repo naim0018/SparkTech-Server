@@ -27,9 +27,9 @@ const auth = (...requiredRoles) => {
         }
         // checking if the given token is valid
         const decoded = jsonwebtoken_1.default.verify(token, config_1.default.jwt_access_secret);
-        const { role, userId, iat } = decoded;
+        const { role, email, iat } = decoded;
         // checking if the user is exist
-        const user = yield user_model_1.UserModel.isUserExistsByCustomId(userId);
+        const user = yield user_model_1.UserModel.isUserExistsByCustomId(email);
         if (!user) {
             throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This user is not found !");
         }

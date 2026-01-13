@@ -9,4 +9,7 @@ export interface ITracking extends Document {
   clarityId: string;
   searchConsoleVerificationCode: string;
   lookerStudioEmbedUrl: string;
+  steadfastApiKey: string;
+  steadfastSecretKey: string;
+  steadfastEnabled: boolean;
 }

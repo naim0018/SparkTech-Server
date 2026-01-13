@@ -47,10 +47,9 @@ const getAllProductData = (query) => __awaiter(void 0, void 0, void 0, function*
     }
     const skip = (Number(page) - 1) * Number(limit);
     // Before the sort line, add type assertion for the sort key
-    const sortKey = sort;
     const result = yield product_model_1.default
         .find(filter)
-        .sort(sortKey ? { [sortKey]: 1 } : { createdAt: -1 })
+        .sort(sort ? sort : '-createdAt')
         .skip(skip)
         .limit(Number(limit));
     const total = yield product_model_1.default.countDocuments(filter);

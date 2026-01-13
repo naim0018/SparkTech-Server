@@ -34,10 +34,23 @@ const updateOrderDataById = (id, updateData) => __awaiter(void 0, void 0, void 0
 const deleteOrderDataById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return yield orders_model_1.default.findByIdAndDelete(id);
 });
+const trackOrderByPhoneData = (phone) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield orders_model_1.default.find({ "billingInformation.phone": phone })
+        .populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants")
+        .sort({ createdAt: -1 });
+    return result;
+});
+const trackOrderByConsignmentIdData = (consignmentId) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield orders_model_1.default.findOne({ consignment_id: consignmentId })
+        .populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants");
+    return result;
+});
 exports.OrderService = {
     addOrderData,
     getAllOrdersData,
     getOrderByIdData,
+    trackOrderByPhoneData,
+    trackOrderByConsignmentIdData,
     updateOrderDataById,
     deleteOrderDataById,
 };

@@ -11,6 +11,7 @@ const orders_validation_1 = require("./orders.validation");
 const router = (0, express_1.Router)();
 router.get('/', orders_controller_1.OrderController.getAllOrders);
 router.post('/create-order', (0, validateRequest_1.default)(orders_validation_1.OrderZodValidation.orderSchemaZod), orders_controller_1.OrderController.createOrder);
+router.get('/track-order', orders_controller_1.OrderController.trackOrder);
 router.get('/:id', orders_controller_1.OrderController.getOrderById);
 router.patch('/:id', (0, validateRequest_1.default)(orders_validation_1.OrderZodValidation.updateOrderSchemaZod.innerType()), orders_controller_1.OrderController.updateOrderById);
 router.delete('/:id/delete-order', orders_controller_1.OrderController.deleteOrderById);

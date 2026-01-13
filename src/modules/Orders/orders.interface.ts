@@ -8,6 +8,7 @@ export interface OrderInterface {
   paymentInfo?: PaymentInfo;
   courierCharge: 'insideDhaka' | 'outsideDhaka';
   cuponCode?: string;
+  consignment_id?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }

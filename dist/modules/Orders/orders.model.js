@@ -39,7 +39,8 @@ const orderSchema = new mongoose_1.Schema({
     billingInformation: { type: billingInformationSchema, required: true },
     paymentInfo: { type: paymentInfoSchema },
     courierCharge: { type: String, enum: ['insideDhaka', 'outsideDhaka'], required: true },
-    cuponCode: { type: String }
+    cuponCode: { type: String },
+    consignment_id: { type: String }
 }, { timestamps: true });
 function arrayMinLength(val) {
     return val.length > 0;

@@ -1,8 +1,8 @@
-import { Schema, model } from "mongoose";
-import { ITracking } from "./tracking.interface";
-
-const trackingSchema = new Schema<ITracking>(
-  {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Tracking = void 0;
+const mongoose_1 = require("mongoose");
+const trackingSchema = new mongoose_1.Schema({
     googleAnalyticsId: { type: String, default: "" },
     facebookPixelId: { type: String, default: "" },
     facebookAccessToken: { type: String, default: "" },
@@ -14,10 +14,7 @@ const trackingSchema = new Schema<ITracking>(
     steadfastApiKey: { type: String, default: "" },
     steadfastSecretKey: { type: String, default: "" },
     steadfastEnabled: { type: Boolean, default: false },
-  },
-  {
+}, {
     timestamps: true,
-  }
-);
-
-export const Tracking = model<ITracking>("Tracking", trackingSchema);
+});
+exports.Tracking = (0, mongoose_1.model)("Tracking", trackingSchema);

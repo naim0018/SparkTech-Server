@@ -12,80 +12,71 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SteadFastController = void 0;
+exports.SteadfastController = void 0;
 const http_status_1 = __importDefault(require("http-status"));
-const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // TODO: Implement parcel creation logic
-        res.status(http_status_1.default.OK).json({
-            success: true,
-            message: "Parcel created successfully",
-            data: null
-        });
-    }
-    catch (error) {
-        res.status(http_status_1.default.BAD_REQUEST).json({
-            success: false,
-            message: "Failed to create parcel",
-            error: error
-        });
-    }
-});
-const getCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // TODO: Implement city retrieval logic
-        res.status(http_status_1.default.OK).json({
-            success: true,
-            message: "City retrieved successfully",
-            data: null
-        });
-    }
-    catch (error) {
-        res.status(http_status_1.default.BAD_REQUEST).json({
-            success: false,
-            message: "Failed to get city",
-            error: error
-        });
-    }
-});
-const getZone = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // TODO: Implement zone retrieval logic
-        res.status(http_status_1.default.OK).json({
-            success: true,
-            message: "Zone retrieved successfully",
-            data: null
-        });
-    }
-    catch (error) {
-        res.status(http_status_1.default.BAD_REQUEST).json({
-            success: false,
-            message: "Failed to get zone",
-            error: error
-        });
-    }
-});
-const trackParcel = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { consignment } = req.params;
-        // TODO: Implement parcel tracking logic
-        res.status(http_status_1.default.OK).json({
-            success: true,
-            message: "Parcel tracked successfully",
-            data: null
-        });
-    }
-    catch (error) {
-        res.status(http_status_1.default.BAD_REQUEST).json({
-            success: false,
-            message: "Failed to track parcel",
-            error: error
-        });
-    }
-});
-exports.SteadFastController = {
+const catchAsync_1 = __importDefault(require("../../app/utils/catchAsync"));
+const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
+const steadfast_service_1 = require("./steadfast.service");
+const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield steadfast_service_1.SteadfastService.createOrder(req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Order created in Steadfast successfully",
+        data: result,
+    });
+}));
+const bulkCreateOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield steadfast_service_1.SteadfastService.bulkCreateOrder(req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Bulk orders created in Steadfast successfully",
+        data: result,
+    });
+}));
+const checkDeliveryStatus = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield steadfast_service_1.SteadfastService.checkDeliveryStatus(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Delivery status fetched successfully",
+        data: result,
+    });
+}));
+const getCurrentBalance = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield steadfast_service_1.SteadfastService.getCurrentBalance();
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Current balance fetched successfully",
+        data: result,
+    });
+}));
+const getReturnRequests = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield steadfast_service_1.SteadfastService.getReturnRequests(req.query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Return requests fetched successfully",
+        data: result,
+    });
+}));
+const getPoliceStations = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield steadfast_service_1.SteadfastService.getPoliceStations();
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Police stations fetched successfully",
+        data: result,
+    });
+}));
+exports.SteadfastController = {
     createOrder,
-    getCity,
-    getZone,
-    trackParcel
+    bulkCreateOrder,
+    checkDeliveryStatus,
+    getCurrentBalance,
+    getReturnRequests,
+    getPoliceStations
 };

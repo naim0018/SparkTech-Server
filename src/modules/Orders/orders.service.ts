@@ -36,11 +36,18 @@ const trackOrderByPhoneData = async (phone: string) => {
   return result;
 };
 
+const trackOrderByConsignmentIdData = async (consignmentId: string) => {
+  const result = await OrderModel.findOne({ consignment_id: consignmentId })
+    .populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants");
+  return result;
+};
+
 export const OrderService = {
   addOrderData,
   getAllOrdersData,
   getOrderByIdData,
   trackOrderByPhoneData,
+  trackOrderByConsignmentIdData,
   updateOrderDataById,
   deleteOrderDataById,
 };

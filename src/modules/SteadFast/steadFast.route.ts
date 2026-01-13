@@ -1,26 +1,13 @@
 import { Router } from "express";
-import { SteadFastController } from "./steadFast.controller";
+import { SteadfastController } from "./steadfast.controller";
 
 const router = Router();
 
-router.post(
-    '/create-order',
-    SteadFastController.createOrder
-);
+router.post("/create-order", SteadfastController.createOrder);
+router.post("/bulk-create-order", SteadfastController.bulkCreateOrder);
+router.get("/status/:id", SteadfastController.checkDeliveryStatus);
+router.get("/balance", SteadfastController.getCurrentBalance);
+router.get("/return-requests", SteadfastController.getReturnRequests);
+router.get("/police-stations", SteadfastController.getPoliceStations);
 
-router.get(
-    '/get-city',
-    SteadFastController.getCity
-);
-
-router.get(
-    '/get-zone',
-    SteadFastController.getZone
-);
-
-router.get(
-    '/track-parcel/:consignment',
-    SteadFastController.trackParcel
-);
-
-export const SteadFastRoute = router;
+export const SteadfastRoutes = router;

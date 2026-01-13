@@ -34,13 +34,26 @@ const getOrderById = catchAsync(async (req, res) => {
   });
 });
 
-const trackOrderByPhone = catchAsync(async (req, res) => {
-  const { phone } = req.query;
-  const result = await OrderService.trackOrderByPhoneData(phone as string);
+const trackOrder = catchAsync(async (req, res) => {
+  const { phone, consignmentId } = req.query;
+  let result;
+  
+  if (consignmentId) {
+    result = await OrderService.trackOrderByConsignmentIdData(consignmentId as string);
+    // Wrap single result in array to match frontend expectation if needed, or handle null
+    // Frontend expects array for phone search, maybe single object for ID/Consignment?
+    // Let's return as data. If frontend expects array for phone and object for others, we must be consistent.
+    // The previous trackOrderByPhone returned `find()` result (Array).
+    // `trackOrderByConsignmentIdData` uses `findOne` (Object).
+    // Let's stick to what appropriate for each. Frontend handles it.
+  } else {
+    result = await OrderService.trackOrderByPhoneData(phone as string);
+  }
+
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: "Orders Fetched Successfully",
+    message: "Order(s) Fetched Successfully",
     data: result,
   });
 });
@@ -71,7 +84,7 @@ export const OrderController = {
   getAllOrders,
   createOrder,
   getOrderById,
-  trackOrderByPhone,
+  trackOrder,
   updateOrderById,
   deleteOrderById
 };
