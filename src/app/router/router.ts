@@ -8,8 +8,7 @@ import { bkashRouter } from "../../modules/bkash/bkash.router";
 import { CategoryRoute } from "../../modules/Categories/categories.route";
 import { DashboardRoute } from "../../modules/Dashboard/dashboard.route";
 import { bannerRoutes } from "../../modules/Banner/banner.route";
-import { GoogleAnalyticsRoutes } from "../../modules/GoogleAnalytics/googleAnalytics.route";
-import { FacebookPixelRoutes } from "../../modules/FacebookPixel/facebookPixel.route";
+import { TrackingRoutes } from "../../modules/TrackingIntegrations/tracking.route";
 import { UserDashboardRoute } from "../../modules/UserDashboard/userDashboard.route";
 
 const router = Router()
@@ -56,12 +55,8 @@ const moduleRoute = [
         route: bannerRoutes
     },
     {
-        path: '/google-analytics',
-        route: GoogleAnalyticsRoutes
-    },
-    {
-        path: '/facebook-pixel',
-        route: FacebookPixelRoutes
+        path: '/tracking',
+        route: TrackingRoutes
     },
     {
         path: '/user-dashboard',
