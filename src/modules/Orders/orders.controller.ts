@@ -4,12 +4,13 @@ import sendResponse from '../../app/utils/sendResponse';
 import { OrderService } from './orders.service';
 
 const getAllOrders = catchAsync(async (req, res) => {
-  const result = await OrderService.getAllOrdersData();
+  const result = await OrderService.getAllOrdersData(req.query);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: "Orders Fetched Successfully",
-    data: result,
+    data: result.data,
+    meta: result.meta,
   });
 });
 
