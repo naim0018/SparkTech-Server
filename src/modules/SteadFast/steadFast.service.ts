@@ -4,7 +4,7 @@ import AppError from "../../app/error/AppError";
 import { Tracking } from "../TrackingIntegrations/tracking.model";
 import OrderModel from "../Orders/orders.model";
 
-const BASE_URL = "https://portal.steadfast.com.bd/api/v1";
+const BASE_URL = " https://portal.packzy.com/api/v1";
 
 const getHeaders = async () => {
   const settings = await Tracking.findOne();
@@ -21,7 +21,6 @@ const getHeaders = async () => {
 
 const createOrder = async (orderData: any) => {
   const headers = await getHeaders();
-  
   // If orderId is provided, we fetch and update the local order
   // Expecting orderData to contain either full payload OR just an { orderId } to build payload from
   let payload = orderData;
@@ -38,35 +37,43 @@ const createOrder = async (orderData: any) => {
            recipient_name: localOrder.billingInformation.name,
            recipient_phone: localOrder.billingInformation.phone,
            recipient_address: localOrder.billingInformation.address,
-           cod_amount: localOrder.paymentInfo?.paymentMethod === 'cash on delivery' ? localOrder.totalAmount : 0,
+           cod_amount: localOrder.totalAmount,
            note: localOrder.billingInformation.notes || "Handle with care",
        };
   }
 
   try {
     const response = await axios.post(`${BASE_URL}/create_order`, payload, { headers });
-    
+    console.log("Steadfast Response:", response.data);
+
+    if (response.data.status !== 200) {
+      const errorMsg = response.data.errors 
+        ? Object.entries(response.data.errors).map(([k, v]) => `${k}: ${v}`).join(', ')
+        : (response.data.message || "Failed to create order in Steadfast");
+      throw new AppError(httpStatus.BAD_REQUEST, errorMsg);
+    }
+
     // Auto-update local order if we have one
     if (localOrder && response.data?.consignment?.consignment_id) {
-        localOrder.consignment_id = response.data.consignment.consignment_id;
-        // Map Steadfast status to local status if needed, or just keep as is until webhook/status check
-        // Usually creation implies 'Processing' or 'Shipped' depending on workflow. 
-        // User asked for "steadfast order status automaticaly update on the site". 
-        // Initial status from Steadfast is usually 'pending' (in their system).
-        // Let's set local status to 'Start With Courier' -> maybe just 'Processing' or 'Shipped'?
-        // Existing enums: ['pending', 'processing', 'shipped', 'completed', 'cancelled']
-        // Let's move to 'shipped' if it was pending/processing
-        if(localOrder.status === 'pending' || localOrder.status === 'processing'){
-            localOrder.status = 'shipped'; 
+        const updatePayload: any = {
+            consignment_id: response.data.consignment.consignment_id
+        };
+        // User asked to update the delivery status according to the steadfast.
+        // Steadfast initial status is usually 'in_review' or 'pending'.
+        if (response.data?.consignment?.status) {
+            updatePayload.status = response.data.consignment.status; 
         }
-        await localOrder.save();
+        
+        // Use findByIdAndUpdate to avoid validation errors on unrelated fields (e.g. courierCharge)
+        await OrderModel.findByIdAndUpdate(localOrder._id, updatePayload);
     }
     
     return response.data;
   } catch (error: any) {
+    if (error instanceof AppError) throw error;
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      error.response?.data?.message || "Failed to create order in Steadfast"
+      error.response?.data?.message || error.message || "Failed to create order in Steadfast"
     );
   }
 };
@@ -75,11 +82,17 @@ const bulkCreateOrder = async (orders: any[]) => {
   const headers = await getHeaders();
   try {
     const response = await axios.post(`${BASE_URL}/create_order/bulk-order`, { data: orders }, { headers });
+    
+    if (response.data.status !== 200) {
+        throw new AppError(httpStatus.BAD_REQUEST, response.data.message || "Failed to create bulk orders in Steadfast");
+    }
+
     return response.data;
   } catch (error: any) {
+    if (error instanceof AppError) throw error;
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      error.response?.data?.message || "Failed to create bulk orders in Steadfast"
+      error.response?.data?.message || error.message || "Failed to create bulk orders in Steadfast"
     );
   }
 };
@@ -88,14 +101,30 @@ const checkDeliveryStatus = async (consignmentId: string) => {
   const headers = await getHeaders();
   try {
     const response = await axios.get(`${BASE_URL}/status_by_cid/${consignmentId}`, { headers });
-    return response.data;
+    
+    if (response.data.status !== 200) {
+        throw new AppError(httpStatus.BAD_REQUEST, response.data.message || "Failed to fetch delivery status");
+    }
+
+    const data = response.data;
+
+    // Sync status with local order if available
+    if (data?.delivery_status) {
+        await OrderModel.findOneAndUpdate(
+            { consignment_id: consignmentId },
+            { status: data.delivery_status }
+        );
+    }
+
+    return data;
   } catch (error: any) {
-      if(error.response?.status === 404){
+    if (error instanceof AppError) throw error;
+    if(error.response?.status === 404){
            throw new AppError(httpStatus.NOT_FOUND, "Consignment ID not found");
-      }
+    }
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      error.response?.data?.message || "Failed to fetch delivery status"
+      error.response?.data?.message || error.message || "Failed to fetch delivery status"
     );
   }
 };
