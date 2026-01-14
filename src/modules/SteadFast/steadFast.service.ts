@@ -44,8 +44,6 @@ const createOrder = async (orderData: any) => {
 
   try {
     const response = await axios.post(`${BASE_URL}/create_order`, payload, { headers });
-    console.log("Steadfast Response:", response.data);
-
     if (response.data.status !== 200) {
       const errorMsg = response.data.errors 
         ? Object.entries(response.data.errors).map(([k, v]) => `${k}: ${v}`).join(', ')
