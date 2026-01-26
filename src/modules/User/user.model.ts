@@ -6,6 +6,7 @@ import { USER_ROLE, USER_STATUS } from './user.constant';
 
 const userSchema = new Schema<TUser>(
   {
+    storeId: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
     name: {
       type: String,
       required: true,
@@ -85,8 +86,8 @@ userSchema.post('save', function (doc: TUser, next) {
   next();
 });
 
-userSchema.statics.isUserExistsByCustomId = async function (email: string) {
-  return await UserModel.findOne({ email }).select('+password');
+userSchema.statics.isUserExistsByCustomId = async function (email: string, storeId: string) {
+  return await UserModel.findOne({ email, storeId }).select('+password');
 };
 
 userSchema.statics.isPasswordMatched = async function (

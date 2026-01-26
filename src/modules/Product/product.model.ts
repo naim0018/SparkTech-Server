@@ -103,6 +103,7 @@ const ProductBasicInfoSchema = new Schema(
 
 const productSchema = new Schema<IProduct>(
   {
+    storeId: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
     basicInfo: { type: ProductBasicInfoSchema, required: true },
     price: { type: ProductPriceSchema, required: true },
     stockStatus: {

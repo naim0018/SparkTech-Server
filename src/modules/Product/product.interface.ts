@@ -101,6 +101,7 @@ export interface ProductSEO {
  * Represents a product in the e-commerce system.
  */
 export interface IProduct extends Document {
+  storeId: Types.ObjectId;
   // Basic Information
   basicInfo: ProductBasicInfo;
 

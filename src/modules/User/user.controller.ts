@@ -5,7 +5,7 @@ import sendResponse from '../../app/utils/sendResponse';
 import { UserService } from './user.service';
 
 const createUser = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserService.createUser(req.body);
+  const result = await UserService.createUser(req.body, req.store?._id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.CREATED,
@@ -15,7 +15,7 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserService.getAllUsers();
+  const result = await UserService.getAllUsers(req.store?._id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -26,7 +26,7 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
 
 const getUserById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await UserService.getUserById(id);
+  const result = await UserService.getUserById(id, req.store?._id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -36,7 +36,7 @@ const getUserById = catchAsync(async (req: Request, res: Response) => {
 });
 const getUserByEmail = catchAsync(async (req: Request, res: Response) => {
   const email = req.params.email;
-  const result = await UserService.getUserByEmail(email);
+  const result = await UserService.getUserByEmail(email, req.store?._id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,

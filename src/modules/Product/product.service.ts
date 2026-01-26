@@ -2,12 +2,12 @@ import { IProduct } from "./product.interface"
 import ProductModel from "./product.model"
 
 
-const addProductData = async (payload: IProduct) => {
-    const result = await ProductModel.create(payload)
+const addProductData = async (payload: IProduct, storeId: string) => {
+    const result = await ProductModel.create({ ...payload, storeId })
     return result 
 }
 
-const getAllProductData = async (query: Record<string, unknown>) => {
+const getAllProductData = async (query: Record<string, unknown>, storeId: string) => {
     const {
         search,
         category,
@@ -19,7 +19,7 @@ const getAllProductData = async (query: Record<string, unknown>) => {
         limit = 12
     } = query;
 
-    let filter: any = {};
+    let filter: any = { storeId };
 
     // Add search filter
     if (search) {
@@ -80,8 +80,9 @@ const deleteProductDataById = async (id: string) => {
     return await ProductModel.findByIdAndDelete(id);
 };
 
-const getProductsByCategory = async (category: string, limit: number): Promise<IProduct[]> => {
+const getProductsByCategory = async (category: string, limit: number, storeId: string): Promise<IProduct[]> => {
     const products = await ProductModel.find({
+        storeId,
         'basicInfo.category': { 
             $regex: new RegExp(category, 'i') 
         }

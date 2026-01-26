@@ -4,7 +4,7 @@ import sendResponse from '../../app/utils/sendResponse';
 import { OrderService } from './orders.service';
 
 const getAllOrders = catchAsync(async (req, res) => {
-  const result = await OrderService.getAllOrdersData(req.query);
+  const result = await OrderService.getAllOrdersData(req.query, req.store?._id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -15,7 +15,7 @@ const getAllOrders = catchAsync(async (req, res) => {
 });
 
 const createOrder = catchAsync(async (req, res) => {
-  const result = await OrderService.addOrderData(req.body);
+  const result = await OrderService.addOrderData(req.body, req.store?._id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.CREATED,
@@ -43,10 +43,10 @@ const trackOrder = catchAsync(async (req, res) => {
     const order = await OrderService.getOrderByIdData(orderId as string);
     result = order ? [order] : [];
   } else if (consignmentId) {
-    const order = await OrderService.trackOrderByConsignmentIdData(consignmentId as string);
+    const order = await OrderService.trackOrderByConsignmentIdData(consignmentId as string, req.store?._id);
     result = order ? [order] : [];
   } else if (phone) {
-    result = await OrderService.trackOrderByPhoneData(phone as string);
+    result = await OrderService.trackOrderByPhoneData(phone as string, req.store?._id);
   }
 
   sendResponse(res, {

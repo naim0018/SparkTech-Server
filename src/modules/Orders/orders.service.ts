@@ -1,12 +1,12 @@
 import { OrderInterface } from "./orders.interface";
 import OrderModel from "./orders.model";
 
-const addOrderData = async (payload: OrderInterface) => {
-  const result = await OrderModel.create(payload);
+const addOrderData = async (payload: OrderInterface, storeId: string) => {
+  const result = await OrderModel.create({ ...payload, storeId });
   return result;
 };
 
-const getAllOrdersData = async (query: Record<string, unknown>) => {
+const getAllOrdersData = async (query: Record<string, unknown>, storeId: string) => {
   const {
       search,
       status,
@@ -16,7 +16,7 @@ const getAllOrdersData = async (query: Record<string, unknown>) => {
       limit = 10
   } = query;
 
-  let filter: any = {};
+  let filter: any = { storeId };
 
   if (search) {
       filter.$or = [
@@ -79,15 +79,15 @@ const deleteOrderDataById = async (id: string) => {
   return await OrderModel.findByIdAndDelete(id);
 };
 
-const trackOrderByPhoneData = async (phone: string) => {
-  const result = await OrderModel.find({ "billingInformation.phone": phone })
+const trackOrderByPhoneData = async (phone: string, storeId: string) => {
+  const result = await OrderModel.find({ "billingInformation.phone": phone, storeId })
     .populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants")
     .sort({ createdAt: -1 });
   return result;
 };
 
-const trackOrderByConsignmentIdData = async (consignmentId: string) => {
-  const result = await OrderModel.findOne({ consignment_id: consignmentId })
+const trackOrderByConsignmentIdData = async (consignmentId: string, storeId: string) => {
+  const result = await OrderModel.findOne({ consignment_id: consignmentId, storeId })
     .populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants");
   return result;
 };

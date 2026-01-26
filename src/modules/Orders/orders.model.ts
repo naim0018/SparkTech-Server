@@ -36,6 +36,7 @@ const billingInformationSchema = new Schema<BillingInformation>({
 });
 
 const orderSchema = new Schema<OrderInterface>({
+  storeId: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
   items: { type: [orderItemSchema], required: true, validate: [arrayMinLength, 'Order must contain at least one item'] },
   totalAmount: { type: Number, required: true, min: 0 },
   status: { type: String, required: true },

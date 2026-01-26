@@ -1,8 +1,9 @@
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { USER_ROLE, USER_STATUS } from "./user.constant";
 
 export interface TUser {
   id: string;
+  storeId: Types.ObjectId;
   name: string;
   email: string;
   password: string;
@@ -23,7 +24,7 @@ export interface TUser {
 }
 
 export interface TUserModel extends Model<TUser> {
-  isUserExistsByCustomId(id: string): Promise<TUser | null>;
+  isUserExistsByCustomId(id: string, storeId: string): Promise<TUser | null>;
   isPasswordMatched(
     plainTextPassword: string,
     hashedPassword: string

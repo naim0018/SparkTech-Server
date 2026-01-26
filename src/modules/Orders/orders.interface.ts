@@ -1,6 +1,7 @@
 import { ObjectId } from "mongoose";
 
 export interface OrderInterface {
+  storeId: ObjectId;
   items: OrderItem[];
   totalAmount: number;
   status: string;

@@ -5,7 +5,7 @@ import { ProductService } from "./product.service";
 import httpStatus from "http-status";
 
 const addProduct = catchAsync(async (req, res) => {
-  const result = await ProductService.addProductData(req.body);
+  const result = await ProductService.addProductData(req.body, req.store?._id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -15,7 +15,7 @@ const addProduct = catchAsync(async (req, res) => {
 });
 
 const getAllProduct = catchAsync(async (req, res) => {
-  const result = await ProductService.getAllProductData(req.query)
+  const result = await ProductService.getAllProductData(req.query, req.store?._id)
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -62,7 +62,7 @@ const getProductsByCategory = catchAsync(async (req, res) => {
   const { category } = req.params;
   const { limit = 10 } = req.query;
   
-  const result = await ProductService.getProductsByCategory(category, Number(limit));
+  const result = await ProductService.getProductsByCategory(category, Number(limit), req.store?._id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

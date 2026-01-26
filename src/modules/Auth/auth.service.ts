@@ -9,10 +9,10 @@ import { sendEmail } from "../../app/utils/sendEmail";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const loginUser = async (payload: TLoginUser) => {
+const loginUser = async (payload: TLoginUser, storeId: string) => {
   // checking if the user is exist
 
-  const user = await UserModel.isUserExistsByCustomId(payload.email);
+  const user = await UserModel.isUserExistsByCustomId(payload.email, storeId);
 
   if (!user || user == null) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found!");
@@ -43,6 +43,7 @@ const loginUser = async (payload: TLoginUser) => {
   const jwtPayload = {
     email: user.email,
     role: user.role,
+    storeId: user.storeId.toString(),
   };
 
   const accessToken = createToken(
@@ -69,7 +70,7 @@ const changePassword = async (
   payload: { oldPassword: string; newPassword: string }
 ) => {
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(userData.userId);
+  const user = await UserModel.isUserExistsByCustomId(userData.email, userData.storeId);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
@@ -103,7 +104,8 @@ const changePassword = async (
 
   await UserModel.findOneAndUpdate(
     {
-      id: userData.userId,
+      email: userData.email,
+      storeId: userData.storeId,
       role: userData.role,
     },
     {
@@ -123,7 +125,7 @@ const refreshToken = async (token: string) => {
   const { userId, iat } = decoded;
 
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(userId);
+  const user = await UserModel.isUserExistsByCustomId(userId, decoded.storeId);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
@@ -155,6 +157,7 @@ const refreshToken = async (token: string) => {
   const jwtPayload = {
     email: user.email,
     role: user.role,
+    storeId: user.storeId.toString(),
   };
 
   const accessToken = createToken(
@@ -168,9 +171,9 @@ const refreshToken = async (token: string) => {
   };
 };
 
-const forgetPassword = async (userId: string) => {
+const forgetPassword = async (userId: string, storeId: string) => {
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(userId);
+  const user = await UserModel.isUserExistsByCustomId(userId, storeId);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
@@ -192,6 +195,7 @@ const forgetPassword = async (userId: string) => {
   const jwtPayload = {
     email: user.email,
     role: user.role,
+    storeId: user.storeId.toString(),
   };
 
   const resetToken = createToken(
@@ -208,8 +212,13 @@ const resetPassword = async (
   payload: { email: string; newPassword: string },
   token: string
 ) => {
+  const decoded = jwt.verify(
+    token,
+    config.jwt_access_secret as string
+  ) as JwtPayload;
+
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(payload?.email);
+  const user = await UserModel.isUserExistsByCustomId(payload?.email, decoded.storeId);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
@@ -228,11 +237,6 @@ const resetPassword = async (
     throw new AppError(httpStatus.FORBIDDEN, "This user is blocked ! !");
   }
 
-  const decoded = jwt.verify(
-    token,
-    config.jwt_access_secret as string
-  ) as JwtPayload;
-
   //localhost:3000?id=A-0001&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJBLTAwMDEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDI4NTA2MTcsImV4cCI6MTcwMjg1MTIxN30.-T90nRaz8-KouKki1DkCSMAbsHyb9yDi0djZU3D6QO4
 
   if (payload.email !== decoded.email) {
@@ -248,6 +252,7 @@ const resetPassword = async (
   await UserModel.findOneAndUpdate(
     {
       email: decoded.email,
+      storeId: decoded.storeId,
       role: decoded.role,
     },
     {

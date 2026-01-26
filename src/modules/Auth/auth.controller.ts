@@ -8,7 +8,7 @@ import { AuthServices } from "./auth.service";
 
 const loginUser = catchAsync(async (req, res) => {
   
-  const result = await AuthServices.loginUser(req.body);
+  const result = await AuthServices.loginUser(req.body, req.store?._id);
   const { refreshToken, accessToken, needsPasswordChange } = result;
   res.cookie('refreshToken', refreshToken, {
     secure: config.NODE_ENV === 'production',
@@ -54,7 +54,7 @@ const refreshToken = catchAsync(async (req, res) => {
 
 const forgetPassword = catchAsync(async (req, res) => {
   const userId = req.body.id;
-  const result = await AuthServices.forgetPassword(userId);
+  const result = await AuthServices.forgetPassword(userId, req.store?._id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

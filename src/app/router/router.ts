@@ -10,8 +10,13 @@ import { bannerRoutes } from "../../modules/Banner/banner.route";
 import { TrackingRoutes } from "../../modules/TrackingIntegrations/tracking.route";
 import { SteadfastRoutes } from "../../modules/Steadfast/steadfast.route";
 import { UserDashboardRoute } from "../../modules/UserDashboard/userDashboard.route";
+import { StoreRoutes } from "../../modules/Store/store.route";
+import { storeResolver } from "../middleware/storeResolver";
 
-const router = Router()
+const router = Router();
+
+// Apply storeResolver to all routes to ensure store context is available
+router.use(storeResolver);
 
 const moduleRoute = [
     {
@@ -62,6 +67,10 @@ const moduleRoute = [
     {
         path: '/user-dashboard',
         route: UserDashboardRoute
+    },
+    {
+        path: '/store',
+        route: StoreRoutes
     }
 ]
 
