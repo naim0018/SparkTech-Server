@@ -20,6 +20,14 @@ export interface ProductImage {
   alt: string;
 }
 
+// Product Videos
+export interface ProductVideo {
+  url: string;
+  title: string;
+  thumbnail?: string;
+  platform?: "youtube" | "vimeo" | "direct";
+}
+
 // Product Variants
 export interface ProductVariantItem {
   value: string;
@@ -112,6 +120,7 @@ export interface IProduct extends Document {
 
   // Product Details
   images: ProductImage[];
+  videos?: ProductVideo[];
   variants?: ProductVariant[];
   specifications?: ProductSpecification[];
 

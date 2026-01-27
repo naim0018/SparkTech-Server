@@ -9,6 +9,16 @@ const ProductImageSchema = new Schema(
   { _id: false }
 );
 
+const ProductVideoSchema = new Schema(
+  {
+    url: { type: String, required: true },
+    title: { type: String, required: true },
+    thumbnail: { type: String },
+    platform: { type: String, enum: ["youtube", "vimeo", "direct"] },
+  },
+  { _id: false }
+);
+
 const ProductVariantItemSchema = new Schema(
   {
     value: { type: String, required: true },
@@ -113,6 +123,7 @@ const productSchema = new Schema<IProduct>(
     stockQuantity: { type: Number },
     sold: { type: Number, default: 0 },
     images: { type: [ProductImageSchema], required: true },
+    videos: [ProductVideoSchema],
     variants: [ProductVariantSchema],
     specifications: [ProductSpecificationSchema],
     reviews: [ProductReviewSchema],
