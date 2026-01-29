@@ -55,6 +55,7 @@ function arrayMinLength(val: any[]) {
 
 
 
+export { orderSchema as OrderSchema };
 const OrderModel = model<OrderInterface>('Order', orderSchema);
 
 export default OrderModel;

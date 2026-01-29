@@ -3,10 +3,12 @@ import catchAsync from '../../app/utils/catchAsync';
 import sendResponse from '../../app/utils/sendResponse';
 import { UserDashboardService } from './userDashboard.service';
 
-import { UserModel } from '../User/user.model';
+import { UserSchema } from '../User/user.model';
+import { getTenantModel } from '../../app/utils/getTenantModel';
 
 const getUserStats = catchAsync(async (req, res) => {
   let { phone } = req.query;
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   
   if (!phone) {
     // If no phone provided, check if user is authenticated
@@ -23,7 +25,7 @@ const getUserStats = catchAsync(async (req, res) => {
     throw new Error("Phone number is required");
   }
 
-  const result = await UserDashboardService.getUserDashboardStats(phone as string);
+  const result = await UserDashboardService.getUserDashboardStats(req, phone as string);
   
   sendResponse(res, {
     success: true,

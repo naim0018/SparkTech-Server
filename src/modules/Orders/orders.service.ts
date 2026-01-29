@@ -1,12 +1,16 @@
+import { Request } from "express";
 import { OrderInterface } from "./orders.interface";
-import OrderModel from "./orders.model";
+import { OrderSchema } from "./orders.model";
+import { getTenantModel } from "../../app/utils/getTenantModel";
 
-const addOrderData = async (payload: OrderInterface) => {
+const addOrderData = async (req: Request, payload: OrderInterface) => {
+  const OrderModel = getTenantModel(req, 'Order', OrderSchema);
   const result = await OrderModel.create(payload);
   return result;
 };
 
-const getAllOrdersData = async (query: Record<string, unknown>) => {
+const getAllOrdersData = async (req: Request, query: Record<string, unknown>) => {
+  const OrderModel = getTenantModel(req, 'Order', OrderSchema);
   const {
       search,
       status,
@@ -61,32 +65,38 @@ const getAllOrdersData = async (query: Record<string, unknown>) => {
   };
 };
 
-const getOrderByIdData = async (id: string) => {
+const getOrderByIdData = async (req: Request, id: string) => {
+  const OrderModel = getTenantModel(req, 'Order', OrderSchema);
   const result = await OrderModel.findById(id).populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants");
   return result;
 };
 
 const updateOrderDataById = async (
+  req: Request,
   id: string,
   updateData: Partial<OrderInterface>
 ) => {
+  const OrderModel = getTenantModel(req, 'Order', OrderSchema);
   return await OrderModel.findByIdAndUpdate(id, updateData, {
     new: true,
   }).populate("items.product");
 };
 
-const deleteOrderDataById = async (id: string) => {
+const deleteOrderDataById = async (req: Request, id: string) => {
+  const OrderModel = getTenantModel(req, 'Order', OrderSchema);
   return await OrderModel.findByIdAndDelete(id);
 };
 
-const trackOrderByPhoneData = async (phone: string) => {
+const trackOrderByPhoneData = async (req: Request, phone: string) => {
+  const OrderModel = getTenantModel(req, 'Order', OrderSchema);
   const result = await OrderModel.find({ "billingInformation.phone": phone })
     .populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants")
     .sort({ createdAt: -1 });
   return result;
 };
 
-const trackOrderByConsignmentIdData = async (consignmentId: string) => {
+const trackOrderByConsignmentIdData = async (req: Request, consignmentId: string) => {
+  const OrderModel = getTenantModel(req, 'Order', OrderSchema);
   const result = await OrderModel.findOne({ consignment_id: consignmentId })
     .populate("items.product", "basicInfo.title basicInfo.price basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants");
   return result;
@@ -101,3 +111,4 @@ export const OrderService = {
   updateOrderDataById,
   deleteOrderDataById,
 };
+

@@ -8,4 +8,5 @@ const facebookPixelSchema = new Schema<IFacebookPixel>({
     timestamps: true
 });
 
+export { facebookPixelSchema };
 export const FacebookPixel = model<IFacebookPixel>('FacebookPixel', facebookPixelSchema);

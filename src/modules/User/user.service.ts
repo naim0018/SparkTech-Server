@@ -1,27 +1,34 @@
+import { Request } from "express";
 import { TUser } from "./user.interface";
-import { UserModel } from "./user.model";
+import { UserModel, UserSchema } from "./user.model";
+import { getTenantModel } from "../../app/utils/getTenantModel";
 
-const createUser = async (userData: TUser): Promise<TUser> => {
+const createUser = async (req: Request, userData: TUser): Promise<TUser> => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   const result = await UserModel.create(userData);
   return result;
 };
 
-const getAllUsers = async (): Promise<TUser[]> => {
+const getAllUsers = async (req: Request): Promise<TUser[]> => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   const result = await UserModel.find({ isDeleted: { $ne: true } });
   return result;
 };
 
-const getUserById = async (id: string): Promise<TUser | null> => {
+const getUserById = async (req: Request, id: string): Promise<TUser | null> => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   const result = await UserModel.findOne({ _id: id, isDeleted: { $ne: true } });
   return result;
 };
 
-const getUserByEmail = async (email: string): Promise<TUser | null> => {
+const getUserByEmail = async (req: Request, email: string): Promise<TUser | null> => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   const result = await UserModel.findOne({ email, isDeleted: { $ne: true } });
   return result;
 };
 
-const updateUser = async (id: string, updateData: Partial<TUser>): Promise<TUser | null> => {
+const updateUser = async (req: Request, id: string, updateData: Partial<TUser>): Promise<TUser | null> => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   const result = await UserModel.findOneAndUpdate(
     { _id: id, isDeleted: { $ne: true } },
     updateData,
@@ -30,7 +37,8 @@ const updateUser = async (id: string, updateData: Partial<TUser>): Promise<TUser
   return result;
 };
 
-const deleteUser = async (id: string): Promise<TUser | null> => {
+const deleteUser = async (req: Request, id: string): Promise<TUser | null> => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   const result = await UserModel.findByIdAndUpdate(
     id,
     { isDeleted: true },
@@ -39,7 +47,8 @@ const deleteUser = async (id: string): Promise<TUser | null> => {
   return result;
 };
 
-const checkUserStatus = async (id: string): Promise<boolean> => {
+const checkUserStatus = async (req: Request, id: string): Promise<boolean> => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   const user = await UserModel.findOne({ _id: id, isDeleted: { $ne: true } });
   if (!user) {
     throw new Error('User not found');
@@ -56,3 +65,4 @@ export const UserService = {
   deleteUser,
   checkUserStatus,
 };
+

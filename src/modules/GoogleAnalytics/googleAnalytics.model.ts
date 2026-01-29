@@ -7,4 +7,5 @@ const googleAnalyticsSchema = new Schema<IGoogleAnalytics>({
     timestamps: true
 });
 
+export { googleAnalyticsSchema };
 export const GoogleAnalytics = model<IGoogleAnalytics>('GoogleAnalytics', googleAnalyticsSchema);

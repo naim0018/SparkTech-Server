@@ -6,7 +6,7 @@ import { SteadfastService } from "./steadfast.service";
 
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
-  const result = await SteadfastService.createOrder(req.body);
+  const result = await SteadfastService.createOrder(req, req.body);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -16,7 +16,7 @@ const createOrder = catchAsync(async (req: Request, res: Response) => {
 });
 
 const bulkCreateOrder = catchAsync(async (req: Request, res: Response) => {
-  const result = await SteadfastService.bulkCreateOrder(req.body);
+  const result = await SteadfastService.bulkCreateOrder(req, req.body);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -27,7 +27,7 @@ const bulkCreateOrder = catchAsync(async (req: Request, res: Response) => {
 
 const checkDeliveryStatus = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await SteadfastService.checkDeliveryStatus(id);
+  const result = await SteadfastService.checkDeliveryStatus(req, id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -37,7 +37,7 @@ const checkDeliveryStatus = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getCurrentBalance = catchAsync(async (req: Request, res: Response) => {
-  const result = await SteadfastService.getCurrentBalance();
+  const result = await SteadfastService.getCurrentBalance(req);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -47,7 +47,7 @@ const getCurrentBalance = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getReturnRequests = catchAsync(async (req: Request, res: Response) => {
-    const result = await SteadfastService.getReturnRequests(req.query);
+    const result = await SteadfastService.getReturnRequests(req, req.query);
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
@@ -57,7 +57,7 @@ const getReturnRequests = catchAsync(async (req: Request, res: Response) => {
 });
   
 const getPoliceStations = catchAsync(async (req: Request, res: Response) => {
-    const result = await SteadfastService.getPoliceStations();
+    const result = await SteadfastService.getPoliceStations(req);
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,

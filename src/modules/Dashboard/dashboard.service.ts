@@ -1,7 +1,12 @@
-import OrderModel from "../Orders/orders.model";
-import ProductModel from "../Product/product.model";
+import { Request } from "express";
+import { OrderSchema } from "../Orders/orders.model";
+import { ProductSchema } from "../Product/product.model";
+import { getTenantModel } from "../../app/utils/getTenantModel";
 
-const getStats = async () => {
+const getStats = async (req: Request) => {
+    const OrderModel = getTenantModel(req, 'Order', OrderSchema);
+    const ProductModel = getTenantModel(req, 'Product', ProductSchema);
+
     const totalOrders = await OrderModel.countDocuments();
     const totalProducts = await ProductModel.countDocuments();
 
@@ -114,10 +119,10 @@ const getStats = async () => {
         })),
         recentOrders: recentOrdersRaw.map(order => ({
             _id: order._id,
-            customerName: order.billingInformation?.name || 'Unknown',
-            amount: order.totalAmount,
-            status: order.status,
-            date: order.createdAt
+            customerName: (order as any).billingInformation?.name || 'Unknown',
+            amount: (order as any).totalAmount,
+            status: (order as any).status,
+            date: (order as any).createdAt
         }))
     };
 };
@@ -125,3 +130,4 @@ const getStats = async () => {
 export const DashboardService = {
     getStats
 };
+

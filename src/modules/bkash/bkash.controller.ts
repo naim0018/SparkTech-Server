@@ -1,18 +1,19 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import paymentModel from "./bkash.model";
+import { PaymentSchema } from "./bkash.model"; 
+import { getTenantModel } from "../../app/utils/getTenantModel";
  
 import config from "../../app/config";
 
 const baseURL = config.baseURL;
 
 class PaymentController {
-  private async bkash_headers() {
+  private async bkash_headers(req: Request) {
     return {
       "Content-Type": "application/json",
       Accept: "application/json",
-      authorization: (globalThis as any).id_token,
+      authorization: req.bkashToken,
       "x-app-key": config.bkash_api_key,
     };
   }
@@ -32,7 +33,7 @@ class PaymentController {
           merchantInvoiceNumber: "Inv" + uuidv4().substring(0, 5),
         },
         {
-          headers: await this.bkash_headers(),
+          headers: await this.bkash_headers(req),
         }
       );
       return res.status(200).json({ bkashURL: data.bkashURL });
@@ -57,10 +58,11 @@ class PaymentController {
           config.bkash_execute_payment_url as string,
           { paymentID },
           {
-            headers: await this.bkash_headers(),
+            headers: await this.bkash_headers(req),
           }
         );
         if (data && data.statusCode === "0000") {
+          const paymentModel = getTenantModel(req, 'payments', PaymentSchema);
           await paymentModel.create({
             userId: Math.random() * 10 + 1,
             paymentID,
@@ -90,6 +92,7 @@ class PaymentController {
     const { trxID } = req.params;
 
     try {
+      const paymentModel = getTenantModel(req, 'payments', PaymentSchema);
       const payment = await paymentModel.findOne({ trxID });
 
       const { data } = await axios.post(
@@ -102,7 +105,7 @@ class PaymentController {
           reason: "cashback",
         },
         {
-          headers: await this.bkash_headers(),
+          headers: await this.bkash_headers(req),
         }
       );
       if (data && data.statusCode === "0000") {

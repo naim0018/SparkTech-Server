@@ -21,7 +21,7 @@ cartSchema.pre('save', async function(next) {
   // Calculate the total amount by fetching the latest product prices
   let total = 0;
   for (const item of this.items) {
-    const product = await model('Product').findById(item.product);
+    const product = await (this.constructor as any).db.model('Product').findById(item.product);
     if (product) {
       const price = product.discountPrice && product.discountPrice < product.price
         ? product.discountPrice
@@ -34,6 +34,7 @@ cartSchema.pre('save', async function(next) {
   next();
 });
 
+export { cartSchema as CartSchema };
 const CartModel = model<ICart>('Cart', cartSchema);
 
 export default CartModel;

@@ -6,7 +6,8 @@ import { JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import httpStatus from "http-status";
 import { TUserRole } from "../../modules/User/user.interface";
-import { UserModel } from "../../modules/User/user.model";
+import { UserSchema } from "../../modules/User/user.model";
+import { getTenantModel } from "../utils/getTenantModel";
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -25,8 +26,10 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
     const { role, email, iat } = decoded;
 
+    const UserModel = getTenantModel(req, 'User', UserSchema);
+
     // checking if the user is exist
-    const user = await UserModel.isUserExistsByCustomId(email);
+    const user = await (UserModel as any).isUserExistsByCustomId(email);
 
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
@@ -48,7 +51,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
     if (
       user.passwordChangedAt &&
-      UserModel.isJWTIssuedBeforePasswordChanged(
+      (UserModel as any).isJWTIssuedBeforePasswordChanged(
         user.passwordChangedAt,
         iat as number
       )

@@ -20,4 +20,5 @@ const trackingSchema = new Schema<ITracking>(
   }
 );
 
+export { trackingSchema };
 export const Tracking = model<ITracking>("Tracking", trackingSchema);

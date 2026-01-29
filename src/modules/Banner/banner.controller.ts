@@ -3,7 +3,7 @@ import { bannerService } from "./banner.service";
 
 const createBanner = async (req: Request, res: Response) => {
     try {
-        const result = await bannerService.createBanner(req.body);
+        const result = await bannerService.createBanner(req, req.body);
         res.status(200).json({
             success: true,
             message: 'Banner created successfully',
@@ -20,7 +20,7 @@ const createBanner = async (req: Request, res: Response) => {
 
 const getAllBanners = async (req: Request, res: Response) => {
     try {
-        const result = await bannerService.getAllBanners();
+        const result = await bannerService.getAllBanners(req);
         res.status(200).json({
             success: true,
             message: 'Banners fetched successfully',
@@ -37,7 +37,7 @@ const getAllBanners = async (req: Request, res: Response) => {
 
 const updateBanner = async (req: Request, res: Response) => {
     try {
-        const result = await bannerService.updateBanner(req.params.id, req.body);
+        const result = await bannerService.updateBanner(req, req.params.id, req.body);
         res.status(200).json({
             success: true,
             message: 'Banner updated successfully',
@@ -54,7 +54,7 @@ const updateBanner = async (req: Request, res: Response) => {
 
 const deleteBanner = async (req: Request, res: Response) => {
     try {
-        const result = await bannerService.deleteBanner(req.params.id);
+        const result = await bannerService.deleteBanner(req, req.params.id);
         res.status(200).json({
             success: true,
             message: 'Banner deleted successfully',
