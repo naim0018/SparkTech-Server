@@ -1,0 +1,12 @@
+
+> sparktech-server@1.0.0 build
+> tsc
+
+src/modules/Steadfast/steadfast.controller.ts(5,34): error TS1261: Already included file name 'E:/Projects/BestBuy/SparkTech-Server/src/modules/Steadfast/steadfast.service.ts' differs from file name 'E:/Projects/BestBuy/SparkTech-Server/src/modules/Steadfast/steadFast.service.ts' only in casing.
+  The file is in the program because:
+    Imported via "./steadfast.service" from file 'E:/Projects/BestBuy/SparkTech-Server/src/modules/Steadfast/steadfast.controller.ts'
+    Matched by default include pattern '**/*'
+src/modules/Steadfast/steadfast.route.ts(2,37): error TS1261: Already included file name 'E:/Projects/BestBuy/SparkTech-Server/src/modules/Steadfast/steadfast.controller.ts' differs from file name 'E:/Projects/BestBuy/SparkTech-Server/src/modules/Steadfast/steadFast.controller.ts' only in casing.
+  The file is in the program because:
+    Imported via "./steadfast.controller" from file 'E:/Projects/BestBuy/SparkTech-Server/src/modules/Steadfast/steadfast.route.ts'
+    Matched by default include pattern '**/*'

@@ -5,6 +5,12 @@ const ProductImageSchema = new mongoose_1.Schema({
     url: { type: String, required: true },
     alt: { type: String, required: true },
 }, { _id: false });
+const ProductVideoSchema = new mongoose_1.Schema({
+    url: { type: String, required: true },
+    title: { type: String, required: true },
+    thumbnail: { type: String },
+    platform: { type: String, enum: ["youtube", "vimeo", "direct"] },
+}, { _id: false });
 const ProductVariantItemSchema = new mongoose_1.Schema({
     value: { type: String, required: true },
     price: { type: Number },
@@ -64,9 +70,14 @@ const ProductBasicInfoSchema = new mongoose_1.Schema({
     deliveryChargeInsideDhaka: { type: Number },
     deliveryChargeOutsideDhaka: { type: Number },
 }, { _id: false });
+const BulkPricingSchema = new mongoose_1.Schema({
+    minQuantity: { type: Number, required: true },
+    price: { type: Number, required: true },
+}, { _id: false });
 const productSchema = new mongoose_1.Schema({
     basicInfo: { type: ProductBasicInfoSchema, required: true },
     price: { type: ProductPriceSchema, required: true },
+    bulkPricing: [BulkPricingSchema],
     stockStatus: {
         type: String,
         enum: ["In Stock", "Out of Stock", "Pre-order"],
@@ -75,6 +86,7 @@ const productSchema = new mongoose_1.Schema({
     stockQuantity: { type: Number },
     sold: { type: Number, default: 0 },
     images: { type: [ProductImageSchema], required: true },
+    videos: [ProductVideoSchema],
     variants: [ProductVariantSchema],
     specifications: [ProductSpecificationSchema],
     reviews: [ProductReviewSchema],
