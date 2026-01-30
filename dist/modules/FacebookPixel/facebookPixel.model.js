@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FacebookPixel = void 0;
+exports.FacebookPixel = exports.facebookPixelSchema = void 0;
 const mongoose_1 = require("mongoose");
 const facebookPixelSchema = new mongoose_1.Schema({
     pixelId: { type: String, default: "" },
@@ -8,4 +8,5 @@ const facebookPixelSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+exports.facebookPixelSchema = facebookPixelSchema;
 exports.FacebookPixel = (0, mongoose_1.model)('FacebookPixel', facebookPixelSchema);

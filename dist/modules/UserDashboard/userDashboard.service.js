@@ -8,15 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserDashboardService = void 0;
-const orders_model_1 = __importDefault(require("../Orders/orders.model"));
-const getUserDashboardStats = (phone) => __awaiter(void 0, void 0, void 0, function* () {
+const orders_model_1 = require("../Orders/orders.model");
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
+const getUserDashboardStats = (req, phone) => __awaiter(void 0, void 0, void 0, function* () {
+    const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
     // Get all orders for this phone number
-    const orders = yield orders_model_1.default.find({ "billingInformation.phone": phone }).sort({ createdAt: -1 });
+    const orders = yield OrderModel.find({ "billingInformation.phone": phone }).sort({ createdAt: -1 });
     const totalOrders = orders.length;
     const totalSpent = orders.reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0);
     // Status breakdown

@@ -9,6 +9,7 @@ const http_status_codes_1 = require("http-status-codes");
 const router_1 = __importDefault(require("./app/router/router"));
 const globalErrorHandler_1 = __importDefault(require("./app/middleware/globalErrorHandler"));
 const notFound_1 = __importDefault(require("./app/middleware/notFound"));
+const tenantResolver_1 = require("./app/middleware/tenantResolver");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 // app.use(
@@ -51,6 +52,8 @@ app.use((0, cors_1.default)({
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
+// Tenant resolver - must come after CORS and before routes
+app.use(tenantResolver_1.tenantResolver);
 app.use("/api/v1", router_1.default);
 app.get("/", (req, res) => {
     res.status(http_status_codes_1.StatusCodes.OK).json({

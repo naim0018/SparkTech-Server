@@ -18,13 +18,15 @@ const catchAsync_1 = __importDefault(require("../../app/utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const userDashboard_service_1 = require("./userDashboard.service");
 const user_model_1 = require("../User/user.model");
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
 const getUserStats = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { phone } = req.query;
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
     if (!phone) {
         // If no phone provided, check if user is authenticated
         const user = req.user;
         if (user && user.email) {
-            const userDetails = yield user_model_1.UserModel.findOne({ email: user.email });
+            const userDetails = yield UserModel.findOne({ email: user.email });
             if (userDetails && userDetails.phoneNumber) {
                 phone = userDetails.phoneNumber;
             }
@@ -33,7 +35,7 @@ const getUserStats = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
     if (!phone) {
         throw new Error("Phone number is required");
     }
-    const result = yield userDashboard_service_1.UserDashboardService.getUserDashboardStats(phone);
+    const result = yield userDashboard_service_1.UserDashboardService.getUserDashboardStats(req, phone);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,

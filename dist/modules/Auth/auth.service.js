@@ -21,9 +21,11 @@ const config_1 = __importDefault(require("../../app/config"));
 const sendEmail_1 = require("../../app/utils/sendEmail");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
+const loginUser = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
     // checking if the user is exist
-    const user = yield user_model_1.UserModel.isUserExistsByCustomId(payload.email);
+    const user = yield UserModel.isUserExistsByCustomId(payload.email);
     if (!user || user == null) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This user is not found!");
     }
@@ -38,7 +40,7 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, "This user is blocked ! !");
     }
     //checking if the password is correct
-    if (!(yield user_model_1.UserModel.isPasswordMatched(payload === null || payload === void 0 ? void 0 : payload.password, user === null || user === void 0 ? void 0 : user.password)))
+    if (!(yield UserModel.isPasswordMatched(payload === null || payload === void 0 ? void 0 : payload.password, user === null || user === void 0 ? void 0 : user.password)))
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, "Password do not matched");
     //create token and sent to the  client
     const jwtPayload = {
@@ -53,9 +55,10 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         needsPasswordChange: user === null || user === void 0 ? void 0 : user.needsPasswordChange,
     };
 });
-const changePassword = (userData, payload) => __awaiter(void 0, void 0, void 0, function* () {
+const changePassword = (req, userData, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
     // checking if the user is exist
-    const user = yield user_model_1.UserModel.isUserExistsByCustomId(userData.userId);
+    const user = yield UserModel.isUserExistsByCustomId(userData.userId);
     if (!user) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This user is not found !");
     }
@@ -70,11 +73,11 @@ const changePassword = (userData, payload) => __awaiter(void 0, void 0, void 0, 
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, "This user is blocked ! !");
     }
     //checking if the password is correct
-    if (!(yield user_model_1.UserModel.isPasswordMatched(payload.oldPassword, user === null || user === void 0 ? void 0 : user.password)))
+    if (!(yield UserModel.isPasswordMatched(payload.oldPassword, user === null || user === void 0 ? void 0 : user.password)))
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, "Password do not matched");
     //hash new password
     const newHashedPassword = yield bcrypt_1.default.hash(payload.newPassword, Number(config_1.default.bcrypt_salt_rounds));
-    yield user_model_1.UserModel.findOneAndUpdate({
+    yield UserModel.findOneAndUpdate({
         id: userData.userId,
         role: userData.role,
     }, {
@@ -84,12 +87,13 @@ const changePassword = (userData, payload) => __awaiter(void 0, void 0, void 0, 
     });
     return null;
 });
-const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
+const refreshToken = (req, token) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
     // checking if the given token is valid
     const decoded = (0, auth_utils_1.verifyToken)(token, config_1.default.jwt_refresh_secret);
     const { userId, iat } = decoded;
     // checking if the user is exist
-    const user = yield user_model_1.UserModel.isUserExistsByCustomId(userId);
+    const user = yield UserModel.isUserExistsByCustomId(userId);
     if (!user) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This user is not found !");
     }
@@ -104,7 +108,7 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, "This user is blocked ! !");
     }
     if (user.passwordChangedAt &&
-        user_model_1.UserModel.isJWTIssuedBeforePasswordChanged(user.passwordChangedAt, iat)) {
+        UserModel.isJWTIssuedBeforePasswordChanged(user.passwordChangedAt, iat)) {
         throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized !");
     }
     const jwtPayload = {
@@ -116,9 +120,10 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
         accessToken,
     };
 });
-const forgetPassword = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+const forgetPassword = (req, userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
     // checking if the user is exist
-    const user = yield user_model_1.UserModel.isUserExistsByCustomId(userId);
+    const user = yield UserModel.isUserExistsByCustomId(userId);
     if (!user) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This user is not found !");
     }
@@ -140,9 +145,10 @@ const forgetPassword = (userId) => __awaiter(void 0, void 0, void 0, function* (
     const resetUILink = `${config_1.default.reset_pass_ui_link}?id=${user.id}&token=${resetToken} `;
     (0, sendEmail_1.sendEmail)(user.email, resetUILink);
 });
-const resetPassword = (payload, token) => __awaiter(void 0, void 0, void 0, function* () {
+const resetPassword = (req, payload, token) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
     // checking if the user is exist
-    const user = yield user_model_1.UserModel.isUserExistsByCustomId(payload === null || payload === void 0 ? void 0 : payload.email);
+    const user = yield UserModel.isUserExistsByCustomId(payload === null || payload === void 0 ? void 0 : payload.email);
     if (!user) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This user is not found !");
     }
@@ -163,7 +169,7 @@ const resetPassword = (payload, token) => __awaiter(void 0, void 0, void 0, func
     }
     //hash new password
     const newHashedPassword = yield bcrypt_1.default.hash(payload.newPassword, Number(config_1.default.bcrypt_salt_rounds));
-    yield user_model_1.UserModel.findOneAndUpdate({
+    yield UserModel.findOneAndUpdate({
         email: decoded.email,
         role: decoded.role,
     }, {

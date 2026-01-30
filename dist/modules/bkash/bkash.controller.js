@@ -14,7 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const uuid_1 = require("uuid");
 const axios_1 = __importDefault(require("axios"));
-const bkash_model_1 = __importDefault(require("./bkash.model"));
+const bkash_model_1 = require("./bkash.model");
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
 const config_1 = __importDefault(require("../../app/config"));
 const baseURL = config_1.default.baseURL;
 class PaymentController {
@@ -31,7 +32,7 @@ class PaymentController {
                     intent: "sale",
                     merchantInvoiceNumber: "Inv" + (0, uuid_1.v4)().substring(0, 5),
                 }, {
-                    headers: yield this.bkash_headers(),
+                    headers: yield this.bkash_headers(req),
                 });
                 return res.status(200).json({ bkashURL: data.bkashURL });
             }
@@ -50,10 +51,11 @@ class PaymentController {
             if (status === "success") {
                 try {
                     const { data } = yield axios_1.default.post(config_1.default.bkash_execute_payment_url, { paymentID }, {
-                        headers: yield this.bkash_headers(),
+                        headers: yield this.bkash_headers(req),
                     });
                     if (data && data.statusCode === "0000") {
-                        yield bkash_model_1.default.create({
+                        const paymentModel = (0, getTenantModel_1.getTenantModel)(req, 'payments', bkash_model_1.PaymentSchema);
+                        yield paymentModel.create({
                             userId: Math.random() * 10 + 1,
                             paymentID,
                             trxID: data.trxID,
@@ -75,7 +77,8 @@ class PaymentController {
         this.refund = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const { trxID } = req.params;
             try {
-                const payment = yield bkash_model_1.default.findOne({ trxID });
+                const paymentModel = (0, getTenantModel_1.getTenantModel)(req, 'payments', bkash_model_1.PaymentSchema);
+                const payment = yield paymentModel.findOne({ trxID });
                 const { data } = yield axios_1.default.post(config_1.default.bkash_refund_transaction_url, {
                     paymentID: payment === null || payment === void 0 ? void 0 : payment.paymentID,
                     amount: payment === null || payment === void 0 ? void 0 : payment.amount,
@@ -83,7 +86,7 @@ class PaymentController {
                     sku: "payment",
                     reason: "cashback",
                 }, {
-                    headers: yield this.bkash_headers(),
+                    headers: yield this.bkash_headers(req),
                 });
                 if (data && data.statusCode === "0000") {
                     return res.status(200).json({ message: "refund success" });
@@ -97,12 +100,12 @@ class PaymentController {
             }
         });
     }
-    bkash_headers() {
+    bkash_headers(req) {
         return __awaiter(this, void 0, void 0, function* () {
             return {
                 "Content-Type": "application/json",
                 Accept: "application/json",
-                authorization: globalThis.id_token,
+                authorization: req.bkashToken,
                 "x-app-key": config_1.default.bkash_api_key,
             };
         });

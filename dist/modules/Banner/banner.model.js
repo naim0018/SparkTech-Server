@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Banner = void 0;
+exports.Banner = exports.bannerSchema = void 0;
 const mongoose_1 = require("mongoose");
 const bannerSchema = new mongoose_1.Schema({
     type: { type: String, required: true },
@@ -12,4 +12,5 @@ const bannerSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+exports.bannerSchema = bannerSchema;
 exports.Banner = (0, mongoose_1.model)('Banner', bannerSchema);

@@ -1,9 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductSchema = void 0;
 const mongoose_1 = require("mongoose");
 const ProductImageSchema = new mongoose_1.Schema({
     url: { type: String, required: true },
     alt: { type: String, required: true },
+}, { _id: false });
+const ProductVideoSchema = new mongoose_1.Schema({
+    url: { type: String, required: true },
+    title: { type: String, required: true },
+    thumbnail: { type: String },
+    platform: { type: String, enum: ["youtube", "vimeo", "direct"] },
 }, { _id: false });
 const ProductVariantItemSchema = new mongoose_1.Schema({
     value: { type: String, required: true },
@@ -75,6 +82,7 @@ const productSchema = new mongoose_1.Schema({
     stockQuantity: { type: Number },
     sold: { type: Number, default: 0 },
     images: { type: [ProductImageSchema], required: true },
+    videos: [ProductVideoSchema],
     variants: [ProductVariantSchema],
     specifications: [ProductSpecificationSchema],
     reviews: [ProductReviewSchema],
@@ -96,5 +104,6 @@ const productSchema = new mongoose_1.Schema({
     },
     seo: { type: ProductSEOSchema },
 }, { timestamps: true });
+exports.ProductSchema = productSchema;
 const ProductModel = (0, mongoose_1.model)("Product", productSchema);
 exports.default = ProductModel;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserModel = void 0;
+exports.UserModel = exports.UserSchema = void 0;
 const mongoose_1 = require("mongoose");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const config_1 = __importDefault(require("../../app/config"));
@@ -78,6 +78,7 @@ const userSchema = new mongoose_1.Schema({
 }, {
     timestamps: true,
 });
+exports.UserSchema = userSchema;
 userSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -93,7 +94,7 @@ userSchema.post('save', function (doc, next) {
 });
 userSchema.statics.isUserExistsByCustomId = function (email) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield exports.UserModel.findOne({ email }).select('+password');
+        return yield this.findOne({ email }).select('+password');
     });
 };
 userSchema.statics.isPasswordMatched = function (plainTextPassword, hashedPassword) {
@@ -107,8 +108,9 @@ userSchema.statics.isJWTIssuedBeforePasswordChanged = function (passwordChangedT
 };
 userSchema.statics.checkUserStatus = function (id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const user = yield exports.UserModel.findById(id);
+        const user = yield this.findById(id);
         return (user === null || user === void 0 ? void 0 : user.status) === user_constant_1.USER_STATUS.ACTIVE;
     });
 };
+// Export default model for backward compatibility (will be deprecated)
 exports.UserModel = (0, mongoose_1.model)('User', userSchema);

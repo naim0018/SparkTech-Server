@@ -19,7 +19,7 @@ const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const product_service_1 = require("./product.service");
 const http_status_1 = __importDefault(require("http-status"));
 const addProduct = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_service_1.ProductService.addProductData(req.body);
+    const result = yield product_service_1.ProductService.addProductData(req, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -28,7 +28,7 @@ const addProduct = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     });
 }));
 const getAllProduct = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_service_1.ProductService.getAllProductData(req.query);
+    const result = yield product_service_1.ProductService.getAllProductData(req, req.query);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -39,7 +39,7 @@ const getAllProduct = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
 }));
 const getProductById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield product_service_1.ProductService.getProductByIdData(id);
+    const result = yield product_service_1.ProductService.getProductByIdData(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -49,7 +49,7 @@ const getProductById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
 }));
 const updateProductById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield product_service_1.ProductService.updateProductDataById(id, req.body);
+    const result = yield product_service_1.ProductService.updateProductDataById(req, id, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -59,7 +59,7 @@ const updateProductById = (0, catchAsync_1.default)((req, res) => __awaiter(void
 }));
 const deleteProductById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield product_service_1.ProductService.deleteProductDataById(id);
+    const result = yield product_service_1.ProductService.deleteProductDataById(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -70,7 +70,7 @@ const deleteProductById = (0, catchAsync_1.default)((req, res) => __awaiter(void
 const getProductsByCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { category } = req.params;
     const { limit = 10 } = req.query;
-    const result = yield product_service_1.ProductService.getProductsByCategory(category, Number(limit));
+    const result = yield product_service_1.ProductService.getProductsByCategory(req, category, Number(limit));
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,

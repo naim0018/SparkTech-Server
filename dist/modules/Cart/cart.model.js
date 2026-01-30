@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CartSchema = void 0;
 const mongoose_1 = require("mongoose");
 const cartItemSchema = new mongoose_1.Schema({
     product: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Product', required: true },
@@ -22,13 +23,14 @@ const cartSchema = new mongoose_1.Schema({
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
+exports.CartSchema = cartSchema;
 cartSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         this.updatedAt = new Date();
         // Calculate the total amount by fetching the latest product prices
         let total = 0;
         for (const item of this.items) {
-            const product = yield (0, mongoose_1.model)('Product').findById(item.product);
+            const product = yield this.constructor.db.model('Product').findById(item.product);
             if (product) {
                 const price = product.discountPrice && product.discountPrice < product.price
                     ? product.discountPrice

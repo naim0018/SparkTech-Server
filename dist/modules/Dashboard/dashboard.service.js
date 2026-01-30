@@ -8,19 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardService = void 0;
-const orders_model_1 = __importDefault(require("../Orders/orders.model"));
-const product_model_1 = __importDefault(require("../Product/product.model"));
-const getStats = () => __awaiter(void 0, void 0, void 0, function* () {
+const orders_model_1 = require("../Orders/orders.model");
+const product_model_1 = require("../Product/product.model");
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
+const getStats = (req) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
-    const totalOrders = yield orders_model_1.default.countDocuments();
-    const totalProducts = yield product_model_1.default.countDocuments();
+    const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    const totalOrders = yield OrderModel.countDocuments();
+    const totalProducts = yield ProductModel.countDocuments();
     // Aggregating general order stats by status
-    const orderStats = yield orders_model_1.default.aggregate([
+    const orderStats = yield OrderModel.aggregate([
         {
             $group: {
                 _id: { $toLower: "$status" },
@@ -42,7 +42,7 @@ const getStats = () => __awaiter(void 0, void 0, void 0, function* () {
     const processingCount = ((_g = statsMap['processing']) === null || _g === void 0 ? void 0 : _g.count) || 0;
     const canceledCount = ((_h = statsMap['cancelled']) === null || _h === void 0 ? void 0 : _h.count) || 0;
     // Monthly Sales & Revenue for Chart
-    const monthlyStatsResult = yield orders_model_1.default.aggregate([
+    const monthlyStatsResult = yield OrderModel.aggregate([
         {
             $match: {
                 createdAt: { $exists: true, $ne: null }
@@ -85,7 +85,7 @@ const getStats = () => __awaiter(void 0, void 0, void 0, function* () {
         salesGrowth = 100;
     }
     // Recent Orders
-    const recentOrdersRaw = yield orders_model_1.default.find()
+    const recentOrdersRaw = yield OrderModel.find()
         .sort({ createdAt: -1 })
         .limit(10)
         .select('totalAmount status createdAt billingInformation');

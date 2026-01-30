@@ -13,7 +13,7 @@ exports.bannerController = void 0;
 const banner_service_1 = require("./banner.service");
 const createBanner = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield banner_service_1.bannerService.createBanner(req.body);
+        const result = yield banner_service_1.bannerService.createBanner(req, req.body);
         res.status(200).json({
             success: true,
             message: 'Banner created successfully',
@@ -30,7 +30,7 @@ const createBanner = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 const getAllBanners = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield banner_service_1.bannerService.getAllBanners();
+        const result = yield banner_service_1.bannerService.getAllBanners(req);
         res.status(200).json({
             success: true,
             message: 'Banners fetched successfully',
@@ -47,7 +47,7 @@ const getAllBanners = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 });
 const updateBanner = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield banner_service_1.bannerService.updateBanner(req.params.id, req.body);
+        const result = yield banner_service_1.bannerService.updateBanner(req, req.params.id, req.body);
         res.status(200).json({
             success: true,
             message: 'Banner updated successfully',
@@ -64,7 +64,7 @@ const updateBanner = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 const deleteBanner = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield banner_service_1.bannerService.deleteBanner(req.params.id);
+        const result = yield banner_service_1.bannerService.deleteBanner(req, req.params.id);
         res.status(200).json({
             success: true,
             message: 'Banner deleted successfully',

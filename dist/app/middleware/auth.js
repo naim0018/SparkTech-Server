@@ -18,6 +18,7 @@ const config_1 = __importDefault(require("../config"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const http_status_1 = __importDefault(require("http-status"));
 const user_model_1 = require("../../modules/User/user.model");
+const getTenantModel_1 = require("../utils/getTenantModel");
 const auth = (...requiredRoles) => {
     return (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const token = req.headers.authorization;
@@ -28,8 +29,9 @@ const auth = (...requiredRoles) => {
         // checking if the given token is valid
         const decoded = jsonwebtoken_1.default.verify(token, config_1.default.jwt_access_secret);
         const { role, email, iat } = decoded;
+        const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
         // checking if the user is exist
-        const user = yield user_model_1.UserModel.isUserExistsByCustomId(email);
+        const user = yield UserModel.isUserExistsByCustomId(email);
         if (!user) {
             throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This user is not found !");
         }
@@ -44,7 +46,7 @@ const auth = (...requiredRoles) => {
             throw new AppError_1.default(http_status_1.default.FORBIDDEN, "This user is blocked ! !");
         }
         if (user.passwordChangedAt &&
-            user_model_1.UserModel.isJWTIssuedBeforePasswordChanged(user.passwordChangedAt, iat)) {
+            UserModel.isJWTIssuedBeforePasswordChanged(user.passwordChangedAt, iat)) {
             throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized !");
         }
         if (requiredRoles && !requiredRoles.includes(role)) {

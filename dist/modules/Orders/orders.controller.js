@@ -18,16 +18,17 @@ const catchAsync_1 = __importDefault(require("../../app/utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const orders_service_1 = require("./orders.service");
 const getAllOrders = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield orders_service_1.OrderService.getAllOrdersData();
+    const result = yield orders_service_1.OrderService.getAllOrdersData(req, req.query);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
         message: "Orders Fetched Successfully",
-        data: result,
+        data: result.data,
+        meta: result.meta,
     });
 }));
 const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield orders_service_1.OrderService.addOrderData(req.body);
+    const result = yield orders_service_1.OrderService.addOrderData(req, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.CREATED,
@@ -37,7 +38,7 @@ const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
 }));
 const getOrderById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield orders_service_1.OrderService.getOrderByIdData(id);
+    const result = yield orders_service_1.OrderService.getOrderByIdData(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -46,19 +47,18 @@ const getOrderById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
     });
 }));
 const trackOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { phone, consignmentId } = req.query;
-    let result;
-    if (consignmentId) {
-        result = yield orders_service_1.OrderService.trackOrderByConsignmentIdData(consignmentId);
-        // Wrap single result in array to match frontend expectation if needed, or handle null
-        // Frontend expects array for phone search, maybe single object for ID/Consignment?
-        // Let's return as data. If frontend expects array for phone and object for others, we must be consistent.
-        // The previous trackOrderByPhone returned `find()` result (Array).
-        // `trackOrderByConsignmentIdData` uses `findOne` (Object).
-        // Let's stick to what appropriate for each. Frontend handles it.
+    const { phone, consignmentId, orderId } = req.query;
+    let result = [];
+    if (orderId) {
+        const order = yield orders_service_1.OrderService.getOrderByIdData(req, orderId);
+        result = order ? [order] : [];
     }
-    else {
-        result = yield orders_service_1.OrderService.trackOrderByPhoneData(phone);
+    else if (consignmentId) {
+        const order = yield orders_service_1.OrderService.trackOrderByConsignmentIdData(req, consignmentId);
+        result = order ? [order] : [];
+    }
+    else if (phone) {
+        result = yield orders_service_1.OrderService.trackOrderByPhoneData(req, phone);
     }
     (0, sendResponse_1.default)(res, {
         success: true,
@@ -69,7 +69,7 @@ const trackOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 }));
 const updateOrderById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield orders_service_1.OrderService.updateOrderDataById(id, req.body);
+    const result = yield orders_service_1.OrderService.updateOrderDataById(req, id, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -79,7 +79,7 @@ const updateOrderById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
 }));
 const deleteOrderById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield orders_service_1.OrderService.deleteOrderDataById(id);
+    const result = yield orders_service_1.OrderService.deleteOrderDataById(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,

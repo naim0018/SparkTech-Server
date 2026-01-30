@@ -18,7 +18,7 @@ const catchAsync_1 = __importDefault(require("../../app/utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const cart_service_1 = require("./cart.service");
 const addToCart = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield cart_service_1.CartService.addToCartData(req.body);
+    const result = yield cart_service_1.CartService.addToCartData(req, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -27,7 +27,7 @@ const addToCart = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
     });
 }));
 const getCart = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield cart_service_1.CartService.getCartData();
+    const result = yield cart_service_1.CartService.getCartData(req);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -37,7 +37,7 @@ const getCart = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0
 }));
 const getCartItemById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield cart_service_1.CartService.getCartItemByIdData(id);
+    const result = yield cart_service_1.CartService.getCartItemByIdData(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -47,7 +47,7 @@ const getCartItemById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
 }));
 const updateCartItemById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield cart_service_1.CartService.updateCartItemDataById(id, req.body);
+    const result = yield cart_service_1.CartService.updateCartItemDataById(req, id, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -57,7 +57,7 @@ const updateCartItemById = (0, catchAsync_1.default)((req, res) => __awaiter(voi
 }));
 const removeCartItemById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield cart_service_1.CartService.removeCartItemDataById(id);
+    const result = yield cart_service_1.CartService.removeCartItemDataById(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,

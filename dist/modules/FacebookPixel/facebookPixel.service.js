@@ -11,24 +11,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.facebookPixelService = void 0;
 const facebookPixel_model_1 = require("./facebookPixel.model");
-const createFacebookPixel = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExist = yield facebookPixel_model_1.FacebookPixel.findOne({});
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
+const createFacebookPixel = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const FacebookPixel = (0, getTenantModel_1.getTenantModel)(req, 'FacebookPixel', facebookPixel_model_1.facebookPixelSchema);
+    const isExist = yield FacebookPixel.findOne({});
     if (isExist) {
         throw new Error("Facebook Pixel config already exists. Use update instead.");
     }
-    const result = yield facebookPixel_model_1.FacebookPixel.create(payload);
+    const result = yield FacebookPixel.create(payload);
     return result;
 });
-const getFacebookPixel = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield facebookPixel_model_1.FacebookPixel.findOne({});
+const getFacebookPixel = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const FacebookPixel = (0, getTenantModel_1.getTenantModel)(req, 'FacebookPixel', facebookPixel_model_1.facebookPixelSchema);
+    const result = yield FacebookPixel.findOne({});
     return result;
 });
-const updateFacebookPixel = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield facebookPixel_model_1.FacebookPixel.findOneAndUpdate({}, payload, { new: true });
+const updateFacebookPixel = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const FacebookPixel = (0, getTenantModel_1.getTenantModel)(req, 'FacebookPixel', facebookPixel_model_1.facebookPixelSchema);
+    const result = yield FacebookPixel.findOneAndUpdate({}, payload, { new: true });
     return result;
 });
-const deleteFacebookPixel = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield facebookPixel_model_1.FacebookPixel.findOneAndUpdate({}, { pixelId: "", accessToken: "" }, { new: true });
+const deleteFacebookPixel = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const FacebookPixel = (0, getTenantModel_1.getTenantModel)(req, 'FacebookPixel', facebookPixel_model_1.facebookPixelSchema);
+    const result = yield FacebookPixel.findOneAndUpdate({}, { pixelId: "", accessToken: "" }, { new: true });
     return result;
 });
 exports.facebookPixelService = {
