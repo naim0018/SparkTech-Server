@@ -105,6 +105,12 @@ export interface ProductSEO {
   slug?: string;
 }
 
+// Bulk Pricing
+export interface BulkPricing {
+  minQuantity: number;
+  price: number;
+}
+
 /**
  * Represents a product in the e-commerce system.
  */
@@ -114,6 +120,7 @@ export interface IProduct extends Document {
 
   // Pricing and Stock
   price: ProductPrice;
+  bulkPricing?: BulkPricing[];
   stockStatus: "In Stock" | "Out of Stock" | "Pre-order";
   stockQuantity?: number;
   sold: number;
