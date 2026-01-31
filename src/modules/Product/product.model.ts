@@ -111,10 +111,10 @@ const ProductBasicInfoSchema = new Schema(
   { _id: false }
 );
 
-const BulkPricingSchema = new Schema(
+const ComboPricingSchema = new Schema(
   {
     minQuantity: { type: Number, required: true },
-    price: { type: Number, required: true },
+    discount: { type: Number, required: true },
   },
   { _id: false }
 );
@@ -123,7 +123,7 @@ const productSchema = new Schema<IProduct>(
   {
     basicInfo: { type: ProductBasicInfoSchema, required: true },
     price: { type: ProductPriceSchema, required: true },
-    bulkPricing: [BulkPricingSchema],
+    comboPricing: [ComboPricingSchema],
     stockStatus: {
       type: String,
       enum: ["In Stock", "Out of Stock", "Pre-order"],

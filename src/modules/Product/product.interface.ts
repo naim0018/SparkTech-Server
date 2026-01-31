@@ -105,10 +105,10 @@ export interface ProductSEO {
   slug?: string;
 }
 
-// Bulk Pricing
-export interface BulkPricing {
+// Combo Pricing
+export interface ComboPricing {
   minQuantity: number;
-  price: number;
+  discount: number;
 }
 
 /**
@@ -120,7 +120,7 @@ export interface IProduct extends Document {
 
   // Pricing and Stock
   price: ProductPrice;
-  bulkPricing?: BulkPricing[];
+  comboPricing?: ComboPricing[];
   stockStatus: "In Stock" | "Out of Stock" | "Pre-order";
   stockQuantity?: number;
   sold: number;
