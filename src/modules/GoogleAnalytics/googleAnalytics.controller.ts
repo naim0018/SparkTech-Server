@@ -5,7 +5,7 @@ import { googleAnalyticsService } from "./googleAnalytics.service";
 
 const createGoogleAnalytics = catchAsync(async (req, res) => {
     const { id } = req.body;
-    const result = await googleAnalyticsService.createGoogleAnalytics(id);
+    const result = await googleAnalyticsService.createGoogleAnalytics(req, id);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -15,7 +15,7 @@ const createGoogleAnalytics = catchAsync(async (req, res) => {
 });
 
 const getGoogleAnalytics = catchAsync(async (req, res) => {
-    const result = await googleAnalyticsService.getGoogleAnalytics();
+    const result = await googleAnalyticsService.getGoogleAnalytics(req);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -26,7 +26,7 @@ const getGoogleAnalytics = catchAsync(async (req, res) => {
 
 const updateGoogleAnalytics = catchAsync(async (req, res) => {
     const { id } = req.body;
-    const result = await googleAnalyticsService.updateGoogleAnalytics(id);
+    const result = await googleAnalyticsService.updateGoogleAnalytics(req, id);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -36,7 +36,7 @@ const updateGoogleAnalytics = catchAsync(async (req, res) => {
 });
 
 const deleteGoogleAnalytics = catchAsync(async (req, res) => {
-    const result = await googleAnalyticsService.deleteGoogleAnalytics();
+    const result = await googleAnalyticsService.deleteGoogleAnalytics(req);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,

@@ -5,6 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import router from "./app/router/router";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import notFound from "./app/middleware/notFound";
+import { tenantResolver } from "./app/middleware/tenantResolver";
 const app = express();
 
 app.use(express.json());
@@ -51,6 +52,9 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Tenant resolver - must come after CORS and before routes
+app.use(tenantResolver);
 
 app.use("/api/v1", router);
 

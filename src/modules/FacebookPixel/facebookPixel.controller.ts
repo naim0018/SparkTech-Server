@@ -4,7 +4,7 @@ import sendResponse from "../../app/utils/sendResponse";
 import { facebookPixelService } from "./facebookPixel.service";
 
 const createFacebookPixel = catchAsync(async (req, res) => {
-    const result = await facebookPixelService.createFacebookPixel(req.body);
+    const result = await facebookPixelService.createFacebookPixel(req, req.body);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -14,7 +14,7 @@ const createFacebookPixel = catchAsync(async (req, res) => {
 });
 
 const getFacebookPixel = catchAsync(async (req, res) => {
-    const result = await facebookPixelService.getFacebookPixel();
+    const result = await facebookPixelService.getFacebookPixel(req);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -24,7 +24,7 @@ const getFacebookPixel = catchAsync(async (req, res) => {
 });
 
 const updateFacebookPixel = catchAsync(async (req, res) => {
-    const result = await facebookPixelService.updateFacebookPixel(req.body);
+    const result = await facebookPixelService.updateFacebookPixel(req, req.body);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -34,7 +34,7 @@ const updateFacebookPixel = catchAsync(async (req, res) => {
 });
 
 const deleteFacebookPixel = catchAsync(async (req, res) => {
-    const result = await facebookPixelService.deleteFacebookPixel();
+    const result = await facebookPixelService.deleteFacebookPixel(req);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,

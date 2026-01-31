@@ -12,4 +12,5 @@ const bannerSchema = new Schema<IBanner>({
     timestamps: true
 });
 
+export { bannerSchema };
 export const Banner = model<IBanner>('Banner', bannerSchema);

@@ -18,7 +18,7 @@ const catchAsync_1 = __importDefault(require("../../app/utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const categories_service_1 = require("./categories.service");
 const createCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield categories_service_1.categoryService.createCategory(req.body);
+    const result = yield categories_service_1.categoryService.createCategory(req, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -28,7 +28,7 @@ const createCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
 }));
 const createSubCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { categoryId } = req.params;
-    const result = yield categories_service_1.categoryService.createSubCategory(categoryId, req.body);
+    const result = yield categories_service_1.categoryService.createSubCategory(req, categoryId, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -38,7 +38,7 @@ const createSubCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void
 }));
 const updateSubCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { categoryId, subCategoryName } = req.params;
-    const result = yield categories_service_1.categoryService.updateSubCategory(categoryId, subCategoryName, req.body);
+    const result = yield categories_service_1.categoryService.updateSubCategory(req, categoryId, subCategoryName, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -47,7 +47,7 @@ const updateSubCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void
     });
 }));
 const getAllCategories = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield categories_service_1.categoryService.getAllCategories();
+    const result = yield categories_service_1.categoryService.getAllCategories(req);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -56,7 +56,7 @@ const getAllCategories = (0, catchAsync_1.default)((req, res) => __awaiter(void 
     });
 }));
 const updateCategoryOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield categories_service_1.categoryService.updateCategoryOrder(req.body);
+    const result = yield categories_service_1.categoryService.updateCategoryOrder(req, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -66,7 +66,7 @@ const updateCategoryOrder = (0, catchAsync_1.default)((req, res) => __awaiter(vo
 }));
 const getCategoryById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield categories_service_1.categoryService.getCategoryById(id);
+    const result = yield categories_service_1.categoryService.getCategoryById(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -76,7 +76,7 @@ const getCategoryById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
 }));
 const updateCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield categories_service_1.categoryService.updateCategory(id, req.body);
+    const result = yield categories_service_1.categoryService.updateCategory(req, id, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -86,7 +86,7 @@ const updateCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
 }));
 const deleteCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield categories_service_1.categoryService.deleteCategory(id);
+    const result = yield categories_service_1.categoryService.deleteCategory(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -96,7 +96,7 @@ const deleteCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
 }));
 const deleteSubCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { categoryId, subCategoryName } = req.params;
-    const result = yield categories_service_1.categoryService.deleteSubCategory(categoryId, subCategoryName);
+    const result = yield categories_service_1.categoryService.deleteSubCategory(req, categoryId, subCategoryName);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,

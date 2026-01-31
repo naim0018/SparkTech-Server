@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductSchema = void 0;
 const mongoose_1 = require("mongoose");
 const ProductImageSchema = new mongoose_1.Schema({
     url: { type: String, required: true },
@@ -108,5 +109,6 @@ const productSchema = new mongoose_1.Schema({
     },
     seo: { type: ProductSEOSchema },
 }, { timestamps: true });
+exports.ProductSchema = productSchema;
 const ProductModel = (0, mongoose_1.model)("Product", productSchema);
 exports.default = ProductModel;

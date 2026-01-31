@@ -1,13 +1,17 @@
+import { Request } from "express";
 import { IProduct } from "./product.interface"
-import ProductModel from "./product.model"
+import { ProductSchema } from "./product.model"
+import { getTenantModel } from "../../app/utils/getTenantModel";
 
 
-const addProductData = async (payload: IProduct) => {
+const addProductData = async (req: Request, payload: IProduct) => {
+    const ProductModel = getTenantModel(req, 'Product', ProductSchema);
     const result = await ProductModel.create(payload)
     return result 
 }
 
-const getAllProductData = async (query: Record<string, unknown>) => {
+const getAllProductData = async (req: Request, query: Record<string, unknown>) => {
+    const ProductModel = getTenantModel(req, 'Product', ProductSchema);
     const {
         search,
         category,
@@ -68,19 +72,23 @@ const getAllProductData = async (query: Record<string, unknown>) => {
     };
 }
 
-const getProductByIdData = async (id: string) => {
+const getProductByIdData = async (req: Request, id: string) => {
+    const ProductModel = getTenantModel(req, 'Product', ProductSchema);
     return await ProductModel.findById(id);
 };
 
-const updateProductDataById = async (id: string, updateData: Partial<IProduct>) => {
+const updateProductDataById = async (req: Request, id: string, updateData: Partial<IProduct>) => {
+    const ProductModel = getTenantModel(req, 'Product', ProductSchema);
     return await ProductModel.findByIdAndUpdate(id, updateData, { new: true });
 };
 
-const deleteProductDataById = async (id: string) => {
+const deleteProductDataById = async (req: Request, id: string) => {
+    const ProductModel = getTenantModel(req, 'Product', ProductSchema);
     return await ProductModel.findByIdAndDelete(id);
 };
 
-const getProductsByCategory = async (category: string, limit: number): Promise<IProduct[]> => {
+const getProductsByCategory = async (req: Request, category: string, limit: number): Promise<IProduct[]> => {
+    const ProductModel = getTenantModel(req, 'Product', ProductSchema);
     const products = await ProductModel.find({
         'basicInfo.category': { 
             $regex: new RegExp(category, 'i') 
@@ -100,3 +108,4 @@ export const ProductService = {
     deleteProductDataById,
     getProductsByCategory,
 }
+

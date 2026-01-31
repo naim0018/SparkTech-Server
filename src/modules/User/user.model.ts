@@ -86,7 +86,7 @@ userSchema.post('save', function (doc: TUser, next) {
 });
 
 userSchema.statics.isUserExistsByCustomId = async function (email: string) {
-  return await UserModel.findOne({ email }).select('+password');
+  return await this.findOne({ email }).select('+password');
 };
 
 userSchema.statics.isPasswordMatched = async function (
@@ -106,8 +106,14 @@ userSchema.statics.isJWTIssuedBeforePasswordChanged = function (
 };
 
 userSchema.statics.checkUserStatus = async function (id: string) {
-  const user = await UserModel.findById(id);
+  const user = await this.findById(id);
   return user?.status === USER_STATUS.ACTIVE;
 };
 
+// Export the schema for multi-tenant usage
+export { userSchema as UserSchema };
+
+// Export default model for backward compatibility (will be deprecated)
 export const UserModel = model<TUser, TUserModel>('User', userSchema);
+
+

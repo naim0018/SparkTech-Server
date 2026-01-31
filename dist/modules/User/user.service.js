@@ -11,32 +11,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const user_model_1 = require("./user.model");
-const createUser = (userData) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.UserModel.create(userData);
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
+const createUser = (req, userData) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
+    const result = yield UserModel.create(userData);
     return result;
 });
-const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.UserModel.find({ isDeleted: { $ne: true } });
+const getAllUsers = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
+    const result = yield UserModel.find({ isDeleted: { $ne: true } });
     return result;
 });
-const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.UserModel.findOne({ _id: id, isDeleted: { $ne: true } });
+const getUserById = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
+    const result = yield UserModel.findOne({ _id: id, isDeleted: { $ne: true } });
     return result;
 });
-const getUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.UserModel.findOne({ email, isDeleted: { $ne: true } });
+const getUserByEmail = (req, email) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
+    const result = yield UserModel.findOne({ email, isDeleted: { $ne: true } });
     return result;
 });
-const updateUser = (id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.UserModel.findOneAndUpdate({ _id: id, isDeleted: { $ne: true } }, updateData, { new: true });
+const updateUser = (req, id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
+    const result = yield UserModel.findOneAndUpdate({ _id: id, isDeleted: { $ne: true } }, updateData, { new: true });
     return result;
 });
-const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.UserModel.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+const deleteUser = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
+    const result = yield UserModel.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
     return result;
 });
-const checkUserStatus = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield user_model_1.UserModel.findOne({ _id: id, isDeleted: { $ne: true } });
+const checkUserStatus = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    const UserModel = (0, getTenantModel_1.getTenantModel)(req, 'User', user_model_1.UserSchema);
+    const user = yield UserModel.findOne({ _id: id, isDeleted: { $ne: true } });
     if (!user) {
         throw new Error('User not found');
     }

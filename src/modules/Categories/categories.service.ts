@@ -1,11 +1,15 @@
-import { Category } from "./categories.model";
+import { Request } from "express";
+import { CategorySchema } from "./categories.model";
 import { ICategory, ISubCategory } from "./categories.interface";
+import { getTenantModel } from "../../app/utils/getTenantModel";
 
-const createCategory = async (category: ICategory) => {
+const createCategory = async (req: Request, category: ICategory) => {
+    const Category = getTenantModel(req, 'Category', CategorySchema);
     const newCategory = await Category.create(category);
     return newCategory;
 }
-const createSubCategory = async (categoryId: string, subCategory: ISubCategory) => {
+const createSubCategory = async (req: Request, categoryId: string, subCategory: ISubCategory) => {
+    const Category = getTenantModel(req, 'Category', CategorySchema);
     const category = await Category.findById(categoryId);
     if (!category) {
         throw new Error('Category not found');
@@ -16,7 +20,8 @@ const createSubCategory = async (categoryId: string, subCategory: ISubCategory) 
     return category;
 }
 
-const updateCategoryOrder = async (categories: { id: string; order: number }[]) => {
+const updateCategoryOrder = async (req: Request, categories: { id: string; order: number }[]) => {
+    const Category = getTenantModel(req, 'Category', CategorySchema);
     const session = await Category.startSession();
     session.startTransaction();
 
@@ -40,27 +45,32 @@ const updateCategoryOrder = async (categories: { id: string; order: number }[]) 
     }
 };
 
-const getAllCategories = async () => {
+const getAllCategories = async (req: Request) => {
+    const Category = getTenantModel(req, 'Category', CategorySchema);
     const categories = await Category.find().sort({ order: 1 });
     return categories;
 }
 
-const getCategoryById = async (id: string) => {
+const getCategoryById = async (req: Request, id: string) => {
+    const Category = getTenantModel(req, 'Category', CategorySchema);
     const category = await Category.findById(id);
     return category;
 }
 
-const updateCategory = async (id: string, category: ICategory) => {
+const updateCategory = async (req: Request, id: string, category: ICategory) => {
+    const Category = getTenantModel(req, 'Category', CategorySchema);
     const updatedCategory = await Category.findByIdAndUpdate(id, category, { new: true });
     return updatedCategory;
 }
 
-const deleteCategory = async (id: string) => {
+const deleteCategory = async (req: Request, id: string) => {
+    const Category = getTenantModel(req, 'Category', CategorySchema);
     const deletedCategory = await Category.findByIdAndDelete(id, { new: true });
     return deletedCategory;
 }
 
-const deleteSubCategory = async (categoryId: string, subCategoryName: string) => {
+const deleteSubCategory = async (req: Request, categoryId: string, subCategoryName: string) => {
+    const Category = getTenantModel(req, 'Category', CategorySchema);
     const category = await Category.findById(categoryId);
     if (!category) {
         throw new Error('Category not found');
@@ -80,10 +90,12 @@ const deleteSubCategory = async (categoryId: string, subCategoryName: string) =>
 }
 
 const updateSubCategory = async (
+  req: Request,
   categoryId: string, 
   oldName: string, 
   updatedSubCategory: ISubCategory
 ) => {
+  const Category = getTenantModel(req, 'Category', CategorySchema);
   const category = await Category.findById(categoryId);
   if (!category || !category.subCategories) throw new Error('Category not found');
 
@@ -109,3 +121,4 @@ export const categoryService = {
     updateCategoryOrder,
     updateSubCategory
 }
+

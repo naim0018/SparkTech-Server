@@ -18,7 +18,7 @@ const catchAsync_1 = __importDefault(require("../../app/utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const dashboard_service_1 = require("./dashboard.service");
 const getStats = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield dashboard_service_1.DashboardService.getStats();
+    const result = yield dashboard_service_1.DashboardService.getStats(req);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,
         success: true,

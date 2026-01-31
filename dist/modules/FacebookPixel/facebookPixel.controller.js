@@ -18,7 +18,7 @@ const catchAsync_1 = __importDefault(require("../../app/utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const facebookPixel_service_1 = require("./facebookPixel.service");
 const createFacebookPixel = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield facebookPixel_service_1.facebookPixelService.createFacebookPixel(req.body);
+    const result = yield facebookPixel_service_1.facebookPixelService.createFacebookPixel(req, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -27,7 +27,7 @@ const createFacebookPixel = (0, catchAsync_1.default)((req, res) => __awaiter(vo
     });
 }));
 const getFacebookPixel = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield facebookPixel_service_1.facebookPixelService.getFacebookPixel();
+    const result = yield facebookPixel_service_1.facebookPixelService.getFacebookPixel(req);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -36,7 +36,7 @@ const getFacebookPixel = (0, catchAsync_1.default)((req, res) => __awaiter(void 
     });
 }));
 const updateFacebookPixel = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield facebookPixel_service_1.facebookPixelService.updateFacebookPixel(req.body);
+    const result = yield facebookPixel_service_1.facebookPixelService.updateFacebookPixel(req, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -45,7 +45,7 @@ const updateFacebookPixel = (0, catchAsync_1.default)((req, res) => __awaiter(vo
     });
 }));
 const deleteFacebookPixel = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield facebookPixel_service_1.facebookPixelService.deleteFacebookPixel();
+    const result = yield facebookPixel_service_1.facebookPixelService.deleteFacebookPixel(req);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,

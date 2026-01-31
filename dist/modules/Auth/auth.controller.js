@@ -31,7 +31,7 @@ const config_1 = __importDefault(require("../../app/config"));
 const AppError_1 = __importDefault(require("../../app/error/AppError"));
 const auth_service_1 = require("./auth.service");
 const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield auth_service_1.AuthServices.loginUser(req.body);
+    const result = yield auth_service_1.AuthServices.loginUser(req, req.body);
     const { refreshToken, accessToken, needsPasswordChange } = result;
     res.cookie('refreshToken', refreshToken, {
         secure: config_1.default.NODE_ENV === 'production',
@@ -51,7 +51,7 @@ const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
 }));
 const changePassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const passwordData = __rest(req.body, []);
-    const result = yield auth_service_1.AuthServices.changePassword(req.user, passwordData);
+    const result = yield auth_service_1.AuthServices.changePassword(req, req.user, passwordData);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -61,7 +61,7 @@ const changePassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
 }));
 const refreshToken = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { refreshToken } = req.cookies;
-    const result = yield auth_service_1.AuthServices.refreshToken(refreshToken);
+    const result = yield auth_service_1.AuthServices.refreshToken(req, refreshToken);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -71,7 +71,7 @@ const refreshToken = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
 }));
 const forgetPassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.body.id;
-    const result = yield auth_service_1.AuthServices.forgetPassword(userId);
+    const result = yield auth_service_1.AuthServices.forgetPassword(req, userId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -84,7 +84,7 @@ const resetPassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
     if (!token) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Something went wrong !');
     }
-    const result = yield auth_service_1.AuthServices.resetPassword(req.body, token);
+    const result = yield auth_service_1.AuthServices.resetPassword(req, req.body, token);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,

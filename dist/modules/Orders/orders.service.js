@@ -8,22 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderService = void 0;
-const orders_model_1 = __importDefault(require("./orders.model"));
-const product_model_1 = __importDefault(require("../Product/product.model"));
-const addOrderData = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+const orders_model_1 = require("./orders.model");
+const product_model_1 = require("../Product/product.model");
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
+const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
+    const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
     // Validate totals and prices for security
     let calculatedSubtotal = 0;
     let maxDeliveryChargeInside = 0;
     let maxDeliveryChargeOutside = 0;
     let hasFreeShipping = false;
     for (const item of payload.items) {
-        const product = yield product_model_1.default.findById(item.product);
+        const product = yield ProductModel.findById(item.product);
         if (!product)
             throw new Error(`Product ${item.product} not found`);
         // Determine base price
@@ -65,10 +65,11 @@ const addOrderData = (payload) => __awaiter(void 0, void 0, void 0, function* ()
     const discount = payload.discount || 0;
     // Final validation of totalAmount
     payload.totalAmount = calculatedSubtotal + deliveryCharge - discount;
-    const result = yield orders_model_1.default.create(payload);
+    const result = yield OrderModel.create(payload);
     return result;
 });
-const getAllOrdersData = (query) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllOrdersData = (req, query) => __awaiter(void 0, void 0, void 0, function* () {
+    const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
     const { search, status, sort, order, page = 1, limit = 10 } = query;
     let filter = {};
     if (search) {
@@ -90,13 +91,13 @@ const getAllOrdersData = (query) => __awaiter(void 0, void 0, void 0, function* 
     if (sort) {
         sortCriteria = { [sort]: order === 'asc' ? 1 : -1 };
     }
-    const result = yield orders_model_1.default
+    const result = yield OrderModel
         .find(filter)
         .populate("items.product", "basicInfo.title price bulkPricing basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants images")
         .sort(sortCriteria)
         .skip(skip)
         .limit(Number(limit));
-    const total = yield orders_model_1.default.countDocuments(filter);
+    const total = yield OrderModel.countDocuments(filter);
     return {
         data: result,
         meta: {
@@ -107,26 +108,31 @@ const getAllOrdersData = (query) => __awaiter(void 0, void 0, void 0, function* 
         }
     };
 });
-const getOrderByIdData = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield orders_model_1.default.findById(id).populate("items.product", "basicInfo.title price bulkPricing basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants images");
+const getOrderByIdData = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
+    const result = yield OrderModel.findById(id).populate("items.product", "basicInfo.title price bulkPricing basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants images");
     return result;
 });
-const updateOrderDataById = (id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield orders_model_1.default.findByIdAndUpdate(id, updateData, {
+const updateOrderDataById = (req, id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
+    const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
+    return yield OrderModel.findByIdAndUpdate(id, updateData, {
         new: true,
     }).populate("items.product");
 });
-const deleteOrderDataById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield orders_model_1.default.findByIdAndDelete(id);
+const deleteOrderDataById = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
+    return yield OrderModel.findByIdAndDelete(id);
 });
-const trackOrderByPhoneData = (phone) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield orders_model_1.default.find({ "billingInformation.phone": phone })
+const trackOrderByPhoneData = (req, phone) => __awaiter(void 0, void 0, void 0, function* () {
+    const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
+    const result = yield OrderModel.find({ "billingInformation.phone": phone })
         .populate("items.product", "basicInfo.title price bulkPricing basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants images")
         .sort({ createdAt: -1 });
     return result;
 });
-const trackOrderByConsignmentIdData = (consignmentId) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield orders_model_1.default.findOne({ consignment_id: consignmentId })
+const trackOrderByConsignmentIdData = (req, consignmentId) => __awaiter(void 0, void 0, void 0, function* () {
+    const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
+    const result = yield OrderModel.findOne({ consignment_id: consignmentId })
         .populate("items.product", "basicInfo.title price bulkPricing basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants images");
     return result;
 });

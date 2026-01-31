@@ -8,17 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductService = void 0;
-const product_model_1 = __importDefault(require("./product.model"));
-const addProductData = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_model_1.default.create(payload);
+const product_model_1 = require("./product.model");
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
+const addProductData = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    const result = yield ProductModel.create(payload);
     return result;
 });
-const getAllProductData = (query) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllProductData = (req, query) => __awaiter(void 0, void 0, void 0, function* () {
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
     const { search, category, stockStatus, minPrice, maxPrice, sort, page = 1, limit = 12 } = query;
     let filter = {};
     // Add search filter
@@ -47,12 +47,12 @@ const getAllProductData = (query) => __awaiter(void 0, void 0, void 0, function*
     }
     const skip = (Number(page) - 1) * Number(limit);
     // Before the sort line, add type assertion for the sort key
-    const result = yield product_model_1.default
+    const result = yield ProductModel
         .find(filter)
         .sort(sort ? sort : '-createdAt')
         .skip(skip)
         .limit(Number(limit));
-    const total = yield product_model_1.default.countDocuments(filter);
+    const total = yield ProductModel.countDocuments(filter);
     return {
         data: result,
         meta: {
@@ -63,17 +63,21 @@ const getAllProductData = (query) => __awaiter(void 0, void 0, void 0, function*
         }
     };
 });
-const getProductByIdData = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield product_model_1.default.findById(id);
+const getProductByIdData = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    return yield ProductModel.findById(id);
 });
-const updateProductDataById = (id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield product_model_1.default.findByIdAndUpdate(id, updateData, { new: true });
+const updateProductDataById = (req, id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    return yield ProductModel.findByIdAndUpdate(id, updateData, { new: true });
 });
-const deleteProductDataById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield product_model_1.default.findByIdAndDelete(id);
+const deleteProductDataById = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    return yield ProductModel.findByIdAndDelete(id);
 });
-const getProductsByCategory = (category, limit) => __awaiter(void 0, void 0, void 0, function* () {
-    const products = yield product_model_1.default.find({
+const getProductsByCategory = (req, category, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    const products = yield ProductModel.find({
         'basicInfo.category': {
             $regex: new RegExp(category, 'i')
         }

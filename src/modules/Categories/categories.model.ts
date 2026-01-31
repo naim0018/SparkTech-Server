@@ -15,6 +15,7 @@ const CategorySchema = new Schema<ICategory>({
     order: { type: Number, required: false },
     subCategories: { type: [SubCategorySchema], required: false },
 });
+export { CategorySchema };
 export const Category = Mongoose.model('Category', CategorySchema);
 
 

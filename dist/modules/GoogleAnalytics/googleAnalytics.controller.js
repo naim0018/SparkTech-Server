@@ -19,7 +19,7 @@ const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const googleAnalytics_service_1 = require("./googleAnalytics.service");
 const createGoogleAnalytics = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.body;
-    const result = yield googleAnalytics_service_1.googleAnalyticsService.createGoogleAnalytics(id);
+    const result = yield googleAnalytics_service_1.googleAnalyticsService.createGoogleAnalytics(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -28,7 +28,7 @@ const createGoogleAnalytics = (0, catchAsync_1.default)((req, res) => __awaiter(
     });
 }));
 const getGoogleAnalytics = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield googleAnalytics_service_1.googleAnalyticsService.getGoogleAnalytics();
+    const result = yield googleAnalytics_service_1.googleAnalyticsService.getGoogleAnalytics(req);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -38,7 +38,7 @@ const getGoogleAnalytics = (0, catchAsync_1.default)((req, res) => __awaiter(voi
 }));
 const updateGoogleAnalytics = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.body;
-    const result = yield googleAnalytics_service_1.googleAnalyticsService.updateGoogleAnalytics(id);
+    const result = yield googleAnalytics_service_1.googleAnalyticsService.updateGoogleAnalytics(req, id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -47,7 +47,7 @@ const updateGoogleAnalytics = (0, catchAsync_1.default)((req, res) => __awaiter(
     });
 }));
 const deleteGoogleAnalytics = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield googleAnalytics_service_1.googleAnalyticsService.deleteGoogleAnalytics();
+    const result = yield googleAnalytics_service_1.googleAnalyticsService.deleteGoogleAnalytics(req);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,

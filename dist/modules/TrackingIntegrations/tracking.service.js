@@ -11,21 +11,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TrackingServices = void 0;
 const tracking_model_1 = require("./tracking.model");
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
 // Get the single tracking document, or create it if not exists
-const getTrackingSettings = () => __awaiter(void 0, void 0, void 0, function* () {
-    let settings = yield tracking_model_1.Tracking.findOne();
+const getTrackingSettings = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const Tracking = (0, getTenantModel_1.getTenantModel)(req, 'Tracking', tracking_model_1.trackingSchema);
+    let settings = yield Tracking.findOne();
     if (!settings) {
-        settings = yield tracking_model_1.Tracking.create({});
+        settings = yield Tracking.create({});
     }
     return settings;
 });
-const updateTrackingSettings = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    let settings = yield tracking_model_1.Tracking.findOne();
+const updateTrackingSettings = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const Tracking = (0, getTenantModel_1.getTenantModel)(req, 'Tracking', tracking_model_1.trackingSchema);
+    let settings = yield Tracking.findOne();
     if (!settings) {
-        settings = yield tracking_model_1.Tracking.create(payload);
+        settings = yield Tracking.create(payload);
     }
     else {
-        settings = yield tracking_model_1.Tracking.findByIdAndUpdate(settings._id, payload, {
+        settings = yield Tracking.findByIdAndUpdate(settings._id, payload, {
             new: true,
             runValidators: true,
         });

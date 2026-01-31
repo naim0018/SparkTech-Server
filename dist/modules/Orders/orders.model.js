@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.OrderSchema = void 0;
 const mongoose_1 = require("mongoose");
 const orderItemSchema = new mongoose_1.Schema({
     product: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Product', required: true }, // Reference to Product model
@@ -42,6 +43,7 @@ const orderSchema = new mongoose_1.Schema({
     cuponCode: { type: String },
     consignment_id: { type: String }
 }, { timestamps: true });
+exports.OrderSchema = orderSchema;
 function arrayMinLength(val) {
     return val.length > 0;
 }

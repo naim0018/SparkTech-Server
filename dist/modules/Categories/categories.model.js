@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Category = void 0;
+exports.Category = exports.CategorySchema = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const SubCategorySchema = new mongoose_1.Schema({
     name: { type: String, required: true },
@@ -37,4 +37,5 @@ const CategorySchema = new mongoose_1.Schema({
     order: { type: Number, required: false },
     subCategories: { type: [SubCategorySchema], required: false },
 });
+exports.CategorySchema = CategorySchema;
 exports.Category = mongoose_1.default.model('Category', CategorySchema);

@@ -31,7 +31,7 @@ class middleware {
                         password: process.env.bkash_password,
                     }
                 });
-                globalThis.id_token = data.id_token;
+                req.bkashToken = data.id_token;
                 next();
             }
             catch (error) {

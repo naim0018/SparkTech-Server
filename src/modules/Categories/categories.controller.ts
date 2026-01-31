@@ -4,7 +4,7 @@ import sendResponse from "../../app/utils/sendResponse";
 import { categoryService } from "./categories.service";
 
 const createCategory = catchAsync(async (req, res) => {
-  const result = await categoryService.createCategory(req.body);
+  const result = await categoryService.createCategory(req, req.body);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -15,7 +15,7 @@ const createCategory = catchAsync(async (req, res) => {
 
 const createSubCategory = catchAsync(async (req, res) => {
   const { categoryId } = req.params;
-  const result = await categoryService.createSubCategory(categoryId, req.body);
+  const result = await categoryService.createSubCategory(req, categoryId, req.body);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -26,7 +26,7 @@ const createSubCategory = catchAsync(async (req, res) => {
 
 const updateSubCategory = catchAsync(async (req, res) => {
   const { categoryId, subCategoryName } = req.params;
-  const result = await categoryService.updateSubCategory(categoryId, subCategoryName, req.body);
+  const result = await categoryService.updateSubCategory(req, categoryId, subCategoryName, req.body);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -36,7 +36,7 @@ const updateSubCategory = catchAsync(async (req, res) => {
 });
 
 const getAllCategories = catchAsync(async (req, res) => {
-  const result = await categoryService.getAllCategories();
+  const result = await categoryService.getAllCategories(req);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -46,7 +46,7 @@ const getAllCategories = catchAsync(async (req, res) => {
 });
 
 const updateCategoryOrder = catchAsync(async (req, res) => {
-  const result = await categoryService.updateCategoryOrder(req.body);
+  const result = await categoryService.updateCategoryOrder(req, req.body);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -57,7 +57,7 @@ const updateCategoryOrder = catchAsync(async (req, res) => {
 
 const getCategoryById = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await categoryService.getCategoryById(id);
+  const result = await categoryService.getCategoryById(req, id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -68,7 +68,7 @@ const getCategoryById = catchAsync(async (req, res) => {
 
 const updateCategory = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await categoryService.updateCategory(id, req.body);
+  const result = await categoryService.updateCategory(req, id, req.body);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -79,7 +79,7 @@ const updateCategory = catchAsync(async (req, res) => {
 
 const deleteCategory = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await categoryService.deleteCategory(id);
+  const result = await categoryService.deleteCategory(req, id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -90,7 +90,7 @@ const deleteCategory = catchAsync(async (req, res) => {
 
 const deleteSubCategory = catchAsync(async (req, res) => {
   const { categoryId, subCategoryName } = req.params;
-  const result = await categoryService.deleteSubCategory(categoryId, subCategoryName);
+  const result = await categoryService.deleteSubCategory(req, categoryId, subCategoryName);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,

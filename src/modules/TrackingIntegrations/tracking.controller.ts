@@ -5,7 +5,7 @@ import sendResponse from "../../app/utils/sendResponse";
 import { TrackingServices } from "./tracking.service";
 
 const getTrackingSettings = catchAsync(async (req: Request, res: Response) => {
-  const result = await TrackingServices.getTrackingSettings();
+  const result = await TrackingServices.getTrackingSettings(req);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -15,7 +15,7 @@ const getTrackingSettings = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateTrackingSettings = catchAsync(async (req: Request, res: Response) => {
-  const result = await TrackingServices.updateTrackingSettings(req.body);
+  const result = await TrackingServices.updateTrackingSettings(req, req.body);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

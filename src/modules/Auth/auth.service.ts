@@ -1,18 +1,20 @@
+import { Request } from "express";
 import httpStatus from "http-status";
 import { TLoginUser } from "./auth.interface";
 import AppError from "../../app/error/AppError";
-import { UserModel } from "../User/user.model";
+import { UserSchema } from "../User/user.model";
 import { createToken, verifyToken } from "./auth.utils";
 import { JwtPayload } from "jsonwebtoken";
 import config from "../../app/config";
 import { sendEmail } from "../../app/utils/sendEmail";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { getTenantModel } from "../../app/utils/getTenantModel";
 
-const loginUser = async (payload: TLoginUser) => {
+const loginUser = async (req: Request, payload: TLoginUser) => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   // checking if the user is exist
-
-  const user = await UserModel.isUserExistsByCustomId(payload.email);
+  const user = await (UserModel as any).isUserExistsByCustomId(payload.email);
 
   if (!user || user == null) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found!");
@@ -35,7 +37,7 @@ const loginUser = async (payload: TLoginUser) => {
 
   //checking if the password is correct
 
-  if (!(await UserModel.isPasswordMatched(payload?.password, user?.password)))
+  if (!(await (UserModel as any).isPasswordMatched(payload?.password, user?.password)))
     throw new AppError(httpStatus.FORBIDDEN, "Password do not matched");
 
   //create token and sent to the  client
@@ -65,11 +67,13 @@ const loginUser = async (payload: TLoginUser) => {
 };
 
 const changePassword = async (
+  req: Request,
   userData: JwtPayload,
   payload: { oldPassword: string; newPassword: string }
 ) => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(userData.userId);
+  const user = await (UserModel as any).isUserExistsByCustomId(userData.userId);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
@@ -92,7 +96,7 @@ const changePassword = async (
 
   //checking if the password is correct
 
-  if (!(await UserModel.isPasswordMatched(payload.oldPassword, user?.password)))
+  if (!(await (UserModel as any).isPasswordMatched(payload.oldPassword, user?.password)))
     throw new AppError(httpStatus.FORBIDDEN, "Password do not matched");
 
   //hash new password
@@ -116,14 +120,15 @@ const changePassword = async (
   return null;
 };
 
-const refreshToken = async (token: string) => {
+const refreshToken = async (req: Request, token: string) => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   // checking if the given token is valid
   const decoded = verifyToken(token, config.jwt_refresh_secret as string);
 
   const { userId, iat } = decoded;
 
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(userId);
+  const user = await (UserModel as any).isUserExistsByCustomId(userId);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
@@ -144,7 +149,7 @@ const refreshToken = async (token: string) => {
 
   if (
     user.passwordChangedAt &&
-    UserModel.isJWTIssuedBeforePasswordChanged(
+    (UserModel as any).isJWTIssuedBeforePasswordChanged(
       user.passwordChangedAt,
       iat as number
     )
@@ -168,9 +173,10 @@ const refreshToken = async (token: string) => {
   };
 };
 
-const forgetPassword = async (userId: string) => {
+const forgetPassword = async (req: Request, userId: string) => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(userId);
+  const user = await (UserModel as any).isUserExistsByCustomId(userId);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
@@ -205,11 +211,13 @@ const forgetPassword = async (userId: string) => {
 };
 
 const resetPassword = async (
+  req: Request,
   payload: { email: string; newPassword: string },
   token: string
 ) => {
+  const UserModel = getTenantModel(req, 'User', UserSchema);
   // checking if the user is exist
-  const user = await UserModel.isUserExistsByCustomId(payload?.email);
+  const user = await (UserModel as any).isUserExistsByCustomId(payload?.email);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
@@ -265,3 +273,4 @@ export const AuthServices = {
   forgetPassword,
   resetPassword,
 };
+

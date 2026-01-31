@@ -5,7 +5,7 @@ import sendResponse from "../../app/utils/sendResponse";
 import { DashboardService } from "./dashboard.service";
 
 const getStats = catchAsync(async (req: Request, res: Response) => {
-    const result = await DashboardService.getStats();
+    const result = await DashboardService.getStats(req);
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,

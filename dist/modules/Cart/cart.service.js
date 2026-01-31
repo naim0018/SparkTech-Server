@@ -8,28 +8,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartService = void 0;
-const cart_model_1 = __importDefault(require("./cart.model"));
-const addToCartData = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield cart_model_1.default.create(payload);
+const cart_model_1 = require("./cart.model");
+const getTenantModel_1 = require("../../app/utils/getTenantModel");
+const addToCartData = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const CartModel = (0, getTenantModel_1.getTenantModel)(req, 'Cart', cart_model_1.CartSchema);
+    const result = yield CartModel.create(payload);
     return result;
 });
-const getCartData = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield cart_model_1.default.find();
+const getCartData = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const CartModel = (0, getTenantModel_1.getTenantModel)(req, 'Cart', cart_model_1.CartSchema);
+    const result = yield CartModel.find();
     return result;
 });
-const getCartItemByIdData = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield cart_model_1.default.findById(id);
+const getCartItemByIdData = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    const CartModel = (0, getTenantModel_1.getTenantModel)(req, 'Cart', cart_model_1.CartSchema);
+    return yield CartModel.findById(id);
 });
-const updateCartItemDataById = (id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield cart_model_1.default.findByIdAndUpdate(id, updateData, { new: true });
+const updateCartItemDataById = (req, id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
+    const CartModel = (0, getTenantModel_1.getTenantModel)(req, 'Cart', cart_model_1.CartSchema);
+    return yield CartModel.findByIdAndUpdate(id, updateData, { new: true });
 });
-const removeCartItemDataById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield cart_model_1.default.findByIdAndDelete(id);
+const removeCartItemDataById = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    const CartModel = (0, getTenantModel_1.getTenantModel)(req, 'Cart', cart_model_1.CartSchema);
+    return yield CartModel.findByIdAndDelete(id);
 });
 exports.CartService = {
     addToCartData,

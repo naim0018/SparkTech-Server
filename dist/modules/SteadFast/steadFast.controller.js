@@ -18,7 +18,7 @@ const catchAsync_1 = __importDefault(require("../../app/utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../app/utils/sendResponse"));
 const steadfast_service_1 = require("./steadfast.service");
 const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield steadfast_service_1.SteadfastService.createOrder(req.body);
+    const result = yield steadfast_service_1.SteadfastService.createOrder(req, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -27,7 +27,7 @@ const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
     });
 }));
 const bulkCreateOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield steadfast_service_1.SteadfastService.bulkCreateOrder(req.body);
+    const result = yield steadfast_service_1.SteadfastService.bulkCreateOrder(req, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -37,7 +37,7 @@ const bulkCreateOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
 }));
 const checkDeliveryStatus = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield steadfast_service_1.SteadfastService.checkDeliveryStatus(id);
+    const result = yield steadfast_service_1.SteadfastService.checkDeliveryStatus(req, id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -46,7 +46,7 @@ const checkDeliveryStatus = (0, catchAsync_1.default)((req, res) => __awaiter(vo
     });
 }));
 const getCurrentBalance = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield steadfast_service_1.SteadfastService.getCurrentBalance();
+    const result = yield steadfast_service_1.SteadfastService.getCurrentBalance(req);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -55,7 +55,7 @@ const getCurrentBalance = (0, catchAsync_1.default)((req, res) => __awaiter(void
     });
 }));
 const getReturnRequests = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield steadfast_service_1.SteadfastService.getReturnRequests(req.query);
+    const result = yield steadfast_service_1.SteadfastService.getReturnRequests(req, req.query);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -64,7 +64,7 @@ const getReturnRequests = (0, catchAsync_1.default)((req, res) => __awaiter(void
     });
 }));
 const getPoliceStations = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield steadfast_service_1.SteadfastService.getPoliceStations();
+    const result = yield steadfast_service_1.SteadfastService.getPoliceStations(req);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,

@@ -4,7 +4,7 @@ import sendResponse from "../../app/utils/sendResponse";
 import { CartService } from "./cart.service";
 
 const addToCart = catchAsync(async (req, res) => {
-  const result = await CartService.addToCartData(req.body);
+  const result = await CartService.addToCartData(req, req.body);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -14,7 +14,7 @@ const addToCart = catchAsync(async (req, res) => {
 });
 
 const getCart = catchAsync(async (req, res) => {
-  const result = await CartService.getCartData();
+  const result = await CartService.getCartData(req);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -25,7 +25,7 @@ const getCart = catchAsync(async (req, res) => {
 
 const getCartItemById = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await CartService.getCartItemByIdData(id);
+  const result = await CartService.getCartItemByIdData(req, id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -36,7 +36,7 @@ const getCartItemById = catchAsync(async (req, res) => {
 
 const updateCartItemById = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await CartService.updateCartItemDataById(id, req.body);
+  const result = await CartService.updateCartItemDataById(req, id, req.body);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -47,7 +47,7 @@ const updateCartItemById = catchAsync(async (req, res) => {
 
 const removeCartItemById = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await CartService.removeCartItemDataById(id);
+  const result = await CartService.removeCartItemDataById(req, id);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
