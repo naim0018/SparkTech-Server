@@ -6,6 +6,8 @@ const trackingSchema = new Schema<ITracking>(
     googleAnalyticsId: { type: String, default: "" },
     facebookPixelId: { type: String, default: "" },
     facebookAccessToken: { type: String, default: "" },
+    facebookPageId: { type: String, default: "" },
+    whatsappNumber: { type: String, default: "" },
     tiktokPixelId: { type: String, default: "" },
     gtmId: { type: String, default: "" },
     clarityId: { type: String, default: "" },
