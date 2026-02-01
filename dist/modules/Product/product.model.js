@@ -71,14 +71,14 @@ const ProductBasicInfoSchema = new mongoose_1.Schema({
     deliveryChargeInsideDhaka: { type: Number },
     deliveryChargeOutsideDhaka: { type: Number },
 }, { _id: false });
-const BulkPricingSchema = new mongoose_1.Schema({
+const ComboPricingSchema = new mongoose_1.Schema({
     minQuantity: { type: Number, required: true },
-    price: { type: Number, required: true },
+    discount: { type: Number, required: true },
 }, { _id: false });
 const productSchema = new mongoose_1.Schema({
     basicInfo: { type: ProductBasicInfoSchema, required: true },
     price: { type: ProductPriceSchema, required: true },
-    bulkPricing: [BulkPricingSchema],
+    comboPricing: [ComboPricingSchema],
     stockStatus: {
         type: String,
         enum: ["In Stock", "Out of Stock", "Pre-order"],

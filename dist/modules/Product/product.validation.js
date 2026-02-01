@@ -87,15 +87,10 @@ const ProductSEOSchema = zod_1.z.object({
     metaDescription: zod_1.z.string().optional(),
     slug: zod_1.z.string().optional()
 });
-const BulkPricingSchemaZod = zod_1.z.object({
-    minQuantity: zod_1.z.number().int().positive(),
-    price: zod_1.z.number().positive()
-});
 const productSchemaZod = zod_1.z.object({
     body: zod_1.z.object({
         basicInfo: ProductBasicInfoSchema,
         price: ProductPriceSchema,
-        bulkPricing: zod_1.z.array(BulkPricingSchemaZod).optional(),
         stockStatus: zod_1.z.enum(['In Stock', 'Out of Stock', 'Pre-order']),
         stockQuantity: zod_1.z.number().int().nonnegative().optional(),
         sold: zod_1.z.number().int().nonnegative().default(0),
