@@ -111,6 +111,11 @@ export interface ComboPricing {
   discount: number;
 }
 
+export interface BulkPricing {
+  minQuantity: number;
+  price: number;
+}
+
 /**
  * Represents a product in the e-commerce system.
  */
@@ -121,6 +126,7 @@ export interface IProduct extends Document {
   // Pricing and Stock
   price: ProductPrice;
   comboPricing?: ComboPricing[];
+  bulkPricing?: BulkPricing[];
   stockStatus: "In Stock" | "Out of Stock" | "Pre-order";
   stockQuantity?: number;
   sold: number;

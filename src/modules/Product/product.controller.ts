@@ -72,11 +72,23 @@ const getProductsByCategory = catchAsync(async (req, res) => {
   });
 });
 
+const getNewArrivals = catchAsync(async (req, res) => {
+  const result = await ProductService.getNewArrivalsData(req);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'New arrival products retrieved successfully',
+    data: result
+  });
+});
+
 export const ProductController = {
   addProduct,
   getAllProduct,
   getProductById,
   updateProductById,
   deleteProductById,
-  getProductsByCategory
+  getProductsByCategory,
+  getNewArrivals
 };

@@ -75,6 +75,48 @@ const deleteProductDataById = (req, id) => __awaiter(void 0, void 0, void 0, fun
     const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
     return yield ProductModel.findByIdAndDelete(id);
 });
+const getNewArrivalsData = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    // 1. Get up to 2 latest products with combo pricing
+    const comboProducts = yield ProductModel.find({
+        comboPricing: { $exists: true, $not: { $size: 0 } }
+    })
+        .sort({ createdAt: -1 })
+        .limit(2);
+    const comboIds = comboProducts.map(p => p._id);
+    // 2. Get the latest products excluding the picked combo products to fill 8 slots
+    const latestProducts = yield ProductModel.find({
+        _id: { $nin: comboIds }
+    })
+        .sort({ createdAt: -1 })
+        .limit(8);
+    // 3. Assemble the 8 products
+    // Indices 0 and 4 are for the "Large" cards (ideally combo products)
+    const result = new Array(8).fill(null);
+    let latestIdx = 0;
+    // Place first combo product at index 0
+    if (comboProducts.length > 0) {
+        result[0] = comboProducts[0];
+    }
+    else if (latestProducts[latestIdx]) {
+        result[0] = latestProducts[latestIdx++];
+    }
+    // Place second combo product at index 4
+    if (comboProducts.length > 1) {
+        result[4] = comboProducts[1];
+    }
+    else if (latestProducts[latestIdx]) {
+        result[4] = latestProducts[latestIdx++];
+    }
+    // Fill the remaining slots
+    for (let i = 0; i < 8; i++) {
+        if (result[i] === null && latestProducts[latestIdx]) {
+            result[i] = latestProducts[latestIdx++];
+        }
+    }
+    // Filter out any remaining nulls if there were fewer than 8 products total
+    return result.filter(p => p !== null);
+});
 const getProductsByCategory = (req, category, limit) => __awaiter(void 0, void 0, void 0, function* () {
     const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
     const products = yield ProductModel.find({
@@ -93,4 +135,5 @@ exports.ProductService = {
     updateProductDataById,
     deleteProductDataById,
     getProductsByCategory,
+    getNewArrivalsData,
 };

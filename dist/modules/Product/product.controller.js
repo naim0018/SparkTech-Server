@@ -78,11 +78,21 @@ const getProductsByCategory = (0, catchAsync_1.default)((req, res) => __awaiter(
         data: result
     });
 }));
+const getNewArrivals = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield product_service_1.ProductService.getNewArrivalsData(req);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'New arrival products retrieved successfully',
+        data: result
+    });
+}));
 exports.ProductController = {
     addProduct,
     getAllProduct,
     getProductById,
     updateProductById,
     deleteProductById,
-    getProductsByCategory
+    getProductsByCategory,
+    getNewArrivals
 };

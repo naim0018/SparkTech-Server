@@ -1,10 +1,20 @@
 import { Document } from "mongoose";
 
 export interface IBanner extends Document {
-    type: string; // 'hero', 'top-right', 'middle-right', 'bottom-left', 'bottom-middle'
-    title: string;
+    type: string; // 'hero', 'product', 'feature', 'promotional'
+    title?: string;
+    subtitle?: string;
     description?: string;
-    productId: string;
+    link?: string;
     image: string;
     isActive: boolean;
+    buttonText?: string;
+    buttonBgColor?: string;
+    buttonTextColor?: string;
+    textColor?: string;
+    textPosition?: string; // 'top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'
+    titleSize?: string;
+    subtitleSize?: string;
+    showButton?: boolean;
+    showTitle?: boolean;
 }
