@@ -13,25 +13,24 @@ exports.ProductService = void 0;
 const product_model_1 = require("./product.model");
 const getTenantModel_1 = require("../../app/utils/getTenantModel");
 const addProductData = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, "Product", product_model_1.ProductSchema);
     const result = yield ProductModel.create(payload);
     return result;
 });
 const getAllProductData = (req, query) => __awaiter(void 0, void 0, void 0, function* () {
-    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
-    const { search, category, stockStatus, minPrice, maxPrice, sort, page = 1, limit = 12 } = query;
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, "Product", product_model_1.ProductSchema);
+    const { search, category, stockStatus, minPrice, maxPrice, rating, sort, page = 1, limit = 12, } = query;
     let filter = {};
     // Add search filter
     if (search) {
         filter.$or = [
-            { 'basicInfo.title': { $regex: search, $options: 'i' } },
-            { 'basicInfo.category': { $regex: search, $options: 'i' } },
-            { 'basicInfo.brand': { $regex: search, $options: 'i' } }
+            { "basicInfo.title": { $regex: search, $options: "i" } },
+            { "basicInfo.category": { $regex: search, $options: "i" } },
         ];
     }
     // Add category filter
     if (category) {
-        filter['basicInfo.category'] = category;
+        filter["basicInfo.category"] = { $regex: new RegExp(`^${category}$`, "i") };
     }
     // Add stock status filter
     if (stockStatus) {
@@ -39,17 +38,19 @@ const getAllProductData = (req, query) => __awaiter(void 0, void 0, void 0, func
     }
     // Add price range filter
     if (minPrice || maxPrice) {
-        filter.price = {};
         if (minPrice)
-            filter.price.$gte = Number(minPrice);
+            filter["price.regular"] = Object.assign(Object.assign({}, filter["price.regular"]), { $gte: Number(minPrice) });
         if (maxPrice)
-            filter.price.$lte = Number(maxPrice);
+            filter["price.regular"] = Object.assign(Object.assign({}, filter["price.regular"]), { $lte: Number(maxPrice) });
+    }
+    // Add rating filter
+    if (rating && Number(rating) > 0) {
+        filter["rating.average"] = { $gte: Number(rating) };
     }
     const skip = (Number(page) - 1) * Number(limit);
     // Before the sort line, add type assertion for the sort key
-    const result = yield ProductModel
-        .find(filter)
-        .sort(sort ? sort : '-createdAt')
+    const result = yield ProductModel.find(filter)
+        .sort(sort ? sort : "-createdAt")
         .skip(skip)
         .limit(Number(limit));
     const total = yield ProductModel.countDocuments(filter);
@@ -59,34 +60,34 @@ const getAllProductData = (req, query) => __awaiter(void 0, void 0, void 0, func
             page: Number(page),
             limit: Number(limit),
             total,
-            totalPage: Math.ceil(total / Number(limit))
-        }
+            totalPage: Math.ceil(total / Number(limit)),
+        },
     };
 });
 const getProductByIdData = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
-    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, "Product", product_model_1.ProductSchema);
     return yield ProductModel.findById(id);
 });
 const updateProductDataById = (req, id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
-    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, "Product", product_model_1.ProductSchema);
     return yield ProductModel.findByIdAndUpdate(id, updateData, { new: true });
 });
 const deleteProductDataById = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
-    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, "Product", product_model_1.ProductSchema);
     return yield ProductModel.findByIdAndDelete(id);
 });
 const getNewArrivalsData = (req) => __awaiter(void 0, void 0, void 0, function* () {
-    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, "Product", product_model_1.ProductSchema);
     // 1. Get up to 2 latest products with combo pricing
     const comboProducts = yield ProductModel.find({
-        comboPricing: { $exists: true, $not: { $size: 0 } }
+        comboPricing: { $exists: true, $not: { $size: 0 } },
     })
         .sort({ createdAt: -1 })
         .limit(2);
-    const comboIds = comboProducts.map(p => p._id);
+    const comboIds = comboProducts.map((p) => p._id);
     // 2. Get the latest products excluding the picked combo products to fill 8 slots
     const latestProducts = yield ProductModel.find({
-        _id: { $nin: comboIds }
+        _id: { $nin: comboIds },
     })
         .sort({ createdAt: -1 })
         .limit(8);
@@ -115,14 +116,14 @@ const getNewArrivalsData = (req) => __awaiter(void 0, void 0, void 0, function* 
         }
     }
     // Filter out any remaining nulls if there were fewer than 8 products total
-    return result.filter(p => p !== null);
+    return result.filter((p) => p !== null);
 });
 const getProductsByCategory = (req, category, limit) => __awaiter(void 0, void 0, void 0, function* () {
-    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    const ProductModel = (0, getTenantModel_1.getTenantModel)(req, "Product", product_model_1.ProductSchema);
     const products = yield ProductModel.find({
-        'basicInfo.category': {
-            $regex: new RegExp(category, 'i')
-        }
+        "basicInfo.category": {
+            $regex: new RegExp(category, "i"),
+        },
     })
         .limit(limit)
         .sort({ createdAt: -1 });
