@@ -109,6 +109,7 @@ export interface ProductSEO {
 export interface ComboPricing {
   minQuantity: number;
   discount: number;
+  discountType?: "total" | "per_product";
 }
 
 export interface BulkPricing {

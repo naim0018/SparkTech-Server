@@ -10,6 +10,7 @@ import { bannerRoutes } from "../../modules/Banner/banner.route";
 import { TrackingRoutes } from "../../modules/TrackingIntegrations/tracking.route";
 import { SteadfastRoutes } from "../../modules/Steadfast/steadfast.route";
 import { UserDashboardRoute } from "../../modules/UserDashboard/userDashboard.route";
+import { SettingsRoutes } from "../../modules/Settings/settings.route";
 
 const router = Router()
 
@@ -62,6 +63,10 @@ const moduleRoute = [
     {
         path: '/user-dashboard',
         route: UserDashboardRoute
+    },
+    {
+        path: '/settings',
+        route: SettingsRoutes
     }
 ]
 

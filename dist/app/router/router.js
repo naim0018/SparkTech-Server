@@ -12,6 +12,7 @@ const banner_route_1 = require("../../modules/Banner/banner.route");
 const tracking_route_1 = require("../../modules/TrackingIntegrations/tracking.route");
 const steadfast_route_1 = require("../../modules/Steadfast/steadfast.route");
 const userDashboard_route_1 = require("../../modules/UserDashboard/userDashboard.route");
+const settings_route_1 = require("../../modules/Settings/settings.route");
 const router = (0, express_1.Router)();
 const moduleRoute = [
     {
@@ -61,6 +62,10 @@ const moduleRoute = [
     {
         path: '/user-dashboard',
         route: userDashboard_route_1.UserDashboardRoute
+    },
+    {
+        path: '/settings',
+        route: settings_route_1.SettingsRoutes
     }
 ];
 moduleRoute.forEach((route) => router.use(route.path, route.route));

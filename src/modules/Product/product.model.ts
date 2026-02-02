@@ -115,6 +115,11 @@ const ComboPricingSchema = new Schema(
   {
     minQuantity: { type: Number, required: true },
     discount: { type: Number, required: true },
+    discountType: {
+      type: String,
+      enum: ["total", "per_product"],
+      default: "total",
+    },
   },
   { _id: false }
 );
