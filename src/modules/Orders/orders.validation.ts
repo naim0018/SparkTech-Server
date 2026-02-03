@@ -3,7 +3,8 @@ import { z } from 'zod';
 // Order Item Schema
 const SelectedVariantSchema = z.object({
   value: z.string().optional(),
-  price: z.number().nonnegative().optional()
+  price: z.number().nonnegative().optional(),
+  quantity: z.number().int().positive().optional()
 });
 
 const OrderItemSchema = z.object({
@@ -12,7 +13,7 @@ const OrderItemSchema = z.object({
   price: z.number().positive(),
   image: z.string(),
   itemKey: z.string(),
-  selectedVariants: z.record(SelectedVariantSchema).optional()
+  selectedVariants: z.record(z.array(SelectedVariantSchema)).optional()
 });
 
 // Payment Information Schema
@@ -45,6 +46,7 @@ const orderSchemaZod = z.object({
     billingInformation: BillingInformationSchema,
     paymentInfo: PaymentInfoSchema.optional(),
     courierCharge: z.enum(['insideDhaka', 'outsideDhaka']),
+    deliveryCharge: z.number().nonnegative(),
     cuponCode: z.string().optional()
   })
 });

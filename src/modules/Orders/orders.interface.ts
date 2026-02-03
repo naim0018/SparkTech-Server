@@ -9,6 +9,7 @@ export interface OrderInterface {
   courierCharge: 'insideDhaka' | 'outsideDhaka';
   cuponCode?: string;
   discount?: number;
+  deliveryCharge: number; // Added delivery charge amount
   consignment_id?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
@@ -17,7 +18,7 @@ export interface OrderInterface {
 export interface SelectedVariant {
   value: string; // The selected value of the variant
   price: number; // The price of the selected variant
-  
+  quantity?: number; // Quantity of this specific variant
 }
 
 export interface OrderItem {
@@ -26,7 +27,7 @@ export interface OrderItem {
   price: number;
   image: string;
   itemKey: string;
-  selectedVariants?: Record<string, SelectedVariant>;
+  selectedVariants?: Record<string, SelectedVariant[]>;
 }
 
 export interface BillingInformation {

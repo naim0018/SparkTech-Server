@@ -27,20 +27,26 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
       );
       const tier = sortedBulk.find((t) => item.quantity >= t.minQuantity);
       if (tier) {
-        basePrice = tier.price;
+        // If tier.price is much larger than base, it is a bundle total (e.g. 3 for 900)
+        // We calculate the unit price from the bundle total.
+        basePrice = tier.price >= basePrice * 1.5 ? tier.price / tier.minQuantity : tier.price;
       }
     }
 
-    // Add variant prices
+    // Add variant prices (handling multi-selection arrays)
     let unitPrice = basePrice;
     if (item.selectedVariants) {
-      for (const [groupName, selection] of Object.entries(item.selectedVariants)) {
+      for (const [groupName, selections] of Object.entries(item.selectedVariants)) {
         const variantGroup = product.variants?.find((v) => v.group === groupName);
-        const variantItem = variantGroup?.items.find(
-          (i) => i.value === selection.value
-        );
-        if (variantItem?.price) {
-          unitPrice += variantItem.price;
+        const selectionsArr = Array.isArray(selections) ? selections : [selections];
+
+        for (const selection of selectionsArr) {
+          const variantItem = variantGroup?.items.find(
+            (i) => i.value === selection.value
+          );
+          if (variantItem?.price) {
+            unitPrice += variantItem.price;
+          }
         }
       }
     }
@@ -58,10 +64,15 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
   // Calculate delivery
   let deliveryCharge = 0;
   if (!hasFreeShipping) {
-    deliveryCharge = payload.courierCharge === 'insideDhaka' ? (maxDeliveryChargeInside || 80) : (maxDeliveryChargeOutside || 150);
+    deliveryCharge = payload.courierCharge === 'insideDhaka' 
+      ? (maxDeliveryChargeInside || 80) 
+      : (maxDeliveryChargeOutside || 150);
   }
 
-  // Apply discount if any (trusting for now or could validate coupons)
+  // Save the calculated delivery charge
+  payload.deliveryCharge = deliveryCharge;
+
+  // Apply discount if any
   const discount = payload.discount || 0;
 
   // Final validation of totalAmount

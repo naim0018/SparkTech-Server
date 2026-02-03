@@ -9,10 +9,11 @@ const orderItemSchema = new Schema<OrderItem>({
   price: { type: Number, required: true, min: 0 },
   selectedVariants: { 
     type: Map, 
-    of: new Schema({
+    of: [{
       value: { type: String }, // The selected value of the variant
-      price: { type: Number} // The price of the selected variant
-    }), 
+      price: { type: Number }, // The price of the selected variant
+      quantity: { type: Number } // Quantity of this specific variant
+    }], 
     default: {} 
   }
 }, { _id: false });
@@ -42,6 +43,7 @@ const orderSchema = new Schema<OrderInterface>({
   billingInformation: { type: billingInformationSchema, required: true },
   paymentInfo: { type: paymentInfoSchema },
   courierCharge: { type: String, enum: ['insideDhaka', 'outsideDhaka'], required: true },
+  deliveryCharge: { type: Number, required: true },
   cuponCode: { type: String },
   consignment_id: { type: String }
 },
