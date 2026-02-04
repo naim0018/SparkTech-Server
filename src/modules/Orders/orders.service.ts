@@ -12,6 +12,7 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
   let maxDeliveryChargeInside = 0;
   let maxDeliveryChargeOutside = 0;
   let hasFreeShipping = false;
+  let totalComboDiscount = 0;
 
   for (const item of payload.items) {
     const product = await ProductModel.findById(item.product);
@@ -20,40 +21,131 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
     // Determine base price
     let basePrice = product.price.discounted || product.price.regular;
 
-    // Apply bulk pricing
-    if (product.bulkPricing && product.bulkPricing.length > 0) {
-      const sortedBulk = [...product.bulkPricing].sort(
-        (a, b) => b.minQuantity - a.minQuantity
-      );
-      const tier = sortedBulk.find((t) => item.quantity >= t.minQuantity);
-      if (tier) {
-        // If tier.price is much larger than base, it is a bundle total (e.g. 3 for 900)
-        // We calculate the unit price from the bundle total.
-        basePrice = tier.price >= basePrice * 1.5 ? tier.price / tier.minQuantity : tier.price;
-      }
-    }
-
-    // Add variant prices (handling multi-selection arrays)
-    let unitPrice = basePrice;
+    // Calculate item total using Split Variant Logic or Standard Unit Price Logic
+    let itemTotalExcludingBulkDocs = 0;
+    let variantsHaveQuantities = false;
+    
+    // Check if variants have explicit quantities
     if (item.selectedVariants) {
-      for (const [groupName, selections] of Object.entries(item.selectedVariants)) {
-        const variantGroup = product.variants?.find((v) => v.group === groupName);
-        const selectionsArr = Array.isArray(selections) ? selections : [selections];
-
-        for (const selection of selectionsArr) {
-          const variantItem = variantGroup?.items.find(
-            (i) => i.value === selection.value
-          );
-          if (variantItem?.price) {
-            unitPrice += variantItem.price;
+       for (const selections of Object.values(item.selectedVariants)) {
+          const arr = Array.isArray(selections) ? selections : [selections];
+          for (const s of arr) {
+             if (s.quantity && s.quantity > 0) {
+                variantsHaveQuantities = true;
+                break;
+             }
           }
-        }
-      }
+          if (variantsHaveQuantities) break;
+       }
     }
 
-    // Force the price in the payload to match DB reality
-    item.price = unitPrice;
-    calculatedSubtotal += unitPrice * item.quantity;
+    if (variantsHaveQuantities) {
+       // SPLIT VARIANT LOGIC: Sum of (VariantPrice * VariantQty) + (RemainingQty * BasePrice)
+       let totalVariantQty = 0;
+       
+       if (item.selectedVariants) {
+          for (const [groupName, selections] of Object.entries(item.selectedVariants)) {
+             const variantGroup = product.variants?.find((v) => v.group === groupName);
+             const selectionsArr = Array.isArray(selections) ? selections : [selections];
+             
+             for (const selection of selectionsArr) {
+                const variantItem = variantGroup?.items.find((i) => i.value === selection.value);
+                const qty = selection.quantity || 0; // Should exist if we are in this mode
+                
+                if (qty > 0) {
+                   // If variant has specific price, use it. If 0/undefined, assumes it uses Base Price.
+                   // NOTE: If variant.price is 0, it means it costs the Base Price (e.g. "Quantity" variant).
+                   // If variant.price > 0, it replaces Base Price (e.g. "Red" @ 350).
+                   const confirmPrice = (variantItem?.price && variantItem.price > 0) 
+                                        ? variantItem.price 
+                                        : basePrice;
+                                        
+                   itemTotalExcludingBulkDocs += confirmPrice * qty;
+                   totalVariantQty += qty;
+                }
+             }
+          }
+       }
+       
+       // Handle remaining quantity (if any) that has no specific variant assigned
+       if (item.quantity > totalVariantQty) {
+          itemTotalExcludingBulkDocs += basePrice * (item.quantity - totalVariantQty);
+       }
+       
+       // Set unit price for DB record as average
+       item.price = itemTotalExcludingBulkDocs / item.quantity;
+    
+    } else {
+       // STANDARD LOGIC: Unit Price = Base + Add-ons
+       let unitPrice = basePrice;
+       if (item.selectedVariants) {
+         for (const [groupName, selections] of Object.entries(item.selectedVariants)) {
+           const variantGroup = product.variants?.find((v) => v.group === groupName);
+           const selectionsArr = Array.isArray(selections) ? selections : [selections];
+   
+           for (const selection of selectionsArr) {
+             const variantItem = variantGroup?.items.find(
+               (i) => i.value === selection.value
+             );
+             if (variantItem?.price) {
+               // In standard mode, variant prices are typically additive or replacement?
+               // Based on previous code, they were additive (+=). 
+               // Assuming standard mode implies "Add-ons".
+               unitPrice += variantItem.price;
+             }
+           }
+         }
+       }
+       item.price = unitPrice;
+       itemTotalExcludingBulkDocs = unitPrice * item.quantity;
+    }
+
+    const itemSubtotal = itemTotalExcludingBulkDocs;
+    calculatedSubtotal += itemSubtotal;
+
+    // Apply Combo/Bulk Pricing Logic (Matching Frontend)
+    // Normalize comboPricing and bulkPricing into a single tiers array
+    // Note: Backend Product interface might need to be checked for comboPricing existence
+    // Assuming product object has specific fields, we merge them similarly to frontend
+    const comboPricing = (product.toObject() as any).comboPricing || [];
+    const bulkPricing = (product.toObject() as any).bulkPricing || [];
+    
+    // Merge bulkPricing into comboPricing format if needed
+    if (bulkPricing.length > 0) {
+       bulkPricing.forEach((bp: any) => {
+        // If bp.price is a total for the bundle (e.g. 3 for 900), 
+        // convert it to a per-product discount
+        const unitPriceInTier = bp.price >= basePrice * 1.5 ? bp.price / bp.minQuantity : bp.price;
+        const perProductDiscount = basePrice - unitPriceInTier;
+        
+        if (perProductDiscount > 0) {
+          comboPricing.push({
+            minQuantity: bp.minQuantity,
+            discount: perProductDiscount,
+            discountType: 'per_product'
+          });
+        }
+      });
+    }
+
+    if (comboPricing.length > 0) {
+       // 1. Sort tiers by minQuantity descending
+       const sortedTiers = [...comboPricing].sort((a: any, b: any) => b.minQuantity - a.minQuantity);
+       // 2. Find the first applicable tier
+       const applicableTier = sortedTiers.find((tier: any) => item.quantity >= tier.minQuantity);
+       
+       if (applicableTier) {
+         let discountAmount = 0;
+         if (applicableTier.discountType === "per_product") {
+           discountAmount = applicableTier.discount * item.quantity;
+         } else {
+           discountAmount = applicableTier.discount; // Total discount
+         }
+         // Ensure discount doesn't exceed total price
+         discountAmount = Math.min(discountAmount, itemSubtotal);
+         totalComboDiscount += discountAmount;
+       }
+    }
 
     // Track delivery charges
     if (product.additionalInfo?.freeShipping) hasFreeShipping = true;
@@ -72,11 +164,15 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
   // Save the calculated delivery charge
   payload.deliveryCharge = deliveryCharge;
 
-  // Apply discount if any
-  const discount = payload.discount || 0;
+  // Apply discount (Coupon + Combo)
+  // payload.discount comes from frontend (Coupon discount), we add Combo discount to it
+  const couponDiscount = payload.discount || 0;
+  // We update payload.discount to reflect total savings (Coupon + Combo) so it shows on Order Details
+  payload.discount = couponDiscount + totalComboDiscount;
 
   // Final validation of totalAmount
-  payload.totalAmount = calculatedSubtotal + deliveryCharge - discount;
+  // Total = Subtotal + Delivery - All Discounts
+  payload.totalAmount = calculatedSubtotal + deliveryCharge - payload.discount;
 
   const result = await OrderModel.create(payload);
   return result;
