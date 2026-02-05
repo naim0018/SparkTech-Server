@@ -40,7 +40,7 @@ const trackOrder = catchAsync(async (req, res) => {
   let result: any[] = [];
   
   if (orderId) {
-    const order = await OrderService.getOrderByIdData(req, orderId as string);
+    const order = await OrderService.trackOrderByOrderIdData(req, orderId as string);
     result = order ? [order] : [];
   } else if (consignmentId) {
     const order = await OrderService.trackOrderByConsignmentIdData(req, consignmentId as string);

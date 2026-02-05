@@ -1,8 +1,21 @@
 import { Request } from "express";
+import mongoose from "mongoose";
 import { OrderInterface } from "./orders.interface";
 import { OrderSchema } from "./orders.model";
 import { ProductSchema } from "../Product/product.model";
 import { getTenantModel } from "../../app/utils/getTenantModel";
+
+// Helper to generate Unique Readable ID
+const generateOrderId = async (OrderModel: any): Promise<string> => {
+  const lastOrder = await OrderModel.findOne({}, { orderId: 1 }).sort({ createdAt: -1 });
+  let newId = 1001;
+  if (lastOrder && lastOrder.orderId) {
+    const parts = lastOrder.orderId.split('-');
+    if (parts.length === 3) newId = parseInt(parts[2]) + 1;
+  }
+  const year = new Date().getFullYear();
+  return `ORD-${year}-${newId}`;
+};
 
 const addOrderData = async (req: Request, payload: OrderInterface) => {
   const OrderModel = getTenantModel(req, 'Order', OrderSchema);
@@ -108,25 +121,9 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
     // Note: Backend Product interface might need to be checked for comboPricing existence
     // Assuming product object has specific fields, we merge them similarly to frontend
     const comboPricing = (product.toObject() as any).comboPricing || [];
-    const bulkPricing = (product.toObject() as any).bulkPricing || [];
     
-    // Merge bulkPricing into comboPricing format if needed
-    if (bulkPricing.length > 0) {
-       bulkPricing.forEach((bp: any) => {
-        // If bp.price is a total for the bundle (e.g. 3 for 900), 
-        // convert it to a per-product discount
-        const unitPriceInTier = bp.price >= basePrice * 1.5 ? bp.price / bp.minQuantity : bp.price;
-        const perProductDiscount = basePrice - unitPriceInTier;
-        
-        if (perProductDiscount > 0) {
-          comboPricing.push({
-            minQuantity: bp.minQuantity,
-            discount: perProductDiscount,
-            discountType: 'per_product'
-          });
-        }
-      });
-    }
+    // Legacy Bulk Pricing Logic REMOVED per user request
+    // We now strictly use comboPricing tiers
 
     if (comboPricing.length > 0) {
        // 1. Sort tiers by minQuantity descending
@@ -161,18 +158,28 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
       : (maxDeliveryChargeOutside || 150);
   }
 
-  // Save the calculated delivery charge
-  payload.deliveryCharge = deliveryCharge;
-
   // Apply discount (Coupon + Combo)
-  // payload.discount comes from frontend (Coupon discount), we add Combo discount to it
   const couponDiscount = payload.discount || 0;
-  // We update payload.discount to reflect total savings (Coupon + Combo) so it shows on Order Details
-  payload.discount = couponDiscount + totalComboDiscount;
+  const totalDiscount = couponDiscount + totalComboDiscount;
 
-  // Final validation of totalAmount
-  // Total = Subtotal + Delivery - All Discounts
-  payload.totalAmount = calculatedSubtotal + deliveryCharge - payload.discount;
+  // Generate orderId
+  const orderId = await generateOrderId(OrderModel);
+
+  // Set all required fields on payload
+  payload.orderId = orderId;
+  payload.subTotal = calculatedSubtotal;
+  payload.totalDiscount = totalDiscount;
+  payload.deliveryCharge = deliveryCharge;
+  payload.totalAmount = calculatedSubtotal + deliveryCharge - totalDiscount;
+  payload.status = payload.status || 'pending';
+  payload.statusHistory = [{
+    status: 'pending',
+    date: new Date(),
+    comment: 'Order placed successfully'
+  }];
+  payload.comboInfo = totalComboDiscount > 0 
+    ? `Total combo savings: ৳${totalComboDiscount}` 
+    : undefined;
 
   const result = await OrderModel.create(payload);
   return result;
@@ -196,6 +203,7 @@ const getAllOrdersData = async (req: Request, query: Record<string, unknown>) =>
           { 'billingInformation.name': { $regex: search, $options: 'i' } },
           { 'billingInformation.phone': { $regex: search, $options: 'i' } },
           { consignment_id: { $regex: search, $options: 'i' } },
+          { orderId: { $regex: search, $options: 'i' } }, // NEW: Search by orderId
       ];
       // Check if search looks like a valid MongoDB ObjectId
       if (typeof search === 'string' && /^[0-9a-fA-F]{24}$/.test(search)) {
@@ -271,12 +279,20 @@ const trackOrderByConsignmentIdData = async (req: Request, consignmentId: string
   return result;
 };
 
+const trackOrderByOrderIdData = async (req: Request, orderId: string) => {
+  const OrderModel = getTenantModel(req, 'Order', OrderSchema);
+  const result = await OrderModel.findOne({ orderId: orderId })
+    .populate("items.product", "basicInfo.title price bulkPricing basicInfo.description basicInfo.brand basicInfo.category basicInfo.subcategory variants images");
+  return result;
+};
+
 export const OrderService = {
   addOrderData,
   getAllOrdersData,
   getOrderByIdData,
   trackOrderByPhoneData,
   trackOrderByConsignmentIdData,
+  trackOrderByOrderIdData,
   updateOrderDataById,
   deleteOrderDataById,
 };

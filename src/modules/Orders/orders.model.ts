@@ -1,21 +1,34 @@
 import { Schema, model } from 'mongoose';
-import { BillingInformation, OrderInterface, OrderItem, PaymentInfo } from './orders.interface';
+import { BillingInformation, OrderInterface, OrderItem, PaymentInfo, StatusHistoryEntry } from './orders.interface';
 
 const orderItemSchema = new Schema<OrderItem>({
-  product: { type: Schema.Types.ObjectId, ref: 'Product', required: true }, // Reference to Product model
-  image: { type: String, required: true },
+  product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+  image: { type: String, required: true }, // Main product image or specific variant image
   quantity: { type: Number, required: true, min: 1 },
-  itemKey: { type: String, required: true },
-  price: { type: Number, required: true, min: 0 },
+  itemKey: { type: String, required: true }, // Unique key for frontend mapped lists
+  
+  // Pricing & Financials per Item
+  price: { type: Number, required: true, min: 0 }, // The Unit Price at moment of purchase
+  regularPrice: { type: Number }, // The original price before any discount (for display)
+  discountAmount: { type: Number, default: 0 }, // Total discount applied to this line item
+  
   selectedVariants: { 
     type: Map, 
     of: [{
-      value: { type: String }, // The selected value of the variant
-      price: { type: Number }, // The price of the selected variant
-      quantity: { type: Number } // Quantity of this specific variant
+      value: { type: String },
+      price: { type: Number }, // Variant specific price
+      quantity: { type: Number },
+      image: { type: String } // Variant specific image
     }], 
     default: {} 
   }
+}, { _id: false });
+
+const statusHistorySchema = new Schema<StatusHistoryEntry>({
+  status: { type: String, required: true },
+  date: { type: Date, default: Date.now },
+  updatedBy: { type: String }, // User ID or 'System'
+  comment: { type: String }
 }, { _id: false });
 
 const paymentInfoSchema = new Schema<PaymentInfo>({
@@ -37,13 +50,24 @@ const billingInformationSchema = new Schema<BillingInformation>({
 });
 
 const orderSchema = new Schema<OrderInterface>({
+  orderId: { type: String, required: true, unique: true }, // Readable ID: ORD-2024-001
   items: { type: [orderItemSchema], required: true, validate: [arrayMinLength, 'Order must contain at least one item'] },
-  totalAmount: { type: Number, required: true, min: 0 },
-  status: { type: String, required: true },
+  
+  // Financials
+  subTotal: { type: Number, required: true, min: 0 }, // Total before discounts
+  totalDiscount: { type: Number, default: 0 }, // Combo + Coupon savings
+  deliveryCharge: { type: Number, required: true },
+  totalAmount: { type: Number, required: true, min: 0 }, // Final Payable (Sub - Disc + Del)
+  
+  // Meta
+  status: { type: String, required: true, default: 'pending' },
+  statusHistory: { type: [statusHistorySchema], default: [] },
+  
+  // Info
+  comboInfo: { type: String }, // Description of combo applied
   billingInformation: { type: billingInformationSchema, required: true },
   paymentInfo: { type: paymentInfoSchema },
   courierCharge: { type: String, enum: ['insideDhaka', 'outsideDhaka'], required: true },
-  deliveryCharge: { type: Number, required: true },
   cuponCode: { type: String },
   consignment_id: { type: String }
 },
@@ -53,9 +77,6 @@ const orderSchema = new Schema<OrderInterface>({
 function arrayMinLength(val: any[]) {
   return val.length > 0;
 }
-
-
-
 
 export { orderSchema as OrderSchema };
 const OrderModel = model<OrderInterface>('Order', orderSchema);

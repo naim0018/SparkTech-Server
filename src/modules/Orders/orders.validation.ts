@@ -1,19 +1,31 @@
 import { z } from 'zod';
 
-// Order Item Schema
+// Selected Variant Schema
 const SelectedVariantSchema = z.object({
-  value: z.string().optional(),
-  price: z.number().nonnegative().optional(),
-  quantity: z.number().int().positive().optional()
+  value: z.string(),
+  price: z.number().nonnegative(),
+  quantity: z.number().int().positive().optional(),
+  image: z.string().optional()
 });
 
+// Order Item Schema
 const OrderItemSchema = z.object({
   product: z.union([z.string(), z.number()]),
   quantity: z.number().int().positive(),
   price: z.number().positive(),
+  regularPrice: z.number().positive().optional(),
+  discountAmount: z.number().nonnegative().optional(),
   image: z.string(),
   itemKey: z.string(),
   selectedVariants: z.record(z.array(SelectedVariantSchema)).optional()
+});
+
+// Status History Schema
+const StatusHistorySchema = z.object({
+  status: z.string(),
+  date: z.date().optional(),
+  updatedBy: z.string().optional(),
+  comment: z.string().optional()
 });
 
 // Payment Information Schema
@@ -33,21 +45,34 @@ const BillingInformationSchema = z.object({
   phone: z.string().min(1),
   address: z.string().min(1),
   country: z.string().min(1),
-  paymentMethod: z.string().min(1),
+  paymentMethod: z.string().min(1).optional(),
   notes: z.string().optional()
 });
 
 // Main Order Schema
+// NOTE: Backend calculates subTotal, totalDiscount, deliveryCharge, totalAmount
+// Frontend only sends: items, billingInformation, courierCharge, optional paymentInfo/cuponCode
 const orderSchemaZod = z.object({
   body: z.object({
     items: z.array(OrderItemSchema).nonempty(),
-    totalAmount: z.number().nonnegative(),
-    status: z.string().min(1),
     billingInformation: BillingInformationSchema,
-    paymentInfo: PaymentInfoSchema.optional(),
     courierCharge: z.enum(['insideDhaka', 'outsideDhaka']),
-    deliveryCharge: z.number().nonnegative(),
-    cuponCode: z.string().optional()
+    
+    // Optional fields (either frontend sends or backend generates)
+    paymentInfo: PaymentInfoSchema.optional(),
+    cuponCode: z.string().optional(),
+    discount: z.number().nonnegative().optional(),
+    
+    // Backend-calculated fields (optional in validation, backend will set them)
+    orderId: z.string().optional(),
+    subTotal: z.number().nonnegative().optional(),
+    totalDiscount: z.number().nonnegative().optional(),
+    deliveryCharge: z.number().nonnegative().optional(),
+    totalAmount: z.number().nonnegative().optional(),
+    status: z.string().optional(),
+    statusHistory: z.array(StatusHistorySchema).optional(),
+    comboInfo: z.string().optional(),
+    consignment_id: z.string().optional()
   })
 });
 

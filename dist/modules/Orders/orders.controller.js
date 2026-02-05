@@ -50,7 +50,7 @@ const trackOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     const { phone, consignmentId, orderId } = req.query;
     let result = [];
     if (orderId) {
-        const order = yield orders_service_1.OrderService.getOrderByIdData(req, orderId);
+        const order = yield orders_service_1.OrderService.trackOrderByOrderIdData(req, orderId);
         result = order ? [order] : [];
     }
     else if (consignmentId) {

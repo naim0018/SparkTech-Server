@@ -21,13 +21,13 @@ const DEFAULT_THEMES = [
         isPreset: true,
         className: "",
         variables: {
-            '--color-brand-50': '#eef2ff',
-            '--color-brand-100': '#e0e7ff',
-            '--color-brand-200': '#c7d2fe',
-            '--color-brand-500': '#6366f1',
-            '--color-brand-600': '#4f46e5',
-            '--color-brand-700': '#4338ca',
-            '--color-brand-shadow': 'rgba(79, 70, 229, 0.15)'
+            '--brand-50': '#eef2ff',
+            '--brand-100': '#e0e7ff',
+            '--brand-200': '#c7d2fe',
+            '--brand-500': '#6366f1',
+            '--brand-600': '#4f46e5',
+            '--brand-700': '#4338ca',
+            '--brand-shadow': 'rgba(79, 70, 229, 0.15)'
         }
     },
     {
@@ -37,13 +37,13 @@ const DEFAULT_THEMES = [
         isPreset: true,
         className: "theme-emerald",
         variables: {
-            '--color-brand-50': '#ecfdf5',
-            '--color-brand-100': '#d1fae5',
-            '--color-brand-200': '#a7f3d0',
-            '--color-brand-500': '#10b981',
-            '--color-brand-600': '#059669',
-            '--color-brand-700': '#047857',
-            '--color-brand-shadow': 'rgba(5, 150, 105, 0.15)'
+            '--brand-50': '#ecfdf5',
+            '--brand-100': '#d1fae5',
+            '--brand-200': '#a7f3d0',
+            '--brand-500': '#10b981',
+            '--brand-600': '#059669',
+            '--brand-700': '#047857',
+            '--brand-shadow': 'rgba(5, 150, 105, 0.15)'
         }
     },
     {
@@ -53,13 +53,13 @@ const DEFAULT_THEMES = [
         isPreset: true,
         className: "theme-rose",
         variables: {
-            '--color-brand-50': '#fff1f2',
-            '--color-brand-100': '#ffe4e6',
-            '--color-brand-200': '#fecdd3',
-            '--color-brand-500': '#f43f5e',
-            '--color-brand-600': '#e11d48',
-            '--color-brand-700': '#be123c',
-            '--color-brand-shadow': 'rgba(225, 29, 72, 0.15)'
+            '--brand-50': '#fff1f2',
+            '--brand-100': '#ffe4e6',
+            '--brand-200': '#fecdd3',
+            '--brand-500': '#f43f5e',
+            '--brand-600': '#e11d48',
+            '--brand-700': '#be123c',
+            '--brand-shadow': 'rgba(225, 29, 72, 0.15)'
         }
     },
     {
@@ -69,13 +69,13 @@ const DEFAULT_THEMES = [
         isPreset: true,
         className: "theme-violet",
         variables: {
-            '--color-brand-50': '#f5f3ff',
-            '--color-brand-100': '#ede9fe',
-            '--color-brand-200': '#ddd6fe',
-            '--color-brand-500': '#8b5cf6',
-            '--color-brand-600': '#7c3aed',
-            '--color-brand-700': '#6d28d9',
-            '--color-brand-shadow': 'rgba(124, 58, 237, 0.15)'
+            '--brand-50': '#f5f3ff',
+            '--brand-100': '#ede9fe',
+            '--brand-200': '#ddd6fe',
+            '--brand-500': '#8b5cf6',
+            '--brand-600': '#7c3aed',
+            '--brand-700': '#6d28d9',
+            '--brand-shadow': 'rgba(124, 58, 237, 0.15)'
         }
     },
     {
@@ -85,13 +85,13 @@ const DEFAULT_THEMES = [
         isPreset: true,
         className: "theme-amber",
         variables: {
-            '--color-brand-50': '#fffbeb',
-            '--color-brand-100': '#fef3c7',
-            '--color-brand-200': '#fde68a',
-            '--color-brand-500': '#f59e0b',
-            '--color-brand-600': '#d97706',
-            '--color-brand-700': '#b45309',
-            '--color-brand-shadow': 'rgba(217, 119, 6, 0.15)'
+            '--brand-50': '#fffbeb',
+            '--brand-100': '#fef3c7',
+            '--brand-200': '#fde68a',
+            '--brand-500': '#f59e0b',
+            '--brand-600': '#d97706',
+            '--brand-700': '#b45309',
+            '--brand-shadow': 'rgba(217, 119, 6, 0.15)'
         }
     }
 ];
