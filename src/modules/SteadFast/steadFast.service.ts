@@ -37,7 +37,7 @@ const createOrder = async (req: Request, orderData: any) => {
            throw new AppError(httpStatus.NOT_FOUND, "Order not found");
        }
        payload = {
-           invoice: localOrder._id.toString(),
+           invoice: localOrder.orderId || localOrder._id.toString(), // Use orderId (human-readable) with fallback
            recipient_name: (localOrder as any).billingInformation.name,
            recipient_phone: (localOrder as any).billingInformation.phone,
            recipient_address: (localOrder as any).billingInformation.address,
