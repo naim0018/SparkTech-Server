@@ -6,6 +6,7 @@ const steadfast_controller_1 = require("./steadfast.controller");
 const router = (0, express_1.Router)();
 router.post("/create-order", steadfast_controller_1.SteadfastController.createOrder);
 router.post("/bulk-create-order", steadfast_controller_1.SteadfastController.bulkCreateOrder);
+router.post("/status/bulk", steadfast_controller_1.SteadfastController.bulkCheckDeliveryStatus);
 router.get("/status/:id", steadfast_controller_1.SteadfastController.checkDeliveryStatus);
 router.get("/balance", steadfast_controller_1.SteadfastController.getCurrentBalance);
 router.get("/return-requests", steadfast_controller_1.SteadfastController.getReturnRequests);
