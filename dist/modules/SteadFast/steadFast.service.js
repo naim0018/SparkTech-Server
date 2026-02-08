@@ -19,7 +19,7 @@ const AppError_1 = __importDefault(require("../../app/error/AppError"));
 const tracking_model_1 = require("../TrackingIntegrations/tracking.model");
 const orders_model_1 = require("../Orders/orders.model");
 const getTenantModel_1 = require("../../app/utils/getTenantModel");
-const BASE_URL = " https://portal.packzy.com/api/v1";
+const BASE_URL = "https://portal.packzy.com/api/v1";
 const getHeaders = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const Tracking = (0, getTenantModel_1.getTenantModel)(req, 'Tracking', tracking_model_1.trackingSchema);
     const settings = yield Tracking.findOne();
@@ -33,7 +33,7 @@ const getHeaders = (req) => __awaiter(void 0, void 0, void 0, function* () {
     };
 });
 const createOrder = (req, orderData) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g;
     const headers = yield getHeaders(req);
     const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
     // If orderId is provided, we fetch and update the local order
@@ -81,7 +81,9 @@ const createOrder = (req, orderData) => __awaiter(void 0, void 0, void 0, functi
     catch (error) {
         if (error instanceof AppError_1.default)
             throw error;
-        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, ((_f = (_e = error.response) === null || _e === void 0 ? void 0 : _e.data) === null || _f === void 0 ? void 0 : _f.message) || error.message || "Failed to create order in Steadfast");
+        const statusCode = ((_e = error.response) === null || _e === void 0 ? void 0 : _e.status) || http_status_1.default.BAD_REQUEST;
+        const message = ((_g = (_f = error.response) === null || _f === void 0 ? void 0 : _f.data) === null || _g === void 0 ? void 0 : _g.message) || error.message || "Failed to create order in Steadfast";
+        throw new AppError_1.default(statusCode, message);
     }
 });
 const bulkCreateOrder = (req, orders) => __awaiter(void 0, void 0, void 0, function* () {
@@ -119,11 +121,22 @@ const checkDeliveryStatus = (req, consignmentId) => __awaiter(void 0, void 0, vo
     catch (error) {
         if (error instanceof AppError_1.default)
             throw error;
-        if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 404) {
-            throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Consignment ID not found");
-        }
-        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, ((_c = (_b = error.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.message) || error.message || "Failed to fetch delivery status");
+        const statusCode = ((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) || http_status_1.default.BAD_REQUEST;
+        const message = ((_c = (_b = error.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.message) || error.message || "Failed to fetch delivery status";
+        throw new AppError_1.default(statusCode, message);
     }
+});
+const bulkCheckDeliveryStatus = (req, consignmentIds) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!consignmentIds || consignmentIds.length === 0)
+        return [];
+    // Use Promise.allSettled to handle individual failures without failing the whole request
+    const results = yield Promise.allSettled(consignmentIds.map((id) => checkDeliveryStatus(req, id)));
+    return results.map((result, index) => ({
+        consignment_id: consignmentIds[index],
+        status: result.status === 'fulfilled' ? 'success' : 'failed',
+        data: result.status === 'fulfilled' ? result.value : null,
+        error: result.status === 'rejected' ? result.reason : null
+    }));
 });
 const getCurrentBalance = (req) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
@@ -166,6 +179,7 @@ exports.SteadfastService = {
     createOrder,
     bulkCreateOrder,
     checkDeliveryStatus,
+    bulkCheckDeliveryStatus,
     getCurrentBalance,
     getReturnRequests,
     getPoliceStations

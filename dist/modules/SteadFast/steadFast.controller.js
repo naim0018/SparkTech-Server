@@ -45,6 +45,16 @@ const checkDeliveryStatus = (0, catchAsync_1.default)((req, res) => __awaiter(vo
         data: result,
     });
 }));
+const bulkCheckDeliveryStatus = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { consignmentIds } = req.body;
+    const result = yield steadfast_service_1.SteadfastService.bulkCheckDeliveryStatus(req, consignmentIds);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Bulk delivery status check completed",
+        data: result,
+    });
+}));
 const getCurrentBalance = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield steadfast_service_1.SteadfastService.getCurrentBalance(req);
     (0, sendResponse_1.default)(res, {
@@ -76,6 +86,7 @@ exports.SteadfastController = {
     createOrder,
     bulkCreateOrder,
     checkDeliveryStatus,
+    bulkCheckDeliveryStatus,
     getCurrentBalance,
     getReturnRequests,
     getPoliceStations
