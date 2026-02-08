@@ -6,7 +6,7 @@ import { trackingSchema } from "../TrackingIntegrations/tracking.model";
 import { OrderSchema } from "../Orders/orders.model";
 import { getTenantModel } from "../../app/utils/getTenantModel";
 
-const BASE_URL = " https://portal.packzy.com/api/v1";
+const BASE_URL = "https://portal.packzy.com/api/v1";
 
 const getHeaders = async (req: Request) => {
   const Tracking = getTenantModel(req, 'Tracking', trackingSchema);
@@ -73,10 +73,11 @@ const createOrder = async (req: Request, orderData: any) => {
     return response.data;
   } catch (error: any) {
     if (error instanceof AppError) throw error;
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      error.response?.data?.message || error.message || "Failed to create order in Steadfast"
-    );
+    
+    const statusCode = error.response?.status || httpStatus.BAD_REQUEST;
+    const message = error.response?.data?.message || error.message || "Failed to create order in Steadfast";
+
+    throw new AppError(statusCode, message);
   }
 };
 
@@ -122,14 +123,28 @@ const checkDeliveryStatus = async (req: Request, consignmentId: string) => {
     return data;
   } catch (error: any) {
     if (error instanceof AppError) throw error;
-    if(error.response?.status === 404){
-           throw new AppError(httpStatus.NOT_FOUND, "Consignment ID not found");
-    }
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      error.response?.data?.message || error.message || "Failed to fetch delivery status"
-    );
+    
+    const statusCode = error.response?.status || httpStatus.BAD_REQUEST;
+    const message = error.response?.data?.message || error.message || "Failed to fetch delivery status";
+
+    throw new AppError(statusCode, message);
   }
+};
+
+const bulkCheckDeliveryStatus = async (req: Request, consignmentIds: string[]) => {
+  if (!consignmentIds || consignmentIds.length === 0) return [];
+  
+  // Use Promise.allSettled to handle individual failures without failing the whole request
+  const results = await Promise.allSettled(
+    consignmentIds.map((id) => checkDeliveryStatus(req, id))
+  );
+
+  return results.map((result, index) => ({
+    consignment_id: consignmentIds[index],
+    status: result.status === 'fulfilled' ? 'success' : 'failed',
+    data: result.status === 'fulfilled' ? (result as PromiseFulfilledResult<any>).value : null,
+    error: result.status === 'rejected' ? (result as PromiseRejectedResult).reason : null
+  }));
 };
 
 const getCurrentBalance = async (req: Request) => {
@@ -179,6 +194,7 @@ export const SteadfastService = {
   createOrder,
   bulkCreateOrder,
   checkDeliveryStatus,
+  bulkCheckDeliveryStatus,
   getCurrentBalance,
   getReturnRequests,
   getPoliceStations

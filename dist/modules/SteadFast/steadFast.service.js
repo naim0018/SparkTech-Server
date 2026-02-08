@@ -47,7 +47,7 @@ const createOrder = (req, orderData) => __awaiter(void 0, void 0, void 0, functi
             throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Order not found");
         }
         payload = {
-            invoice: localOrder._id.toString(),
+            invoice: localOrder.orderId || localOrder._id.toString(), // Use orderId (human-readable) with fallback
             recipient_name: localOrder.billingInformation.name,
             recipient_phone: localOrder.billingInformation.phone,
             recipient_address: localOrder.billingInformation.address,

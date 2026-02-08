@@ -36,6 +36,17 @@ const checkDeliveryStatus = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const bulkCheckDeliveryStatus = catchAsync(async (req: Request, res: Response) => {
+  const { consignmentIds } = req.body;
+  const result = await SteadfastService.bulkCheckDeliveryStatus(req, consignmentIds);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Bulk delivery status check completed",
+    data: result,
+  });
+});
+
 const getCurrentBalance = catchAsync(async (req: Request, res: Response) => {
   const result = await SteadfastService.getCurrentBalance(req);
   sendResponse(res, {
@@ -70,6 +81,7 @@ export const SteadfastController = {
   createOrder,
   bulkCreateOrder,
   checkDeliveryStatus,
+  bulkCheckDeliveryStatus,
   getCurrentBalance,
   getReturnRequests,
   getPoliceStations
