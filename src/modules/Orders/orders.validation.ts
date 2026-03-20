@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Selected Variant Schema
 const SelectedVariantSchema = z.object({
   value: z.string(),
   price: z.number().nonnegative(),
   quantity: z.number().int().positive().optional(),
-  image: z.string().optional()
+  image: z.string().optional(),
 });
 
 // Order Item Schema
@@ -17,7 +17,15 @@ const OrderItemSchema = z.object({
   discountAmount: z.number().nonnegative().optional(),
   image: z.string(),
   itemKey: z.string(),
-  selectedVariants: z.record(z.array(SelectedVariantSchema)).optional()
+  selectedVariants: z
+    .record(
+      z.union([
+        z.array(SelectedVariantSchema),
+        // Transform single object into an array for compatibility
+        SelectedVariantSchema.transform((val) => [val]),
+      ]),
+    )
+    .optional(),
 });
 
 // Status History Schema
@@ -25,17 +33,21 @@ const StatusHistorySchema = z.object({
   status: z.string(),
   date: z.date().optional(),
   updatedBy: z.string().optional(),
-  comment: z.string().optional()
+  comment: z.string().optional(),
 });
 
 // Payment Information Schema
 const PaymentInfoSchema = z.object({
-  paymentMethod: z.enum(['cash on delivery', 'bkash']).default('cash on delivery'),
-  status: z.enum(['pending', 'processing', 'shipped', 'completed', 'cancelled']).default('pending'),
+  paymentMethod: z
+    .enum(["cash on delivery", "bkash"])
+    .default("cash on delivery"),
+  status: z
+    .enum(["pending", "processing", "shipped", "completed", "cancelled"])
+    .default("pending"),
   transactionId: z.string().optional(),
   paymentDate: z.string().optional(),
   amount: z.number().positive(),
-  bkashNumber: z.string().optional()
+  bkashNumber: z.string().optional(),
 });
 
 // Billing Information Schema
@@ -46,7 +58,7 @@ const BillingInformationSchema = z.object({
   address: z.string().min(1),
   country: z.string().min(1),
   paymentMethod: z.string().min(1).optional(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
 });
 
 // Main Order Schema
@@ -56,13 +68,13 @@ const orderSchemaZod = z.object({
   body: z.object({
     items: z.array(OrderItemSchema).nonempty(),
     billingInformation: BillingInformationSchema,
-    courierCharge: z.enum(['insideDhaka', 'outsideDhaka']),
-    
+    courierCharge: z.enum(["insideDhaka", "outsideDhaka"]),
+
     // Optional fields (either frontend sends or backend generates)
     paymentInfo: PaymentInfoSchema.optional(),
     cuponCode: z.string().optional(),
     discount: z.number().nonnegative().optional(),
-    
+
     // Backend-calculated fields (optional in validation, backend will set them)
     orderId: z.string().optional(),
     subTotal: z.number().nonnegative().optional(),
@@ -72,18 +84,19 @@ const orderSchemaZod = z.object({
     status: z.string().optional(),
     statusHistory: z.array(StatusHistorySchema).optional(),
     comboInfo: z.string().optional(),
-    consignment_id: z.string().optional()
-  })
+    consignment_id: z.string().optional(),
+  }),
 });
 
-const updateOrderSchemaZod = z.object({
-  body: orderSchemaZod.shape.body.partial()
-}).refine(
-  (data) => Object.keys(data.body || {}).length > 0,
-  { message: "At least one field must be updated." }
-);
+const updateOrderSchemaZod = z
+  .object({
+    body: orderSchemaZod.shape.body.partial(),
+  })
+  .refine((data) => Object.keys(data.body || {}).length > 0, {
+    message: "At least one field must be updated.",
+  });
 
 export const OrderZodValidation = {
   orderSchemaZod,
-  updateOrderSchemaZod
+  updateOrderSchemaZod,
 };
