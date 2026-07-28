@@ -17,6 +17,26 @@ const generateOrderId = async (OrderModel: any): Promise<string> => {
   return `ORD-${year}-${newId}`;
 };
 
+// Helper to resolve unit price for a variant selection
+const resolveSelectionUnitPrice = (selection: any, product: any, basePrice: number): number => {
+  if (selection.price && selection.price > 0) {
+    return selection.price;
+  }
+  const baseVariantName = product.price?.baseVariantName;
+  if (selection.value === baseVariantName) {
+    return basePrice;
+  }
+  if (product.variants && product.variants.length > 0) {
+    for (const group of product.variants) {
+      const found = group.items?.find((i: any) => i.value === selection.value);
+      if (found && found.price && found.price > 0) {
+        return found.price;
+      }
+    }
+  }
+  return basePrice;
+};
+
 const addOrderData = async (req: Request, payload: OrderInterface) => {
   const OrderModel = getTenantModel(req, 'Order', OrderSchema);
   const ProductModel = getTenantModel(req, 'Product', ProductSchema);
@@ -60,21 +80,13 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
        
        if (item.selectedVariants) {
           for (const [groupName, selections] of Object.entries(item.selectedVariants)) {
-             const variantGroup = product.variants?.find((v) => v.group === groupName);
              const selectionsArr = Array.isArray(selections) ? selections : [selections];
              
              for (const selection of selectionsArr) {
-                const variantItem = variantGroup?.items.find((i) => i.value === selection.value);
-                const qty = selection.quantity || 0; // Should exist if we are in this mode
+                const qty = selection.quantity || 0;
                 
                 if (qty > 0) {
-                   // If variant has specific price, use it. If 0/undefined, assumes it uses Base Price.
-                   // NOTE: If variant.price is 0, it means it costs the Base Price (e.g. "Quantity" variant).
-                   // If variant.price > 0, it replaces Base Price (e.g. "Red" @ 350).
-                   const confirmPrice = (variantItem?.price && variantItem.price > 0) 
-                                        ? variantItem.price 
-                                        : basePrice;
-                                        
+                   const confirmPrice = resolveSelectionUnitPrice(selection, product, basePrice);
                    itemTotalExcludingBulkDocs += confirmPrice * qty;
                    totalVariantQty += qty;
                 }
@@ -96,15 +108,11 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
         let selectedPrice = 0;
         if (item.selectedVariants) {
           for (const [groupName, selections] of Object.entries(item.selectedVariants)) {
-            const variantGroup = product.variants?.find((v) => v.group === groupName);
             const selectionsArr = Array.isArray(selections) ? selections : [selections];
-    
             for (const selection of selectionsArr) {
-              const variantItem = variantGroup?.items.find(
-                (i) => i.value === selection.value
-              );
-              if (variantItem?.price && variantItem.price > 0) {
-                selectedPrice = variantItem.price;
+              const confirmPrice = resolveSelectionUnitPrice(selection, product, basePrice);
+              if (confirmPrice !== basePrice) {
+                selectedPrice = confirmPrice;
               }
             }
           }
@@ -112,8 +120,8 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
         if (selectedPrice > 0) {
           unitPrice = selectedPrice;
         }
-        item.price = unitPrice;
-        itemTotalExcludingBulkDocs = unitPrice * item.quantity;
+        item.price = item.price && item.price > 0 ? item.price : unitPrice;
+        itemTotalExcludingBulkDocs = item.price * item.quantity;
     }
 
     const itemSubtotal = itemTotalExcludingBulkDocs;

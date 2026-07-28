@@ -36,6 +36,7 @@ export interface SelectedVariant {
 
 export interface OrderItem {
   product: ObjectId; // Product ID
+  name?: string; // Product or Bundle name snapshot
   quantity: number;
   price: number; // Unit price at moment of purchase
   regularPrice?: number; // Original price before discount (for display)

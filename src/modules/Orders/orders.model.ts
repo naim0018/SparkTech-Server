@@ -3,6 +3,7 @@ import { BillingInformation, OrderInterface, OrderItem, PaymentInfo, StatusHisto
 
 const orderItemSchema = new Schema<OrderItem>({
   product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+  name: { type: String }, // Product or Bundle title snapshot
   image: { type: String, required: true }, // Main product image or specific variant image
   quantity: { type: Number, required: true, min: 1 },
   itemKey: { type: String, required: true }, // Unique key for frontend mapped lists

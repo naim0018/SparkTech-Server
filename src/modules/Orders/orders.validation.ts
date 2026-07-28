@@ -11,6 +11,7 @@ const SelectedVariantSchema = z.object({
 // Order Item Schema
 const OrderItemSchema = z.object({
   product: z.union([z.string(), z.number()]),
+  name: z.string().optional(),
   quantity: z.number().int().positive(),
   price: z.number().positive(),
   regularPrice: z.number().positive().optional(),

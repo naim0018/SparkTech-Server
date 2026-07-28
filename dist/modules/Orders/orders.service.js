@@ -25,8 +25,28 @@ const generateOrderId = (OrderModel) => __awaiter(void 0, void 0, void 0, functi
     const year = new Date().getFullYear();
     return `ORD-${year}-${newId}`;
 });
+// Helper to resolve unit price for a variant selection
+const resolveSelectionUnitPrice = (selection, product, basePrice) => {
+    var _a, _b;
+    if (selection.price && selection.price > 0) {
+        return selection.price;
+    }
+    const baseVariantName = (_a = product.price) === null || _a === void 0 ? void 0 : _a.baseVariantName;
+    if (selection.value === baseVariantName) {
+        return basePrice;
+    }
+    if (product.variants && product.variants.length > 0) {
+        for (const group of product.variants) {
+            const found = (_b = group.items) === null || _b === void 0 ? void 0 : _b.find((i) => i.value === selection.value);
+            if (found && found.price && found.price > 0) {
+                return found.price;
+            }
+        }
+    }
+    return basePrice;
+};
 const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
+    var _a;
     const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
     const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
     // Validate totals and prices for security
@@ -65,18 +85,11 @@ const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, functio
             let totalVariantQty = 0;
             if (item.selectedVariants) {
                 for (const [groupName, selections] of Object.entries(item.selectedVariants)) {
-                    const variantGroup = (_a = product.variants) === null || _a === void 0 ? void 0 : _a.find((v) => v.group === groupName);
                     const selectionsArr = Array.isArray(selections) ? selections : [selections];
                     for (const selection of selectionsArr) {
-                        const variantItem = variantGroup === null || variantGroup === void 0 ? void 0 : variantGroup.items.find((i) => i.value === selection.value);
-                        const qty = selection.quantity || 0; // Should exist if we are in this mode
+                        const qty = selection.quantity || 0;
                         if (qty > 0) {
-                            // If variant has specific price, use it. If 0/undefined, assumes it uses Base Price.
-                            // NOTE: If variant.price is 0, it means it costs the Base Price (e.g. "Quantity" variant).
-                            // If variant.price > 0, it replaces Base Price (e.g. "Red" @ 350).
-                            const confirmPrice = ((variantItem === null || variantItem === void 0 ? void 0 : variantItem.price) && variantItem.price > 0)
-                                ? variantItem.price
-                                : basePrice;
+                            const confirmPrice = resolveSelectionUnitPrice(selection, product, basePrice);
                             itemTotalExcludingBulkDocs += confirmPrice * qty;
                             totalVariantQty += qty;
                         }
@@ -96,12 +109,11 @@ const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, functio
             let selectedPrice = 0;
             if (item.selectedVariants) {
                 for (const [groupName, selections] of Object.entries(item.selectedVariants)) {
-                    const variantGroup = (_b = product.variants) === null || _b === void 0 ? void 0 : _b.find((v) => v.group === groupName);
                     const selectionsArr = Array.isArray(selections) ? selections : [selections];
                     for (const selection of selectionsArr) {
-                        const variantItem = variantGroup === null || variantGroup === void 0 ? void 0 : variantGroup.items.find((i) => i.value === selection.value);
-                        if ((variantItem === null || variantItem === void 0 ? void 0 : variantItem.price) && variantItem.price > 0) {
-                            selectedPrice = variantItem.price;
+                        const confirmPrice = resolveSelectionUnitPrice(selection, product, basePrice);
+                        if (confirmPrice !== basePrice) {
+                            selectedPrice = confirmPrice;
                         }
                     }
                 }
@@ -109,8 +121,8 @@ const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, functio
             if (selectedPrice > 0) {
                 unitPrice = selectedPrice;
             }
-            item.price = unitPrice;
-            itemTotalExcludingBulkDocs = unitPrice * item.quantity;
+            item.price = item.price && item.price > 0 ? item.price : unitPrice;
+            itemTotalExcludingBulkDocs = item.price * item.quantity;
         }
         const itemSubtotal = itemTotalExcludingBulkDocs;
         calculatedSubtotal += itemSubtotal;
@@ -217,7 +229,7 @@ const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, functio
             }
         }
         // Track delivery charges
-        if ((_c = product.additionalInfo) === null || _c === void 0 ? void 0 : _c.freeShipping)
+        if ((_a = product.additionalInfo) === null || _a === void 0 ? void 0 : _a.freeShipping)
             hasFreeShipping = true;
         maxDeliveryChargeInside = Math.max(maxDeliveryChargeInside, product.basicInfo.deliveryChargeInsideDhaka || 0);
         maxDeliveryChargeOutside = Math.max(maxDeliveryChargeOutside, product.basicInfo.deliveryChargeOutsideDhaka || 0);

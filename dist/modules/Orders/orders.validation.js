@@ -12,6 +12,7 @@ const SelectedVariantSchema = zod_1.z.object({
 // Order Item Schema
 const OrderItemSchema = zod_1.z.object({
     product: zod_1.z.union([zod_1.z.string(), zod_1.z.number()]),
+    name: zod_1.z.string().optional(),
     quantity: zod_1.z.number().int().positive(),
     price: zod_1.z.number().positive(),
     regularPrice: zod_1.z.number().positive().optional(),
