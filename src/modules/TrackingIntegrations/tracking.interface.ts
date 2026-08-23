@@ -2,6 +2,8 @@ import { Document } from "mongoose";
 
 export interface ITracking extends Document {
   googleAnalyticsId: string;
+  googleAnalyticsPropertyId: string;
+  googleAnalyticsServiceAccountJson: string;
   facebookPixelId: string;
   facebookAccessToken: string;
   facebookPageId: string;

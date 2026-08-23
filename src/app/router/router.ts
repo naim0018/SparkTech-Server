@@ -12,6 +12,7 @@ import { SteadfastRoutes } from "../../modules/Steadfast/steadfast.route";
 import { UserDashboardRoute } from "../../modules/UserDashboard/userDashboard.route";
 import { SettingsRoutes } from "../../modules/Settings/settings.route";
 import { VisitorRoutes } from "../../modules/VisitorTracking/visitor.route";
+import { AnalyticsDashboardRoutes } from "../../modules/AnalyticsDashboard/analyticsDashboard.route";
 
 const router = Router()
 
@@ -76,6 +77,10 @@ const moduleRoute = [
     {
         path: '/visitor-tracking',
         route: VisitorRoutes
+    },
+    {
+        path: '/analytics',
+        route: AnalyticsDashboardRoutes
     }
 ]
 

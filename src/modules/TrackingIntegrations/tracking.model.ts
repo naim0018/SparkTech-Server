@@ -4,6 +4,8 @@ import { ITracking } from "./tracking.interface";
 const trackingSchema = new Schema<ITracking>(
   {
     googleAnalyticsId: { type: String, default: "" },
+    googleAnalyticsPropertyId: { type: String, default: "" },
+    googleAnalyticsServiceAccountJson: { type: String, default: "" },
     facebookPixelId: { type: String, default: "" },
     facebookAccessToken: { type: String, default: "" },
     facebookPageId: { type: String, default: "" },
