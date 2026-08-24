@@ -34,26 +34,49 @@ const getDashboardData = async (req: Request, res: Response) => {
       }
     });
 
-    const [response] = await analyticsDataClient.runReport({
+    const [response] = await analyticsDataClient.batchRunReports({
       property: `properties/${tracking.googleAnalyticsPropertyId}`,
-      dateRanges: [
+      requests: [
+        // 0: Timeline
         {
-          startDate: '30daysAgo',
-          endDate: 'today',
+          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dimensions: [{ name: 'date' }],
+          metrics: [{ name: 'activeUsers' }, { name: 'screenPageViews' }, { name: 'eventCount' }],
         },
-      ],
-      dimensions: [
-        { name: 'date' },
-      ],
-      metrics: [
-        { name: 'activeUsers' },
-        { name: 'screenPageViews' },
-        { name: 'eventCount' }
-      ],
+        // 1: Totals
+        {
+          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          metrics: [{ name: 'sessions' }, { name: 'bounceRate' }, { name: 'totalRevenue' }],
+        },
+        // 2: Top Pages
+        {
+          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
+          metrics: [{ name: 'screenPageViews' }],
+          limit: 10,
+          orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }]
+        },
+        // 3: Devices
+        {
+          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dimensions: [{ name: 'deviceCategory' }],
+          metrics: [{ name: 'activeUsers' }],
+          orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }]
+        },
+        // 4: Countries
+        {
+          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dimensions: [{ name: 'country' }],
+          metrics: [{ name: 'activeUsers' }],
+          limit: 10,
+          orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }]
+        }
+      ]
     });
 
     // Format data for Recharts
-    const chartData = response.rows?.map(row => {
+    const timelineReport = response.reports?.[0];
+    const chartData = timelineReport?.rows?.map(row => {
       const dateStr = row.dimensionValues?.[0].value || "";
       // Format YYYYMMDD to DD MMM
       let formattedDate = dateStr;
@@ -76,18 +99,52 @@ const getDashboardData = async (req: Request, res: Response) => {
     chartData.sort((a, b) => a.rawDate.localeCompare(b.rawDate));
 
     // Calculate totals
-    const totals = {
+    const baseTotals = {
       activeUsers: chartData.reduce((sum, item) => sum + item.activeUsers, 0),
       pageViews: chartData.reduce((sum, item) => sum + item.pageViews, 0),
       eventCount: chartData.reduce((sum, item) => sum + item.eventCount, 0),
     };
+
+    // Extra Totals
+    const totalsReport = response.reports?.[1];
+    const extraTotals = totalsReport?.rows?.[0]?.metricValues || [];
+    const sessions = parseInt(extraTotals[0]?.value || "0", 10);
+    const bounceRate = parseFloat(extraTotals[1]?.value || "0");
+    const totalRevenue = parseFloat(extraTotals[2]?.value || "0");
+
+    const totals = { ...baseTotals, sessions, bounceRate, totalRevenue };
+
+    // Top Pages
+    const pagesReport = response.reports?.[2];
+    const topPages = pagesReport?.rows?.map(row => ({
+      path: row.dimensionValues?.[0].value || "",
+      title: row.dimensionValues?.[1].value || "",
+      views: parseInt(row.metricValues?.[0].value || "0", 10)
+    })) || [];
+
+    // Devices
+    const devicesReport = response.reports?.[3];
+    const devices = devicesReport?.rows?.map(row => ({
+      category: row.dimensionValues?.[0].value || "",
+      users: parseInt(row.metricValues?.[0].value || "0", 10)
+    })) || [];
+
+    // Countries
+    const countriesReport = response.reports?.[4];
+    const countries = countriesReport?.rows?.map(row => ({
+      country: row.dimensionValues?.[0].value || "",
+      users: parseInt(row.metricValues?.[0].value || "0", 10)
+    })) || [];
 
     return res.status(200).json({
       success: true,
       message: "Analytics data fetched successfully",
       data: {
         chartData,
-        totals
+        totals,
+        topPages,
+        devices,
+        countries
       }
     });
 
