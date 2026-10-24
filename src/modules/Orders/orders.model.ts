@@ -70,10 +70,14 @@ const orderSchema = new Schema<OrderInterface>({
   paymentInfo: { type: paymentInfoSchema },
   courierCharge: { type: String, enum: ['insideDhaka', 'outsideDhaka'], required: true },
   cuponCode: { type: String },
-  consignment_id: { type: String }
+  consignment_id: { type: String },
+  idempotencyKey: { type: String, sparse: true, index: true }
 },
 { timestamps: true }
 );
+
+// Compound index for optimizing phone number and time-window duplicate searches
+orderSchema.index({ "billingInformation.phone": 1, createdAt: -1 });
 
 function arrayMinLength(val: any[]) {
   return val.length > 0;

@@ -1,9 +1,11 @@
 import { Request } from "express";
 import mongoose from "mongoose";
+import { StatusCodes } from "http-status-codes";
 import { OrderInterface } from "./orders.interface";
 import { OrderSchema } from "./orders.model";
 import { ProductSchema } from "../Product/product.model";
 import { getTenantModel } from "../../app/utils/getTenantModel";
+import AppError from "../../app/error/AppError";
 
 // Helper to generate Unique Readable ID
 const generateOrderId = async (OrderModel: any): Promise<string> => {
@@ -40,6 +42,39 @@ const resolveSelectionUnitPrice = (selection: any, product: any, basePrice: numb
 const addOrderData = async (req: Request, payload: OrderInterface) => {
   const OrderModel = getTenantModel(req, 'Order', OrderSchema);
   const ProductModel = getTenantModel(req, 'Product', ProductSchema);
+
+  // 1. Check Idempotency Key (Return existing order if request was already processed)
+  if (payload.idempotencyKey) {
+    const existingKeyOrder = await OrderModel.findOne({ idempotencyKey: payload.idempotencyKey });
+    if (existingKeyOrder) {
+      return existingKeyOrder;
+    }
+  }
+
+  // 2. Prevent Duplicate Order Submissions within 5 Minutes (Time Window Throttling)
+  const customerPhone = payload.billingInformation?.phone?.trim();
+  if (customerPhone) {
+    const DUPLICATE_TIME_LIMIT_MINUTES = 5;
+    const timeThreshold = new Date(Date.now() - DUPLICATE_TIME_LIMIT_MINUTES * 60 * 1000);
+    const sanitizedDigits = customerPhone.replace(/\D/g, "");
+    const phoneSearchPattern = sanitizedDigits.length >= 10 
+      ? sanitizedDigits.slice(-10) 
+      : sanitizedDigits;
+
+    const duplicateOrder = await OrderModel.findOne({
+      "billingInformation.phone": { $regex: new RegExp(phoneSearchPattern + "$") },
+      createdAt: { $gte: timeThreshold },
+      status: { $nin: ["cancelled", "rejected"] },
+    }).sort({ createdAt: -1 });
+
+    if (duplicateOrder) {
+      throw new AppError(
+        StatusCodes.CONFLICT,
+        `You have already placed an order (${duplicateOrder.orderId}) recently. Please wait ${DUPLICATE_TIME_LIMIT_MINUTES} minutes before placing another order.`
+      );
+    }
+  }
+
   // Validate totals and prices for security
   let calculatedSubtotal = 0;
   let maxDeliveryChargeInside = 0;

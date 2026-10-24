@@ -23,6 +23,7 @@ export interface OrderInterface {
   discount?: number;
   deliveryCharge: number; // Added delivery charge amount
   consignment_id?: string;
+  idempotencyKey?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }

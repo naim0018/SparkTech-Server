@@ -45,6 +45,26 @@ const globalErrorHandler = (err, req, res, next) => {
         message = simplifiedError === null || simplifiedError === void 0 ? void 0 : simplifiedError.message;
         errorSources = simplifiedError === null || simplifiedError === void 0 ? void 0 : simplifiedError.errorSources;
     }
+    else if ((err === null || err === void 0 ? void 0 : err.name) === 'TokenExpiredError') {
+        statusCode = 401;
+        message = 'jwt expired';
+        errorSources = [
+            {
+                path: '',
+                message: 'Your session has expired. Please login again.',
+            },
+        ];
+    }
+    else if ((err === null || err === void 0 ? void 0 : err.name) === 'JsonWebTokenError') {
+        statusCode = 401;
+        message = 'Invalid token';
+        errorSources = [
+            {
+                path: '',
+                message: 'You are not authorized.',
+            },
+        ];
+    }
     else if (err instanceof AppError_1.default) {
         statusCode = err === null || err === void 0 ? void 0 : err.statusCode;
         message = err.message;
