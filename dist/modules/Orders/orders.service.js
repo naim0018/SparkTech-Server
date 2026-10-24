@@ -8,11 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderService = void 0;
+const http_status_codes_1 = require("http-status-codes");
 const orders_model_1 = require("./orders.model");
 const product_model_1 = require("../Product/product.model");
 const getTenantModel_1 = require("../../app/utils/getTenantModel");
+const AppError_1 = __importDefault(require("../../app/error/AppError"));
 // Helper to generate Unique Readable ID
 const generateOrderId = (OrderModel) => __awaiter(void 0, void 0, void 0, function* () {
     const lastOrder = yield OrderModel.findOne({}, { orderId: 1 }).sort({ createdAt: -1 });
@@ -46,9 +51,34 @@ const resolveSelectionUnitPrice = (selection, product, basePrice) => {
     return basePrice;
 };
 const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b, _c;
     const OrderModel = (0, getTenantModel_1.getTenantModel)(req, 'Order', orders_model_1.OrderSchema);
     const ProductModel = (0, getTenantModel_1.getTenantModel)(req, 'Product', product_model_1.ProductSchema);
+    // 1. Check Idempotency Key (Return existing order if request was already processed)
+    if (payload.idempotencyKey) {
+        const existingKeyOrder = yield OrderModel.findOne({ idempotencyKey: payload.idempotencyKey });
+        if (existingKeyOrder) {
+            return existingKeyOrder;
+        }
+    }
+    // 2. Prevent Duplicate Order Submissions within 5 Minutes (Time Window Throttling)
+    const customerPhone = (_b = (_a = payload.billingInformation) === null || _a === void 0 ? void 0 : _a.phone) === null || _b === void 0 ? void 0 : _b.trim();
+    if (customerPhone) {
+        const DUPLICATE_TIME_LIMIT_MINUTES = 5;
+        const timeThreshold = new Date(Date.now() - DUPLICATE_TIME_LIMIT_MINUTES * 60 * 1000);
+        const sanitizedDigits = customerPhone.replace(/\D/g, "");
+        const phoneSearchPattern = sanitizedDigits.length >= 10
+            ? sanitizedDigits.slice(-10)
+            : sanitizedDigits;
+        const duplicateOrder = yield OrderModel.findOne({
+            "billingInformation.phone": { $regex: new RegExp(phoneSearchPattern + "$") },
+            createdAt: { $gte: timeThreshold },
+            status: { $nin: ["cancelled", "rejected"] },
+        }).sort({ createdAt: -1 });
+        if (duplicateOrder) {
+            throw new AppError_1.default(http_status_codes_1.StatusCodes.CONFLICT, `You have already placed an order (${duplicateOrder.orderId}) recently. Please wait ${DUPLICATE_TIME_LIMIT_MINUTES} minutes before placing another order.`);
+        }
+    }
     // Validate totals and prices for security
     let calculatedSubtotal = 0;
     let maxDeliveryChargeInside = 0;
@@ -229,7 +259,7 @@ const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, functio
             }
         }
         // Track delivery charges
-        if ((_a = product.additionalInfo) === null || _a === void 0 ? void 0 : _a.freeShipping)
+        if ((_c = product.additionalInfo) === null || _c === void 0 ? void 0 : _c.freeShipping)
             hasFreeShipping = true;
         maxDeliveryChargeInside = Math.max(maxDeliveryChargeInside, product.basicInfo.deliveryChargeInsideDhaka || 0);
         maxDeliveryChargeOutside = Math.max(maxDeliveryChargeOutside, product.basicInfo.deliveryChargeOutsideDhaka || 0);

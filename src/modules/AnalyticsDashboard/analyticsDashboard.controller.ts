@@ -158,6 +158,157 @@ const getDashboardData = async (req: Request, res: Response) => {
   }
 };
 
+const getClientIp = (req: Request): string => {
+  const cfConnectingIp = req.headers["cf-connecting-ip"] as string;
+  const xRealIp = req.headers["x-real-ip"] as string;
+  const forwarded = req.headers["x-forwarded-for"];
+  if (cfConnectingIp) return cfConnectingIp.trim();
+  if (xRealIp) return xRealIp.trim();
+  if (forwarded) {
+    const ips = typeof forwarded === "string" ? forwarded.split(",") : forwarded;
+    return ips[0].trim();
+  }
+  return req.ip || req.socket.remoteAddress || "127.0.0.1";
+};
+
+// 1. Log an interaction event (Public endpoint, saved per tenant database)
+const logEvent = async (req: Request, res: Response) => {
+  try {
+    const { event, path, device, payload, user, referrer } = req.body;
+    if (!event) {
+      return res.status(400).json({ success: false, message: "Event name is required" });
+    }
+
+    const { websiteEventSchema } = await import("./websiteEvent.model");
+    const WebsiteEventModel = getTenantModel(req, "WebsiteEvent", websiteEventSchema);
+    const ip = getClientIp(req);
+
+    const savedEvent = await WebsiteEventModel.create({
+      event,
+      path: path || "/",
+      ip,
+      device: device || "Desktop",
+      payload: payload || {},
+      user,
+      referrer: referrer || req.headers.referer || "",
+      userAgent: req.headers["user-agent"] || "",
+      timestamp: new Date()
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: savedEvent
+    });
+  } catch (error: any) {
+    console.error("Log event error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to log event"
+    });
+  }
+};
+
+// 2. Get paginated interaction events (Admin endpoint, reads from tenant database)
+const getEvents = async (req: Request, res: Response) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string) || 10));
+    const skip = (page - 1) * limit;
+    const search = (req.query.search as string || "").trim();
+    const category = (req.query.category as string || "all").trim();
+
+    const { websiteEventSchema } = await import("./websiteEvent.model");
+    const WebsiteEventModel = getTenantModel(req, "WebsiteEvent", websiteEventSchema);
+
+    const filter: Record<string, any> = {};
+
+    if (category && category !== "all") {
+      if (category === "Purchases") filter.event = "purchase";
+      else if (category === "Cart") filter.event = { $in: ["add_to_cart", "remove_from_cart", "view_cart"] };
+      else if (category === "Search") filter.event = "search";
+      else if (category === "Auth") filter.event = { $in: ["login", "sign_up"] };
+      else filter.event = category;
+    }
+
+    if (search) {
+      filter.$or = [
+        { event: { $regex: search, $options: "i" } },
+        { path: { $regex: search, $options: "i" } },
+        { ip: { $regex: search, $options: "i" } },
+        { "user.name": { $regex: search, $options: "i" } },
+        { "user.email": { $regex: search, $options: "i" } }
+      ];
+    }
+
+    const [events, total] = await Promise.all([
+      WebsiteEventModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      WebsiteEventModel.countDocuments(filter)
+    ]);
+
+    // Aggregate key metrics across all events in this tenant's collection
+    const [totalPurchases, totalRevenueAgg, totalCarts, totalSearches] = await Promise.all([
+      WebsiteEventModel.countDocuments({ event: "purchase" }),
+      WebsiteEventModel.aggregate([
+        { $match: { event: "purchase" } },
+        { $group: { _id: null, total: { $sum: "$payload.ecommerce.value" } } }
+      ]),
+      WebsiteEventModel.countDocuments({ event: "add_to_cart" }),
+      WebsiteEventModel.countDocuments({ event: "search" })
+    ]);
+
+    const totalRevenue = totalRevenueAgg[0]?.total || 0;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        events,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        },
+        metrics: {
+          totalEvents: await WebsiteEventModel.countDocuments(),
+          totalPurchases,
+          totalRevenue,
+          totalCarts,
+          totalSearches
+        }
+      }
+    });
+  } catch (error: any) {
+    console.error("Get events error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch interaction events"
+    });
+  }
+};
+
+// 3. Clear interaction events for this tenant
+const clearEvents = async (req: Request, res: Response) => {
+  try {
+    const { websiteEventSchema } = await import("./websiteEvent.model");
+    const WebsiteEventModel = getTenantModel(req, "WebsiteEvent", websiteEventSchema);
+    await WebsiteEventModel.deleteMany({});
+
+    return res.status(200).json({
+      success: true,
+      message: "Interaction logs cleared successfully"
+    });
+  } catch (error: any) {
+    console.error("Clear events error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to clear logs"
+    });
+  }
+};
+
 export const AnalyticsDashboardController = {
-  getDashboardData
+  getDashboardData,
+  logEvent,
+  getEvents,
+  clearEvents
 };

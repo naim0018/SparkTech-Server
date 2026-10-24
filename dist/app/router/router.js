@@ -14,6 +14,7 @@ const steadfast_route_1 = require("../../modules/Steadfast/steadfast.route");
 const userDashboard_route_1 = require("../../modules/UserDashboard/userDashboard.route");
 const settings_route_1 = require("../../modules/Settings/settings.route");
 const visitor_route_1 = require("../../modules/VisitorTracking/visitor.route");
+const analyticsDashboard_route_1 = require("../../modules/AnalyticsDashboard/analyticsDashboard.route");
 const router = (0, express_1.Router)();
 const moduleRoute = [
     {
@@ -75,6 +76,10 @@ const moduleRoute = [
     {
         path: '/visitor-tracking',
         route: visitor_route_1.VisitorRoutes
+    },
+    {
+        path: '/analytics',
+        route: analyticsDashboard_route_1.AnalyticsDashboardRoutes
     }
 ];
 moduleRoute.forEach((route) => router.use(route.path, route.route));

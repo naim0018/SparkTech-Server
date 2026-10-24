@@ -18,7 +18,11 @@ const changePasswordValidationSchema = zod_1.z.object({
 const refreshTokenValidationSchema = zod_1.z.object({
     cookies: zod_1.z.object({
         refreshToken: zod_1.z.string({ message: 'Refresh token is required!' }),
-    }),
+    }).optional(),
+    body: zod_1.z.object({
+        authorization: zod_1.z.string().optional(),
+        refreshToken: zod_1.z.string().optional(),
+    }).optional(),
 });
 const forgetPasswordValidationSchema = zod_1.z.object({
     body: zod_1.z.object({

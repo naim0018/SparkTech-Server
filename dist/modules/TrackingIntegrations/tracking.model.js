@@ -4,6 +4,8 @@ exports.Tracking = exports.trackingSchema = void 0;
 const mongoose_1 = require("mongoose");
 const trackingSchema = new mongoose_1.Schema({
     googleAnalyticsId: { type: String, default: "" },
+    googleAnalyticsPropertyId: { type: String, default: "" },
+    googleAnalyticsServiceAccountJson: { type: String, default: "" },
     facebookPixelId: { type: String, default: "" },
     facebookAccessToken: { type: String, default: "" },
     facebookPageId: { type: String, default: "" },
