@@ -142,6 +142,7 @@ const forgetPassword = (req, userId) => __awaiter(void 0, void 0, void 0, functi
     const jwtPayload = {
         email: user.email,
         role: user.role,
+        purpose: "RESET_PASSWORD",
     };
     const resetToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, "10m");
     const resetUILink = `${config_1.default.reset_pass_ui_link}?id=${user.id}&token=${resetToken} `;
@@ -165,7 +166,9 @@ const resetPassword = (req, payload, token) => __awaiter(void 0, void 0, void 0,
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, "This user is blocked ! !");
     }
     const decoded = jsonwebtoken_1.default.verify(token, config_1.default.jwt_access_secret);
-    //localhost:3000?id=A-0001&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJBLTAwMDEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDI4NTA2MTcsImV4cCI6MTcwMjg1MTIxN30.-T90nRaz8-KouKki1DkCSMAbsHyb9yDi0djZU3D6QO4
+    if (decoded.purpose !== "RESET_PASSWORD") {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, "Invalid token: not authorized for password reset!");
+    }
     if (payload.email !== decoded.email) {
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, "You are forbidden!");
     }

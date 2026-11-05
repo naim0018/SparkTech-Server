@@ -200,6 +200,7 @@ const forgetPassword = async (req: Request, userId: string) => {
   const jwtPayload = {
     email: user.email,
     role: user.role,
+    purpose: "RESET_PASSWORD",
   };
 
   const resetToken = createToken(
@@ -241,9 +242,11 @@ const resetPassword = async (
   const decoded = jwt.verify(
     token,
     config.jwt_access_secret as string
-  ) as JwtPayload;
+  ) as JwtPayload & { purpose?: string };
 
-  //localhost:3000?id=A-0001&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJBLTAwMDEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDI4NTA2MTcsImV4cCI6MTcwMjg1MTIxN30.-T90nRaz8-KouKki1DkCSMAbsHyb9yDi0djZU3D6QO4
+  if (decoded.purpose !== "RESET_PASSWORD") {
+    throw new AppError(httpStatus.FORBIDDEN, "Invalid token: not authorized for password reset!");
+  }
 
   if (payload.email !== decoded.email) {
     throw new AppError(httpStatus.FORBIDDEN, "You are forbidden!");

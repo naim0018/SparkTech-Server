@@ -21,15 +21,7 @@ const MOCK_LOCATIONS = [
     { country: "Singapore", code: "SG", city: "Singapore", lat: 1.3521, lon: 103.8198 },
     { country: "China", code: "CN", city: "Beijing", lat: 39.9042, lon: 116.4074 }
 ];
-// Helper to get client IP
-const getClientIp = (req) => {
-    const forwarded = req.headers["x-forwarded-for"];
-    if (forwarded) {
-        const ips = typeof forwarded === "string" ? forwarded.split(",") : forwarded;
-        return ips[0].trim();
-    }
-    return req.ip || req.socket.remoteAddress || "127.0.0.1";
-};
+const ipBlocker_1 = require("../../app/middleware/ipBlocker");
 // Helper to check if IP is private/local
 const isLocalIp = (ip) => {
     return (ip === "127.0.0.1" ||
@@ -124,7 +116,7 @@ const saveHeartbeat = (req, payload) => __awaiter(void 0, void 0, void 0, functi
     }
     else {
         // Resolve location info
-        const ip = getClientIp(req);
+        const ip = (0, ipBlocker_1.getClientIp)(req);
         const geo = yield geolocate(req, ip);
         session = yield VisitorSession.create(Object.assign({ sessionToken: payload.sessionToken, ip, userAgent: req.headers["user-agent"] || "", referrer: payload.referrer || "", isReturning: !!payload.isReturning, activePage: payload.page, activePageTitle: payload.pageTitle, pagesVisited: [
                 {

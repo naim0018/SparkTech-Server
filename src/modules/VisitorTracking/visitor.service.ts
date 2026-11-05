@@ -13,15 +13,7 @@ const MOCK_LOCATIONS = [
   { country: "China", code: "CN", city: "Beijing", lat: 39.9042, lon: 116.4074 }
 ];
 
-// Helper to get client IP
-const getClientIp = (req: Request): string => {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (forwarded) {
-    const ips = typeof forwarded === "string" ? forwarded.split(",") : forwarded;
-    return ips[0].trim();
-  }
-  return req.ip || req.socket.remoteAddress || "127.0.0.1";
-};
+import { getClientIp } from "../../app/middleware/ipBlocker";
 
 // Helper to check if IP is private/local
 const isLocalIp = (ip: string): boolean => {

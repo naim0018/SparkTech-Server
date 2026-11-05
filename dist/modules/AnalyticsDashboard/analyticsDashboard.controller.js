@@ -46,6 +46,7 @@ exports.AnalyticsDashboardController = void 0;
 const data_1 = require("@google-analytics/data");
 const getTenantModel_1 = require("../../app/utils/getTenantModel");
 const tracking_model_1 = require("../TrackingIntegrations/tracking.model");
+const ipBlocker_1 = require("../../app/middleware/ipBlocker");
 const getDashboardData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     try {
@@ -199,20 +200,6 @@ const getDashboardData = (req, res) => __awaiter(void 0, void 0, void 0, functio
         });
     }
 });
-const getClientIp = (req) => {
-    const cfConnectingIp = req.headers["cf-connecting-ip"];
-    const xRealIp = req.headers["x-real-ip"];
-    const forwarded = req.headers["x-forwarded-for"];
-    if (cfConnectingIp)
-        return cfConnectingIp.trim();
-    if (xRealIp)
-        return xRealIp.trim();
-    if (forwarded) {
-        const ips = typeof forwarded === "string" ? forwarded.split(",") : forwarded;
-        return ips[0].trim();
-    }
-    return req.ip || req.socket.remoteAddress || "127.0.0.1";
-};
 // 1. Log an interaction event (Public endpoint, saved per tenant database)
 const logEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -222,7 +209,10 @@ const logEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const { websiteEventSchema } = yield Promise.resolve().then(() => __importStar(require("./websiteEvent.model")));
         const WebsiteEventModel = (0, getTenantModel_1.getTenantModel)(req, "WebsiteEvent", websiteEventSchema);
-        const ip = getClientIp(req);
+        const ip = (0, ipBlocker_1.getClientIp)(req);
+        // Resolve Geo Location asynchronously or with cache
+        const { getIpGeoLocation } = yield Promise.resolve().then(() => __importStar(require("../../app/utils/ipGeoLocation")));
+        const geo = yield getIpGeoLocation(ip);
         const savedEvent = yield WebsiteEventModel.create({
             event,
             path: path || "/",
@@ -232,6 +222,12 @@ const logEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             user,
             referrer: referrer || req.headers.referer || "",
             userAgent: req.headers["user-agent"] || "",
+            location: {
+                country: geo.country || "",
+                city: geo.city || "",
+                region: geo.region || "",
+                isp: geo.isp || "",
+            },
             timestamp: new Date()
         });
         return res.status(201).json({
@@ -264,6 +260,8 @@ const getEvents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 filter.event = "purchase";
             else if (category === "Cart")
                 filter.event = { $in: ["add_to_cart", "remove_from_cart", "view_cart"] };
+            else if (category === "Pages")
+                filter.event = { $in: ["page_view", "view_item", "view_item_list"] };
             else if (category === "Search")
                 filter.event = "search";
             else if (category === "Auth")

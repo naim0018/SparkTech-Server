@@ -10,7 +10,10 @@ const router_1 = __importDefault(require("./app/router/router"));
 const globalErrorHandler_1 = __importDefault(require("./app/middleware/globalErrorHandler"));
 const notFound_1 = __importDefault(require("./app/middleware/notFound"));
 const tenantResolver_1 = require("./app/middleware/tenantResolver");
+const ipBlocker_1 = require("./app/middleware/ipBlocker");
 const app = (0, express_1.default)();
+// Trust reverse proxy (Cloudflare, Nginx, Vercel) for accurate client IP resolution
+app.set("trust proxy", true);
 app.use(express_1.default.json());
 // app.use(
 //   cors({
@@ -56,6 +59,8 @@ app.use((0, cors_1.default)({
 }));
 // Tenant resolver - must come after CORS and before routes
 app.use(tenantResolver_1.tenantResolver);
+// Site-wide IP block checking middleware
+app.use(ipBlocker_1.checkSiteIpBlock);
 app.use("/api/v1", router_1.default);
 app.get("/", (req, res) => {
     res.status(http_status_codes_1.StatusCodes.OK).json({

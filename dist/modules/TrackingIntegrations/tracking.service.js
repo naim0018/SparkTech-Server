@@ -31,6 +31,14 @@ const updateTrackingSettings = (req, payload) => __awaiter(void 0, void 0, void 
         delete payload.steadfastApiKey;
     if (payload.steadfastSecretKey === "**********")
         delete payload.steadfastSecretKey;
+    if (payload.googleAnalyticsServiceAccountJson === "**********")
+        delete payload.googleAnalyticsServiceAccountJson;
+    // Trim string values to eliminate accidental trailing/leading whitespace (e.g., "GTM-XXXX ")
+    for (const key of Object.keys(payload)) {
+        if (typeof payload[key] === "string") {
+            payload[key] = payload[key].trim();
+        }
+    }
     if (!settings) {
         settings = yield Tracking.create(payload);
     }

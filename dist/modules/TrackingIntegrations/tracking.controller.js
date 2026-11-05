@@ -27,6 +27,8 @@ const getTrackingSettings = (0, catchAsync_1.default)((req, res) => __awaiter(vo
         data.steadfastApiKey = "**********";
     if (data.steadfastSecretKey)
         data.steadfastSecretKey = "**********";
+    if (data.googleAnalyticsServiceAccountJson)
+        data.googleAnalyticsServiceAccountJson = "**********";
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,

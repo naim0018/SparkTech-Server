@@ -24,6 +24,13 @@ export interface OrderInterface {
   deliveryCharge: number; // Added delivery charge amount
   consignment_id?: string;
   idempotencyKey?: string;
+  clientIp?: string;
+  ipLocation?: {
+    country?: string;
+    city?: string;
+    region?: string;
+    isp?: string;
+  };
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }

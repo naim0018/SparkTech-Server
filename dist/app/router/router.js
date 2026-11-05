@@ -15,6 +15,7 @@ const userDashboard_route_1 = require("../../modules/UserDashboard/userDashboard
 const settings_route_1 = require("../../modules/Settings/settings.route");
 const visitor_route_1 = require("../../modules/VisitorTracking/visitor.route");
 const analyticsDashboard_route_1 = require("../../modules/AnalyticsDashboard/analyticsDashboard.route");
+const blockedIp_route_1 = require("../../modules/BlockedIp/blockedIp.route");
 const router = (0, express_1.Router)();
 const moduleRoute = [
     {
@@ -80,6 +81,10 @@ const moduleRoute = [
     {
         path: '/analytics',
         route: analyticsDashboard_route_1.AnalyticsDashboardRoutes
+    },
+    {
+        path: '/blocked-ips',
+        route: blockedIp_route_1.BlockedIpRoutes
     }
 ];
 moduleRoute.forEach((route) => router.use(route.path, route.route));
