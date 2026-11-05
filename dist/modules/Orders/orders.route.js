@@ -6,13 +6,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderRoute = void 0;
 const express_1 = require("express");
 const validateRequest_1 = __importDefault(require("../../app/middleware/validateRequest"));
+const auth_1 = __importDefault(require("../../app/middleware/auth"));
+const user_constant_1 = require("../User/user.constant");
 const orders_controller_1 = require("./orders.controller");
 const orders_validation_1 = require("./orders.validation");
 const router = (0, express_1.Router)();
-router.get('/', orders_controller_1.OrderController.getAllOrders);
-router.post('/create-order', (0, validateRequest_1.default)(orders_validation_1.OrderZodValidation.orderSchemaZod), orders_controller_1.OrderController.createOrder);
-router.get('/track-order', orders_controller_1.OrderController.trackOrder);
-router.get('/:id', orders_controller_1.OrderController.getOrderById);
-router.patch('/:id', (0, validateRequest_1.default)(orders_validation_1.OrderZodValidation.updateOrderSchemaZod.innerType()), orders_controller_1.OrderController.updateOrderById);
-router.delete('/:id/delete-order', orders_controller_1.OrderController.deleteOrderById);
+// Public routes for customers
+router.post("/create-order", (0, validateRequest_1.default)(orders_validation_1.OrderZodValidation.orderSchemaZod), orders_controller_1.OrderController.createOrder);
+router.get("/track-order", orders_controller_1.OrderController.trackOrder);
+router.get("/:id", orders_controller_1.OrderController.getOrderById);
+// Admin-only routes for store management
+router.get("/", (0, auth_1.default)(user_constant_1.USER_ROLE.ADMIN), orders_controller_1.OrderController.getAllOrders);
+router.patch("/:id", (0, auth_1.default)(user_constant_1.USER_ROLE.ADMIN), (0, validateRequest_1.default)(orders_validation_1.OrderZodValidation.updateOrderSchemaZod.innerType()), orders_controller_1.OrderController.updateOrderById);
+router.delete("/:id/delete-order", (0, auth_1.default)(user_constant_1.USER_ROLE.ADMIN), orders_controller_1.OrderController.deleteOrderById);
 exports.OrderRoute = router;

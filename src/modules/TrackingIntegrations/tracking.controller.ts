@@ -13,6 +13,7 @@ const getTrackingSettings = catchAsync(async (req: Request, res: Response) => {
   if (data.facebookAccessToken) data.facebookAccessToken = "**********";
   if (data.steadfastApiKey) data.steadfastApiKey = "**********";
   if (data.steadfastSecretKey) data.steadfastSecretKey = "**********";
+  if (data.googleAnalyticsServiceAccountJson) data.googleAnalyticsServiceAccountJson = "**********";
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

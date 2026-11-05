@@ -2,6 +2,10 @@ import dotenv from 'dotenv'
 import path from 'path'
 dotenv.config({path:path.join(process.cwd(),'.env')})
 
+if (process.env.NODE_ENV === 'production' && !process.env.jwt_access_secret && !process.env.JWT_ACCESS_SECRET) {
+  console.warn("⚠️ SECURITY WARNING: Running in production without a custom JWT_ACCESS_SECRET environment variable!");
+}
+
 export default {
     NODE_ENV:process.env.NODE_ENV,
     port:process.env.port || process.env.PORT || 5000,

@@ -13,6 +13,12 @@ export interface IWebsiteEvent {
   };
   referrer?: string;
   userAgent?: string;
+  location?: {
+    country?: string;
+    city?: string;
+    region?: string;
+    isp?: string;
+  };
 }
 
 export const websiteEventSchema = new Schema<IWebsiteEvent>(
@@ -29,6 +35,12 @@ export const websiteEventSchema = new Schema<IWebsiteEvent>(
     },
     referrer: { type: String, default: "" },
     userAgent: { type: String, default: "" },
+    location: {
+      country: { type: String, default: "" },
+      city: { type: String, default: "" },
+      region: { type: String, default: "" },
+      isp: { type: String, default: "" },
+    },
   },
   {
     timestamps: true,

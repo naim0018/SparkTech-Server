@@ -63,7 +63,14 @@ const orderSchema = new mongoose_1.Schema({
     courierCharge: { type: String, enum: ['insideDhaka', 'outsideDhaka'], required: true },
     cuponCode: { type: String },
     consignment_id: { type: String },
-    idempotencyKey: { type: String, sparse: true, index: true }
+    idempotencyKey: { type: String, sparse: true, index: true },
+    clientIp: { type: String },
+    ipLocation: {
+        country: { type: String },
+        city: { type: String },
+        region: { type: String },
+        isp: { type: String },
+    },
 }, { timestamps: true });
 exports.OrderSchema = orderSchema;
 // Compound index for optimizing phone number and time-window duplicate searches

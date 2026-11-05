@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { BetaAnalyticsDataClient } from "@google-analytics/data";
 import { getTenantModel } from "../../app/utils/getTenantModel";
 import { trackingSchema } from "../TrackingIntegrations/tracking.model";
+import { getClientIp } from "../../app/middleware/ipBlocker";
 
 const getDashboardData = async (req: Request, res: Response) => {
   try {
@@ -158,19 +159,6 @@ const getDashboardData = async (req: Request, res: Response) => {
   }
 };
 
-const getClientIp = (req: Request): string => {
-  const cfConnectingIp = req.headers["cf-connecting-ip"] as string;
-  const xRealIp = req.headers["x-real-ip"] as string;
-  const forwarded = req.headers["x-forwarded-for"];
-  if (cfConnectingIp) return cfConnectingIp.trim();
-  if (xRealIp) return xRealIp.trim();
-  if (forwarded) {
-    const ips = typeof forwarded === "string" ? forwarded.split(",") : forwarded;
-    return ips[0].trim();
-  }
-  return req.ip || req.socket.remoteAddress || "127.0.0.1";
-};
-
 // 1. Log an interaction event (Public endpoint, saved per tenant database)
 const logEvent = async (req: Request, res: Response) => {
   try {
@@ -183,6 +171,10 @@ const logEvent = async (req: Request, res: Response) => {
     const WebsiteEventModel = getTenantModel(req, "WebsiteEvent", websiteEventSchema);
     const ip = getClientIp(req);
 
+    // Resolve Geo Location asynchronously or with cache
+    const { getIpGeoLocation } = await import("../../app/utils/ipGeoLocation");
+    const geo = await getIpGeoLocation(ip);
+
     const savedEvent = await WebsiteEventModel.create({
       event,
       path: path || "/",
@@ -192,6 +184,12 @@ const logEvent = async (req: Request, res: Response) => {
       user,
       referrer: referrer || req.headers.referer || "",
       userAgent: req.headers["user-agent"] || "",
+      location: {
+        country: geo.country || "",
+        city: geo.city || "",
+        region: geo.region || "",
+        isp: geo.isp || "",
+      },
       timestamp: new Date()
     });
 
@@ -225,6 +223,7 @@ const getEvents = async (req: Request, res: Response) => {
     if (category && category !== "all") {
       if (category === "Purchases") filter.event = "purchase";
       else if (category === "Cart") filter.event = { $in: ["add_to_cart", "remove_from_cart", "view_cart"] };
+      else if (category === "Pages") filter.event = { $in: ["page_view", "view_item", "view_item_list"] };
       else if (category === "Search") filter.event = "search";
       else if (category === "Auth") filter.event = { $in: ["login", "sign_up"] };
       else filter.event = category;

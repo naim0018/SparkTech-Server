@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -18,6 +51,7 @@ const orders_model_1 = require("./orders.model");
 const product_model_1 = require("../Product/product.model");
 const getTenantModel_1 = require("../../app/utils/getTenantModel");
 const AppError_1 = __importDefault(require("../../app/error/AppError"));
+const ipBlocker_1 = require("../../app/middleware/ipBlocker");
 // Helper to generate Unique Readable ID
 const generateOrderId = (OrderModel) => __awaiter(void 0, void 0, void 0, function* () {
     const lastOrder = yield OrderModel.findOne({}, { orderId: 1 }).sort({ createdAt: -1 });
@@ -60,6 +94,12 @@ const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, functio
         if (existingKeyOrder) {
             return existingKeyOrder;
         }
+    }
+    // 2. Check if Client IP is Blocked (Scope: "checkout" or "all")
+    const clientIp = (0, ipBlocker_1.getClientIp)(req);
+    const blockedRecord = yield (0, ipBlocker_1.getBlockedIpRecord)(req, clientIp);
+    if (blockedRecord) {
+        throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, `Your IP address (${clientIp}) has been restricted from placing orders on this store. Reason: ${blockedRecord.reason || "Policy violation"}`);
     }
     // 2. Prevent Duplicate Order Submissions within 5 Minutes (Time Window Throttling)
     const customerPhone = (_b = (_a = payload.billingInformation) === null || _a === void 0 ? void 0 : _a.phone) === null || _b === void 0 ? void 0 : _b.trim();
@@ -274,9 +314,25 @@ const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, functio
             ? (maxDeliveryChargeInside || 80)
             : (maxDeliveryChargeOutside || 150);
     }
-    // Apply discount (Coupon + Combo)
-    const couponDiscount = payload.discount || 0;
-    const totalDiscount = couponDiscount + totalComboDiscount;
+    // Apply discount (Server-Validated Coupon + Combo Savings)
+    const VALID_COUPONS = {
+        FreeShippingDhaka: 80,
+        FreeShippingBD: 150,
+        BestBuy: 50,
+        SPARK50: 50,
+        BESTBUY50: 50,
+        DISCOUNT100: 100,
+    };
+    let validatedCouponDiscount = 0;
+    const rawCouponCode = payload.cuponCode || payload.couponCode;
+    if (rawCouponCode && typeof rawCouponCode === "string") {
+        const cleanCoupon = rawCouponCode.trim();
+        if (VALID_COUPONS[cleanCoupon]) {
+            validatedCouponDiscount = VALID_COUPONS[cleanCoupon];
+        }
+    }
+    // Never accept untrusted client-supplied discount; enforce ceiling at calculatedSubtotal
+    const totalDiscount = Math.min(calculatedSubtotal, validatedCouponDiscount + totalComboDiscount);
     // Generate orderId
     const orderId = yield generateOrderId(OrderModel);
     // Set all required fields on payload
@@ -284,7 +340,7 @@ const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, functio
     payload.subTotal = calculatedSubtotal;
     payload.totalDiscount = totalDiscount;
     payload.deliveryCharge = deliveryCharge;
-    payload.totalAmount = calculatedSubtotal + deliveryCharge - totalDiscount;
+    payload.totalAmount = Math.max(0, calculatedSubtotal + deliveryCharge - totalDiscount);
     payload.status = payload.status || 'pending';
     payload.statusHistory = [{
             status: 'pending',
@@ -294,7 +350,28 @@ const addOrderData = (req, payload) => __awaiter(void 0, void 0, void 0, functio
     payload.comboInfo = totalComboDiscount > 0
         ? `Total combo savings: ৳${totalComboDiscount}`
         : undefined;
+    // Attach client IP snapshot
+    payload.clientIp = clientIp;
+    // Create order immediately without waiting on external geo APIs
     const result = yield OrderModel.create(payload);
+    // Asynchronously resolve geo location in background without stalling checkout
+    Promise.resolve().then(() => __importStar(require("../../app/utils/ipGeoLocation"))).then(({ getIpGeoLocation }) => {
+        getIpGeoLocation(clientIp)
+            .then((geo) => {
+            if (geo && (geo.country || geo.city)) {
+                OrderModel.findByIdAndUpdate(result._id, {
+                    ipLocation: {
+                        country: geo.country || "",
+                        city: geo.city || "",
+                        region: geo.region || "",
+                        isp: geo.isp || "",
+                    },
+                }).exec().catch(() => { });
+            }
+        })
+            .catch(() => { });
+    })
+        .catch(() => { });
     return result;
 });
 const getAllOrdersData = (req, query) => __awaiter(void 0, void 0, void 0, function* () {

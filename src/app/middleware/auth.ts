@@ -59,10 +59,13 @@ const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized !");
     }
 
-    if (requiredRoles && !requiredRoles.includes(role)) {
+    const userRole = (role || "").toLowerCase();
+    const normalizedRequired = (requiredRoles || []).map((r) => r.toLowerCase());
+
+    if (normalizedRequired.length > 0 && !normalizedRequired.includes(userRole)) {
       throw new AppError(
         httpStatus.UNAUTHORIZED,
-        "You are not authorized  hi!"
+        "You are not authorized!"
       );
     }
 

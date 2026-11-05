@@ -21,6 +21,14 @@ const updateTrackingSettings = async (req: Request, payload: Partial<ITracking>)
   if (payload.facebookAccessToken === "**********") delete payload.facebookAccessToken;
   if (payload.steadfastApiKey === "**********") delete payload.steadfastApiKey;
   if (payload.steadfastSecretKey === "**********") delete payload.steadfastSecretKey;
+  if (payload.googleAnalyticsServiceAccountJson === "**********") delete payload.googleAnalyticsServiceAccountJson;
+
+  // Trim string values to eliminate accidental trailing/leading whitespace (e.g., "GTM-XXXX ")
+  for (const key of Object.keys(payload) as Array<keyof ITracking>) {
+    if (typeof payload[key] === "string") {
+      (payload as any)[key] = (payload[key] as string).trim();
+    }
+  }
 
   if (!settings) {
     settings = await Tracking.create(payload);
@@ -37,4 +45,3 @@ export const TrackingServices = {
   getTrackingSettings,
   updateTrackingSettings,
 };
-

@@ -6,6 +6,7 @@ import { OrderSchema } from "./orders.model";
 import { ProductSchema } from "../Product/product.model";
 import { getTenantModel } from "../../app/utils/getTenantModel";
 import AppError from "../../app/error/AppError";
+import { getClientIp, getBlockedIpRecord } from "../../app/middleware/ipBlocker";
 
 // Helper to generate Unique Readable ID
 const generateOrderId = async (OrderModel: any): Promise<string> => {
@@ -49,6 +50,16 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
     if (existingKeyOrder) {
       return existingKeyOrder;
     }
+  }
+
+  // 2. Check if Client IP is Blocked (Scope: "checkout" or "all")
+  const clientIp = getClientIp(req);
+  const blockedRecord = await getBlockedIpRecord(req, clientIp);
+  if (blockedRecord) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      `Your IP address (${clientIp}) has been restricted from placing orders on this store. Reason: ${blockedRecord.reason || "Policy violation"}`
+    );
   }
 
   // 2. Prevent Duplicate Order Submissions within 5 Minutes (Time Window Throttling)
@@ -282,9 +293,30 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
       : (maxDeliveryChargeOutside || 150);
   }
 
-  // Apply discount (Coupon + Combo)
-  const couponDiscount = payload.discount || 0;
-  const totalDiscount = couponDiscount + totalComboDiscount;
+  // Apply discount (Server-Validated Coupon + Combo Savings)
+  const VALID_COUPONS: Record<string, number> = {
+    FreeShippingDhaka: 80,
+    FreeShippingBD: 150,
+    BestBuy: 50,
+    SPARK50: 50,
+    BESTBUY50: 50,
+    DISCOUNT100: 100,
+  };
+
+  let validatedCouponDiscount = 0;
+  const rawCouponCode = payload.cuponCode || (payload as any).couponCode;
+  if (rawCouponCode && typeof rawCouponCode === "string") {
+    const cleanCoupon = rawCouponCode.trim();
+    if (VALID_COUPONS[cleanCoupon]) {
+      validatedCouponDiscount = VALID_COUPONS[cleanCoupon];
+    }
+  }
+
+  // Never accept untrusted client-supplied discount; enforce ceiling at calculatedSubtotal
+  const totalDiscount = Math.min(
+    calculatedSubtotal,
+    validatedCouponDiscount + totalComboDiscount
+  );
 
   // Generate orderId
   const orderId = await generateOrderId(OrderModel);
@@ -294,7 +326,7 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
   payload.subTotal = calculatedSubtotal;
   payload.totalDiscount = totalDiscount;
   payload.deliveryCharge = deliveryCharge;
-  payload.totalAmount = calculatedSubtotal + deliveryCharge - totalDiscount;
+  payload.totalAmount = Math.max(0, calculatedSubtotal + deliveryCharge - totalDiscount);
   payload.status = payload.status || 'pending';
   payload.statusHistory = [{
     status: 'pending',
@@ -305,7 +337,32 @@ const addOrderData = async (req: Request, payload: OrderInterface) => {
     ? `Total combo savings: ৳${totalComboDiscount}` 
     : undefined;
 
+  // Attach client IP snapshot
+  (payload as any).clientIp = clientIp;
+
+  // Create order immediately without waiting on external geo APIs
   const result = await OrderModel.create(payload);
+
+  // Asynchronously resolve geo location in background without stalling checkout
+  import("../../app/utils/ipGeoLocation")
+    .then(({ getIpGeoLocation }) => {
+      getIpGeoLocation(clientIp)
+        .then((geo) => {
+          if (geo && (geo.country || geo.city)) {
+            OrderModel.findByIdAndUpdate(result._id, {
+              ipLocation: {
+                country: geo.country || "",
+                city: geo.city || "",
+                region: geo.region || "",
+                isp: geo.isp || "",
+              },
+            }).exec().catch(() => {});
+          }
+        })
+        .catch(() => {});
+    })
+    .catch(() => {});
+
   return result;
 };
 

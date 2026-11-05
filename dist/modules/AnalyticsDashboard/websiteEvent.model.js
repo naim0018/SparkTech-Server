@@ -15,6 +15,12 @@ exports.websiteEventSchema = new mongoose_1.Schema({
     },
     referrer: { type: String, default: "" },
     userAgent: { type: String, default: "" },
+    location: {
+        country: { type: String, default: "" },
+        city: { type: String, default: "" },
+        region: { type: String, default: "" },
+        isp: { type: String, default: "" },
+    },
 }, {
     timestamps: true,
 });

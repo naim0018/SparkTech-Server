@@ -13,6 +13,7 @@ import { UserDashboardRoute } from "../../modules/UserDashboard/userDashboard.ro
 import { SettingsRoutes } from "../../modules/Settings/settings.route";
 import { VisitorRoutes } from "../../modules/VisitorTracking/visitor.route";
 import { AnalyticsDashboardRoutes } from "../../modules/AnalyticsDashboard/analyticsDashboard.route";
+import { BlockedIpRoutes } from "../../modules/BlockedIp/blockedIp.route";
 
 const router = Router()
 
@@ -81,6 +82,10 @@ const moduleRoute = [
     {
         path: '/analytics',
         route: AnalyticsDashboardRoutes
+    },
+    {
+        path: '/blocked-ips',
+        route: BlockedIpRoutes
     }
 ]
 

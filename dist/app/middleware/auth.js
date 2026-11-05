@@ -49,8 +49,10 @@ const auth = (...requiredRoles) => {
             UserModel.isJWTIssuedBeforePasswordChanged(user.passwordChangedAt, iat)) {
             throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized !");
         }
-        if (requiredRoles && !requiredRoles.includes(role)) {
-            throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized  hi!");
+        const userRole = (role || "").toLowerCase();
+        const normalizedRequired = (requiredRoles || []).map((r) => r.toLowerCase());
+        if (normalizedRequired.length > 0 && !normalizedRequired.includes(userRole)) {
+            throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized!");
         }
         req.user = decoded;
         next();
